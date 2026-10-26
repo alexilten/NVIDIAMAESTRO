@@ -6,10 +6,13 @@ import { useStore } from '../ui/store';
 import { useBoothAnalysis } from '../ui/useBooth';
 import { Label } from './Label';
 
-/** The booth plot in the Compose canvas frame (mm, Z up): floor, aisles, closed walls, circulation and service points. */
-export function BoothLayer() {
+/**
+ * The booth plot in the Compose canvas frame (mm, Z up): floor, aisles, closed walls, circulation and service points.
+ * `present` keeps the floor, aisles and walls only.
+ */
+export function BoothLayer({ present = false }: { present?: boolean }) {
   const booth = useStore((s) => s.comp.booth);
-  const show = useStore((s) => s.circulation);
+  const show = useStore((s) => s.circulation) && !present;
   const a = useBoothAnalysis();
   const tex = useMemo(() => {
     if (!a) return null;
@@ -47,7 +50,7 @@ export function BoothLayer() {
       {SIDES.filter((s) => booth.open[s]).map((s) => (
         <group key={s}>
           <mesh position={aisle[s].pos}><planeGeometry args={aisle[s].size} /><meshBasicMaterial color="#e6e6ea" transparent opacity={0.7} depthWrite={false} polygonOffset polygonOffsetFactor={3} polygonOffsetUnits={3} /></mesh>
-          <Label position={labelAt[s]} text={`Aisle\t${Math.round(A)} mm`} />
+          {!present && <Label position={labelAt[s]} text={`Aisle\t${Math.round(A)} mm`} />}
         </group>
       ))}
       {SIDES.filter((s) => !booth.open[s]).map((s) => (
@@ -60,7 +63,7 @@ export function BoothLayer() {
         </mesh>
       )}
       {show && a.access.map((z) => <Zone key={z.unit} min={z.zone.min} max={z.zone.max} ok={z.approach} />)}
-      {booth.services.map((sp) => (
+      {!present && booth.services.map((sp) => (
         <group key={sp.id} position={[sp.x, sp.y, 0]}>
           <mesh position={[0, 0, 12]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[130, 130, 24, 24]} /><meshStandardMaterial color="#e39a1a" /></mesh>
           <Label position={[0, 0, 60]} text={`${sp.name}\t${sp.kind === 'power-data' ? 'power + data' : sp.kind}`} />

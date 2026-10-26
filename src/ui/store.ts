@@ -10,7 +10,7 @@ import type { Booth, Composition, ItemRef, Placement, Vec3 } from '../core/schem
 import { compStore, partsStore, docsStore, type DocIndex } from '../ingest/store';
 import type { IngestedPart } from '../ingest/types';
 
-export type Workspace = 'discover' | 'compose' | 'exhibition' | 'ingest';
+export type Workspace = 'discover' | 'compose' | 'exhibition' | 'present' | 'ingest';
 export type CameraPreset = 'perspective' | 'front' | 'rear' | 'side' | 'top' | 'iso';
 
 const COMP_KEY = 'maestro.composition.v1';
@@ -88,9 +88,20 @@ interface State {
   loadSampleBooth: () => void;
   circulation: boolean;
 
+  // present
+  /** open the module or the exhibition in Present without leaving it */
+  presentKind: (k: Composition['kind']) => void;
+  /** change the composition's own metadata (views, document links) as one undoable step */
+  patchComp: (patch: Partial<Pick<Composition, 'views' | 'docs' | 'name'>>) => void;
+  /** rendered stills, kept in memory for this session only */
+  stills: Still[];
+  setStills: (s: Still[]) => void;
+
   toast: string | null;
   notify: (s: string | null) => void;
 }
+
+export interface Still { id: string; compId: string; name: string; src: string; width: number; height: number }
 
 export function extentOf(p: Placement, parts: IngestedPart[]) {
   const r = resolveRef(p.ref, parts);
@@ -110,9 +121,9 @@ export const useStore = create<State>((set, get) => {
     set({ comp: c, history: comp.kind === c.kind ? [...history.slice(-80), comp] : [], future: [] });
   };
   /** the composition a workspace edits: Compose a module, Exhibition an exhibition; each is kept on its own */
-  const docFor = (w: Workspace): Composition | null => {
+  const docFor = (w: Workspace | Composition['kind']): Composition | null => {
     const { comp } = get();
-    const want = w === 'exhibition' ? 'exhibition' : w === 'compose' ? 'module' : null;
+    const want = w === 'exhibition' ? 'exhibition' : w === 'compose' || w === 'module' ? 'module' : null;
     if (!want || comp.kind === want) return null;
     writeLocal(keyOf(comp), comp);
     return want === 'exhibition' ? readLocal<Composition>(EXPO_KEY, sampleExhibition()) : readLocal<Composition>(COMP_KEY, newComposition());
@@ -308,6 +319,11 @@ export const useStore = create<State>((set, get) => {
     },
     loadSampleBooth: () => { commit(sampleExhibition()); set({ selection: [] }); get().notify('Sample corner booth loaded. Its plot, limits and service points are placeholders.'); },
     circulation: true,
+
+    presentKind: (k) => { const next = docFor(k); if (next) set({ comp: next, history: [], future: [], selection: [] }); },
+    patchComp: (patch) => commit({ ...get().comp, ...patch, updatedAt: new Date().toISOString() }),
+    stills: [],
+    setStills: (s) => set({ stills: s }),
 
     toast: null,
     notify: (s) => {

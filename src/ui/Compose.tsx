@@ -9,6 +9,7 @@ import type { Placement, Vec3 } from '../core/schema';
 import { ComposeCanvas } from '../viewport/ComposeCanvas';
 import { Catalog } from './Catalog';
 import { BoothPanel, ModulesToPlace, useModuleFlags } from './Exhibition';
+import { ProjectDocs } from './Present';
 import { Icon, KV, Section, VBadge, dims3, mm } from './common';
 import { extentOf, useStore } from './store';
 
@@ -220,6 +221,7 @@ function ModulePanel() {
         <Section title="Templates" summary={`${TEMPLATES.length}`}>
           {TEMPLATES.map((t) => <button key={t.id} className="link-row" title={t.description} onClick={() => st.insertTemplate(t)}>{t.name}<span className="muted small"> · {t.description}</span></button>)}
         </Section>
+        <ProjectDocs open={false} />
         <Section title="Saved modules" summary={`${saved.filter((c) => c.kind === 'module').length}`} open={saved.length > 0}>
           {saved.filter((c) => c.kind === 'module').map((c) => <button key={c.id} className="link-row" onClick={() => st.openComp(c)}>{c.name}<span className="muted small"> · {c.items.length} items</span></button>)}
           {!saved.length && <p className="note">Save a module to reuse it. Modules are kept in this browser.</p>}

@@ -17,6 +17,8 @@ import { analyseBooth, boothCsv } from '../src/core/booth';
 import { sampleExhibition } from '../src/core/exhibitionSample';
 import { boothAnnotations } from '../src/export/boothAnnotations';
 import { schedule, scheduleCsv } from '../src/core/services';
+import { buildClientPackage, clientHtml } from '../src/core/presentation';
+import { moduleTag } from '../src/core/sheet';
 
 const rh = await rhino3dm();
 const pkg = (await import('../package.json', { with: { type: 'json' } })).default as { version: string };
@@ -92,6 +94,21 @@ const plan = buildBoothSheet(expo, analysis, shapeOf, { appLabel: `MAESTRO ${pkg
 writeFileSync('samples/sample-booth.plan.svg', plan.svg);
 writeFileSync('samples/sample-booth.schedule.csv', boothCsv(expo, analysis));
 console.log(`samples/sample-booth.plan.svg: 1:${plan.scale}, ${analysis.units.length} modules, ${analysis.issues.length} checks open`);
+
+// the client view without stills (stills are rendered in the browser): one shared link, one confidential link left out
+expo.docs = [
+  { id: 'doc-venue', title: 'Venue exhibitor manual (placeholder)', kind: 'venue', confidential: false, addedAt: '2026-10-26T00:00:00Z' },
+  { id: 'doc-cost', title: 'Internal cost plan', kind: 'other', reference: 'COST-01', confidential: true, addedAt: '2026-10-26T00:00:00Z' },
+];
+const sch = schedule(expo, (p) => resolveRef(p.ref, [])!.entry.name);
+const client = buildClientPackage(expo, {
+  resolve: (p) => { const e = resolveRef(p.ref, [])?.entry; return e ? { name: e.name, source: e.section, status: e.verification, dims: e.dims, category: e.group } : null; },
+  overall: null, moduleTag, now: '2026-10-26T00:00:00Z',
+  power: { statedW: sch.knownWatts, live: sch.liveCount, unknownLive: sch.unknownLive },
+  access: { accessibleShare: analysis.accessibleShare, open: analysis.issues.length },
+});
+writeFileSync('samples/sample-booth.client.html', clientHtml(client));
+console.log(`samples/sample-booth.client.html: ${client.items.length} item rows, ${client.docs.length} shared link(s)`);
 
 for (const [file, comp] of [['spark-demo-station.3dm', sparkStation()], ['hardware-lineup.3dm', hardwareLineup()], ['lineup-r02.3dm', lineupR02()], ['demo-modules.3dm', modules], ['sample-booth.3dm', expo]] as const) {
   const r = exportComposition(rh, comp, (p) => exportItemFor(p, []), pkg.version, comp === expo ? boothAnnotations(expo, analysis) : []);
