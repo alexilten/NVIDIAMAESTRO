@@ -68,12 +68,9 @@ describe('hardware catalog', () => {
     }
   });
 
-  it('draws nothing for a product whose model or dimensions are not confirmed', () => {
-    const unconfirmed = MODELS.filter((m) => /to confirm/.test(m.name));
-    expect(unconfirmed.length).toBeGreaterThan(0);
-    for (const m of unconfirmed) expect(productShape(m.id), m.id).toBeNull();
-    // announced racks and trays without a published mechanical spec stay placeholders
-    for (const id of ['nv-dgx-vr-nvl72', 'nv-groq3-lpx-rack', 'nv-vera-cpu-rack', 'nv-bf4-stx-rack', 'nv-vr-nvl72-compute-tray']) expect(productShape(id), id).toBeNull();
+  it('draws nothing for a product whose dimensions are not published', () => {
+    // announced racks and trays without a published mechanical spec, and partner systems without one, stay placeholders
+    for (const id of ['qct-arc-pro-2u', 'qct-vera-cmx', 'hp-zgx-fury-g1n', 'nv-dgx-vr-nvl72', 'nv-groq3-lpx-rack', 'nv-vera-cpu-rack', 'nv-bf4-stx-rack', 'nv-vr-nvl72-compute-tray']) expect(productShape(id), id).toBeNull();
   });
 
   it('puts every model in the library with its weakest dimension status', () => {

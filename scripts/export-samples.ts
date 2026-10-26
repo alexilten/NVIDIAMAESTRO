@@ -50,7 +50,7 @@ function hardwareLineup(): Composition {
 function lineupR02(): Composition {
   let c = newComposition('DGX Station, RTX PRO and Spectrum-X line-up (sample)');
   let x = 0;
-  for (const id of ['dell-pro-max-gb300', 'gb-w775-v10', 'msi-ws300', 'smc-ars-511gd', 'nv-rtx-pro-6000-ws', 'nv-rtx-pro-5000', 'nv-connectx-9', 'nv-sn6600', 'nv-sn6600-ld', 'nv-sn6810-ld', 'nv-sn6800-ld']) {
+  for (const id of ['dell-pro-max-gb300', 'gb-w775-v10', 'msi-ws300', 'smc-ars-511gd', 'nv-rtx-pro-6000-ws', 'nv-rtx-pro-5000', 'nv-connectx-9', 'dell-rtx-pro-server', 'hpe-rtx-pro-server', 'nv-sn6600', 'nv-sn6600-ld', 'nv-sn6810-ld', 'nv-sn6800-ld']) {
     const ref: ItemRef = { kind: 'product', id };
     const d = dims(ref);
     c = add(c, ref, MODEL_BY_ID.get(id)!.name, [x + d[0] / 2, 0, 0]).comp;

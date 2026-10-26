@@ -140,6 +140,8 @@ const GENERATORS: Record<string, Gen> = {
   'msi-ws300': tower,
   'smc-ars-511gd': rackChassis('grille', false),
   'nv-sn6600': rackChassis('ports', true),
+  'dell-rtx-pro-server': rackChassis('grille', true),
+  'hpe-rtx-pro-server': rackChassis('grille', false),
   'nv-sn6600-ld': rackChassis('ports', false),
   'nv-sn6810-ld': rackChassis('ports', false),
   'nv-sn6800-ld': rackChassis('ports', false),

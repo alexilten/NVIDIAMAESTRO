@@ -124,16 +124,25 @@ export const LINEUP_MODELS: ProductModel[] = [
     implementations: ['dell-rtx-pro-server', 'hpe-rtx-pro-server'], related: ['nv-rtx-pro-6000-ws'], tags: ['rtx pro', 'server', 'enterprise', 'blackwell'], sources: ['nv-rtx-pro-server'],
   }),
   model({
-    id: 'dell-rtx-pro-server', familyId: 'fam-rtx-pro-server', name: 'Dell PowerEdge RTX PRO Server (model to confirm)', manufacturer: 'Dell Technologies', kind: 'system', status: 'shipping',
-    description: 'A Dell PowerEdge server in the RTX PRO Server programme. The exact PowerEdge model is not identified yet; once it is, its dimensions come from Dell’s installation and service manual.',
-    purpose: 'One physical implementation of RTX PRO Server.', industries: ['Enterprise AI'],
-    physicalAssetId: 'pa-dell-rtx-pro-server', related: ['nv-rtx-pro-server'], tags: ['rtx pro', 'server', 'dell', 'poweredge'], sources: ['nv-rtx-pro-server'],
+    id: 'dell-rtx-pro-server', familyId: 'fam-rtx-pro-server', name: 'Dell PowerEdge R7725', manufacturer: 'Dell Technologies', kind: 'system', status: 'shipping',
+    description: 'A 2U Dell PowerEdge server that takes RTX PRO 6000 Blackwell Server Edition GPUs. Recorded as the likely Dell RTX PRO Server; that match is a best judgement, not a Dell or NVIDIA statement.',
+    purpose: 'A likely physical implementation of a 2U RTX PRO Server.', industries: ['Enterprise AI'],
+    specs: [
+      { label: 'RTX PRO Server role', spec: s<string>('2U RTX PRO Server', 'estimated', undefined, 'best judgement from the 2U RTX PRO Server configurations NVIDIA lists; to confirm') },
+      { label: 'Depth to rear wall', spec: s<number>(700.7, 'verified', 'dell-r7725-ism', 'Zb: ear to rear wall'), unit: 'mm' },
+    ],
+    physicalAssetId: 'pa-dell-rtx-pro-server', related: ['nv-rtx-pro-server'], tags: ['rtx pro', 'server', 'dell', 'poweredge', 'r7725', '2u'], sources: ['dell-r7725-ism', 'nv-rtx-pro-server'],
   }),
   model({
-    id: 'hpe-rtx-pro-server', familyId: 'fam-rtx-pro-server', name: 'HPE ProLiant RTX PRO Server (model to confirm)', manufacturer: 'Hewlett Packard Enterprise', kind: 'system', status: 'shipping',
-    description: 'An HPE ProLiant server in the RTX PRO Server programme. The exact model is not identified yet; once it is, its dimensions come from HPE QuickSpecs.',
-    purpose: 'One physical implementation of RTX PRO Server.', industries: ['Enterprise AI'],
-    physicalAssetId: 'pa-hpe-rtx-pro-server', related: ['nv-rtx-pro-server'], tags: ['rtx pro', 'server', 'hpe', 'proliant'], sources: ['nv-rtx-pro-server'],
+    id: 'hpe-rtx-pro-server', familyId: 'fam-rtx-pro-server', name: 'HPE ProLiant Compute DL380a Gen12', manufacturer: 'Hewlett Packard Enterprise', kind: 'system', status: 'shipping',
+    description: 'A 4U HPE ProLiant server for up to eight double-wide GPUs, including RTX PRO 6000 Blackwell Server Edition. Recorded as the likely HPE RTX PRO Server. Its dimensions come from a review until HPE QuickSpecs are read.',
+    purpose: 'A likely physical implementation of a 4U, eight-GPU RTX PRO Server.', industries: ['Enterprise AI'],
+    specs: [
+      { label: 'Form factor', spec: s<string>('4U rack', 'verified', 'hpe-dl380a-qs') },
+      { label: 'RTX PRO 6000 GPUs', spec: s<string>('up to 8', 'verified', 'hpe-dl380a-qs') },
+      { label: 'RTX PRO Server role', spec: s<string>('4U, 8-GPU RTX PRO Server', 'estimated', undefined, 'best judgement; to confirm') },
+    ],
+    physicalAssetId: 'pa-hpe-rtx-pro-server', related: ['nv-rtx-pro-server'], tags: ['rtx pro', 'server', 'hpe', 'proliant', 'dl380a', '4u'], sources: ['hpe-dl380a-qs', 'sr-dl380a-gen12', 'nv-rtx-pro-server'],
   }),
 
   // ── Aerial RAN Computer ──
@@ -145,10 +154,14 @@ export const LINEUP_MODELS: ProductModel[] = [
     implementations: ['qct-arc-pro-2u'], tags: ['aerial', 'ai-ran', 'arc', 'telco', 'mgx', '2u'], sources: ['nv-arc-family'],
   }),
   model({
-    id: 'qct-arc-pro-2u', familyId: 'fam-aerial', name: 'QCT Aerial RAN Computer, MGX 2U Short (model to confirm)', manufacturer: 'Quanta Cloud Technology', kind: 'system', status: 'shipping',
-    description: `QCT’s MGX 2U Short Aerial RAN Computer. The QuantaEdge model number is not confirmed yet. ${NOT_PUBLISHED}`,
-    purpose: 'One physical implementation of ARC-Pro.', industries: ['Telecommunications'],
-    physicalAssetId: 'pa-qct-arc-pro-2u', related: ['nv-arc-pro'], tags: ['aerial', 'ai-ran', 'qct', 'quanta', 'mgx', '2u', 'short depth'], sources: ['nv-arc-family'],
+    id: 'qct-arc-pro-2u', familyId: 'fam-aerial', name: 'QCT QuantaEdge EGN77C-2U', manufacturer: 'Quanta Cloud Technology', kind: 'system', status: 'shipping',
+    description: `QCT’s 2U2N AI-RAN server for NVIDIA ARC-Pro, with a Grace CPU and an RTX PRO GPU. Recorded as the likely QCT ARC-Pro system (best judgement). ${NOT_PUBLISHED}`,
+    purpose: 'A likely physical implementation of ARC-Pro.', industries: ['Telecommunications'],
+    specs: [
+      { label: 'Form factor', spec: s<string>('2U2N', 'verified', 'qct-egn77c') },
+      { label: 'Platform', spec: s<string>('NVIDIA ARC-Pro: Grace CPU, RTX PRO GPU', 'verified', 'qct-egn77c') },
+    ],
+    physicalAssetId: 'pa-qct-arc-pro-2u', related: ['nv-arc-pro'], tags: ['aerial', 'ai-ran', 'arc-pro', 'qct', 'quanta', 'quantaedge', '2u'], sources: ['qct-egn77c', 'nv-arc-family'],
   }),
 
   // ── Spectrum-X Ethernet ──
@@ -239,13 +252,13 @@ export const LINEUP_MODELS: ProductModel[] = [
     implementations: ['qct-vera-cmx', 'smc-vera-cmx'], related: ['nv-bf4-stx-rack', 'nv-bf4-stx-processor'], tags: ['cmx', 'storage', 'context memory', 'inference'], sources: ['nv-cmx'],
   }),
   model({
-    id: 'qct-vera-cmx', familyId: 'fam-ai-storage', name: 'Quanta Vera CMX system (model to confirm)', manufacturer: 'Quanta Cloud Technology', kind: 'system', status: 'announced',
-    description: `A partner CMX system from Quanta. The model number is not confirmed yet. ${NOT_PUBLISHED}`,
+    id: 'qct-vera-cmx', familyId: 'fam-ai-storage', name: 'Quanta Vera CMX storage system', manufacturer: 'Quanta Cloud Technology', kind: 'system', status: 'announced',
+    description: `A partner CMX system from Quanta; no model number is published yet. ${NOT_PUBLISHED}`,
     purpose: 'One physical implementation of CMX.', physicalAssetId: 'pa-qct-vera-cmx', related: ['nv-cmx'], tags: ['cmx', 'storage', 'quanta', 'qct', 'vera'], sources: ['nv-cmx'],
   }),
   model({
-    id: 'smc-vera-cmx', familyId: 'fam-ai-storage', name: 'Supermicro Vera CMX system (model to confirm)', manufacturer: 'Supermicro', kind: 'system', status: 'announced',
-    description: `A partner CMX system from Supermicro, named on NVIDIA’s CMX page. The model number is not confirmed yet. ${NOT_PUBLISHED}`,
+    id: 'smc-vera-cmx', familyId: 'fam-ai-storage', name: 'Supermicro Vera CMX storage system', manufacturer: 'Supermicro', kind: 'system', status: 'announced',
+    description: `A partner CMX system from Supermicro, named on NVIDIA’s CMX page; no model number is published yet. ${NOT_PUBLISHED}`,
     purpose: 'One physical implementation of CMX.', physicalAssetId: 'pa-smc-vera-cmx', related: ['nv-cmx'], tags: ['cmx', 'storage', 'supermicro', 'vera'], sources: ['nv-cmx'],
   }),
 
@@ -394,8 +407,28 @@ export const LINEUP_PHYSICAL: PhysicalAsset[] = [
     ],
     digitalAssets: [proxy('da-rtx-pro-5000-proxy', 1, 'Board shown upright as installed: shroud, blower intake, bracket and PCIe edge, at the stated length and height.')],
   },
-  unknown('pa-dell-rtx-pro-server', 'dell-rtx-pro-server'),
-  unknown('pa-hpe-rtx-pro-server', 'hpe-rtx-pro-server'),
+  {
+    id: 'pa-dell-rtx-pro-server', modelId: 'dell-rtx-pro-server',
+    dims: dims(
+      s(482, 'verified', 'dell-r7725-ism', 'Xa: across the rack ears'),
+      s(802.4, 'estimated', 'dell-r7725-ism', 'derived: Za 30.78 (bezel) + Zc 771.62 (ear to PSU handle)'),
+      s(86.8, 'verified', 'dell-r7725-ism'),
+    ),
+    rackUnits: s(2, 'estimated', undefined, 'derived from the 86.8 mm height'),
+    interfaces: [],
+    digitalAssets: [proxy('da-dell-r7725-proxy', 1, `2U chassis between rack ears with a front drive field. ${GEN}`)],
+  },
+  {
+    id: 'pa-hpe-rtx-pro-server', modelId: 'hpe-rtx-pro-server',
+    dims: dims(
+      s(447.8, 'estimated', 'sr-dl380a-gen12', 'review lists 6.88 × 17.63 × 31.60, read as inches H × W × D'),
+      s(802.6, 'estimated', 'sr-dl380a-gen12', 'review lists 6.88 × 17.63 × 31.60, read as inches H × W × D'),
+      s(174.8, 'estimated', 'sr-dl380a-gen12', 'review lists 6.88 × 17.63 × 31.60, read as inches H × W × D'),
+    ),
+    rackUnits: s(4, 'verified', 'hpe-dl380a-qs'),
+    interfaces: [],
+    digitalAssets: [proxy('da-hpe-dl380a-proxy', 1, `4U chassis with a front intake field. ${GEN}`)],
+  },
   unknown('pa-qct-arc-pro-2u', 'qct-arc-pro-2u'),
   ...([
     ['nv-sn6600', 438, 767, 133.35, 52, 'EIA'],

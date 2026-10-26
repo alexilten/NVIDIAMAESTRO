@@ -1,12 +1,12 @@
 {
   "schema": "maestro.composition",
   "version": 1,
-  "id": "comp-mvpltxtv-izmu0",
+  "id": "comp-mvpm2iyy-imh6i",
   "name": "DGX Station, RTX PRO and Spectrum-X line-up (sample)",
   "kind": "module",
   "items": [
     {
-      "id": "it-mvpltxtw-jv1tf",
+      "id": "it-mvpm2iyy-jhbd8",
       "ref": {
         "kind": "product",
         "id": "dell-pro-max-gb300"
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "it-mvpltxtw-kgjbu",
+      "id": "it-mvpm2iyy-kbcvd",
       "ref": {
         "kind": "product",
         "id": "gb-w775-v10"
@@ -46,7 +46,7 @@
       }
     },
     {
-      "id": "it-mvpltxtw-lqy83",
+      "id": "it-mvpm2iyy-li9k7",
       "ref": {
         "kind": "product",
         "id": "msi-ws300"
@@ -66,7 +66,7 @@
       }
     },
     {
-      "id": "it-mvpltxtw-mmb72",
+      "id": "it-mvpm2iyy-mrwb6",
       "ref": {
         "kind": "product",
         "id": "smc-ars-511gd"
@@ -86,7 +86,7 @@
       }
     },
     {
-      "id": "it-mvpltxtx-nj7ds",
+      "id": "it-mvpm2iyz-ngfi4",
       "ref": {
         "kind": "product",
         "id": "nv-rtx-pro-6000-ws"
@@ -106,7 +106,7 @@
       }
     },
     {
-      "id": "it-mvpltxtx-obiff",
+      "id": "it-mvpm2iyz-ohtn8",
       "ref": {
         "kind": "product",
         "id": "nv-rtx-pro-5000"
@@ -126,7 +126,7 @@
       }
     },
     {
-      "id": "it-mvpltxtx-pmbs4",
+      "id": "it-mvpm2iyz-pqmv9",
       "ref": {
         "kind": "product",
         "id": "nv-connectx-9"
@@ -146,14 +146,54 @@
       }
     },
     {
-      "id": "it-mvpltxtx-q7vm6",
+      "id": "it-mvpm2iyz-qr1d3",
+      "ref": {
+        "kind": "product",
+        "id": "dell-rtx-pro-server"
+      },
+      "name": "Dell PowerEdge R7725",
+      "position": [
+        4257.9,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 482,
+        "depth": 802.4,
+        "height": 86.8,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyz-rj60c",
+      "ref": {
+        "kind": "product",
+        "id": "hpe-rtx-pro-server"
+      },
+      "name": "HPE ProLiant Compute DL380a Gen12",
+      "position": [
+        5022.799999999999,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 447.8,
+        "depth": 802.6,
+        "height": 174.8,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyz-s6ejq",
       "ref": {
         "kind": "product",
         "id": "nv-sn6600"
       },
       "name": "NVIDIA Spectrum-X SN6600 Ethernet switch",
       "position": [
-        4235.9,
+        5765.7,
         0,
         0
       ],
@@ -166,14 +206,14 @@
       }
     },
     {
-      "id": "it-mvpltxty-rjl13",
+      "id": "it-mvpm2iz0-tt1zv",
       "ref": {
         "kind": "product",
         "id": "nv-sn6600-ld"
       },
       "name": "NVIDIA Spectrum-X SN6600-LD Ethernet switch",
       "position": [
-        4973.9,
+        6503.7,
         0,
         0
       ],
@@ -186,14 +226,14 @@
       }
     },
     {
-      "id": "it-mvpltxty-sqjfk",
+      "id": "it-mvpm2iz0-uayvn",
       "ref": {
         "kind": "product",
         "id": "nv-sn6810-ld"
       },
       "name": "NVIDIA Spectrum-X SN6810-LD Ethernet Photonics switch",
       "position": [
-        5711.9,
+        7241.7,
         0,
         0
       ],
@@ -206,14 +246,14 @@
       }
     },
     {
-      "id": "it-mvpltxty-t9mpv",
+      "id": "it-mvpm2iz0-vkumq",
       "ref": {
         "kind": "product",
         "id": "nv-sn6800-ld"
       },
       "name": "NVIDIA Spectrum-X SN6800-LD Ethernet Photonics switch",
       "position": [
-        6449.9,
+        7979.7,
         0,
         0
       ],
@@ -227,5 +267,5 @@
     }
   ],
   "groups": [],
-  "updatedAt": "2026-10-26T18:43:05.734Z"
+  "updatedAt": "2026-10-26T18:49:46.380Z"
 }

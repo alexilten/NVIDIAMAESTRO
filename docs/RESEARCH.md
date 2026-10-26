@@ -88,12 +88,15 @@ Round 02 catalogs the current NVIDIA exhibition line-up. Values were read from t
 | gb-w775 | GIGABYTE, W775-V10-L01 | Dimensions, weight, power, cooling, I/O |
 | msi-ws300 | MSI, DGX Station landing page | XpertStation WS300 dimensions, power, networking |
 | smc-ars-511gd | Supermicro, ARS-511GD-NB-LCC datasheet | Dimensions (listed in the 5U rack orientation), weight, power, cooling |
+| dell-r7725-ism | Dell, PowerEdge R7725 Installation and Service Manual, Chassis dimensions | R7725 width, height and depth (overall depth derived, Estimated) |
+| hpe-dl380a-qs, sr-dl380a-gen12 | HPE, DL380a Gen12 QuickSpecs; StorageReview review | 4U, up to 8 RTX PRO 6000; dimensions from the review (Estimated) |
+| qct-egn77c | QCT, QuantaEdge EGN77C-2U press release | 2U2N ARC-Pro server |
 | hp-zgx-fury | HP, ZGX Fury AI Station page | Mounting, power and ports. HP's QuickSpecs and datasheet refuse automated reading, so dimensions remain Placeholder |
 
 ### Gaps after Round 02
 
 - **No mechanical data published yet:** Vera Rubin NVL72 rack and trays, Vera Rubin Ultra NVL576 trays, Vera CPU rack and tray, Groq 3 LPX rack and tray, BlueField-4 STX rack and storage processor, Spectrum-6 SPX rack, Spectrum-X Ethernet Photonics, BlueField-4 DPU. These are recorded with their stated facts and draw nothing.
-- **Partner model to confirm:** the Dell and HPE RTX PRO Servers, the QCT Aerial RAN Computer and the Quanta and Supermicro CMX systems are named by partner only. Once the exact model is known its dimensions come from that maker's manual.
+- **Partner models chosen by best judgement:** the Dell RTX PRO Server is recorded as the PowerEdge R7725 (dimensions from Dell's service manual), the HPE one as the ProLiant DL380a Gen12 (dimensions from a review, Estimated, until HPE QuickSpecs are read) and the QCT Aerial RAN Computer as the QuantaEdge EGN77C-2U (no dimensions published). Each carries an Estimated "role" spec until confirmed. The Quanta and Supermicro CMX systems have no published model numbers.
 - **HP ZGX Fury G1n** dimensions need HP's QuickSpecs read by hand.
 - The 19-inch MGX switches (the "-LD" models) have no stated rack-unit height and are left without one.
 
