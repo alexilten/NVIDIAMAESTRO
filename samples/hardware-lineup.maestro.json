@@ -1,0 +1,131 @@
+{
+  "schema": "maestro.composition",
+  "version": 1,
+  "id": "comp-mvpkimjr-bm0ss",
+  "name": "NVIDIA hardware line-up (sample)",
+  "kind": "module",
+  "items": [
+    {
+      "id": "it-mvpkimjr-c8tv3",
+      "ref": {
+        "kind": "product",
+        "id": "gb-gb200-nvl72-rack"
+      },
+      "name": "GIGABYTE GB200 NVL72 rack (GIGAPOD AI-DLC)",
+      "position": [
+        300,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 600,
+        "depth": 1068,
+        "height": 2299,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpkimjr-dfch6",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-b200"
+      },
+      "name": "NVIDIA DGX B200",
+      "position": [
+        1241.15,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 482.3,
+        "depth": 897.1,
+        "height": 444,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpkimjr-e8zr4",
+      "ref": {
+        "kind": "product",
+        "id": "nv-rtx-pro-6000-maxq"
+      },
+      "name": "NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition",
+      "position": [
+        2015.6499999999999,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 266.7,
+        "depth": 40.6,
+        "height": 111.76,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpkimjr-f0zuc",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "NVIDIA DGX Spark",
+      "position": [
+        2624,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpkimjs-gcwq4",
+      "ref": {
+        "kind": "product",
+        "id": "nv-agx-orin-devkit"
+      },
+      "name": "NVIDIA Jetson AGX Orin Developer Kit",
+      "position": [
+        3154,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 110,
+        "depth": 110,
+        "height": 71.65,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpkimjs-hkhzx",
+      "ref": {
+        "kind": "product",
+        "id": "nv-agx-thor-devkit"
+      },
+      "name": "NVIDIA Jetson AGX Thor Developer Kit",
+      "position": [
+        3730.595,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 243.19,
+        "depth": 112.4,
+        "height": 56.88,
+        "version": 1
+      }
+    }
+  ],
+  "groups": [],
+  "updatedAt": "2026-10-26T18:06:18.280Z"
+}
