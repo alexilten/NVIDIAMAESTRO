@@ -1,0 +1,16 @@
+Module,Items,Footprint W (mm),Footprint D (mm),Height (mm),Faces,Live items,Stated power (W),Live items without a figure,Power point,Power run (mm),Data point,Data run (mm),Accessible approach,Turning circle
+Board niche,4,1500,300,2700,front,0,0,0,,,,,yes,yes
+Board niche 2,4,1500,300,2700,front,0,0,0,,,,,yes,yes
+Station podium,3,1400,800,968,front,3,1600,2,S1,2600,,,yes,yes
+Spark counter,3,700,1800,2004,left,3,480,1,S1,3200,,,yes,yes
+Switch table,3,1200,1100,1119,front,3,0,3,S1,3600,S1,3600,yes,yes
+Accessible counter,3,2400,700,2004,front,3,480,1,S1,4200,,,yes,yes
+
+Service point,Kind,X (mm),Y (mm),Capacity (W),Capacity status,Stated load (W),Live items without a figure,Over capacity
+S1,power-data,2000,1200,not stated,placeholder,2560,7,no
+S2,power,-4500,3500,not stated,placeholder,0,0,no
+
+Issue,Level
+1% of the open floor is narrower than the 915 mm route or cut off from it.,info
+
+Runs are plan distances along the floor grid from the module centre; add rise and slack. Power sums stated figures only.

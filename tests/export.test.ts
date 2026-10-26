@@ -4,7 +4,11 @@ import { exportItemFor } from '../src/core/library';
 import { addItem, newComposition, rotateItems } from '../src/core/compose';
 import { defaultParams } from '../src/core/geometry/kit';
 import { exportComposition, readBack } from '../src/export/rhino';
-import type { Composition } from '../src/core/schema';
+import type { Composition, Placement } from '../src/core/schema';
+import { analyseBooth } from '../src/core/booth';
+import { sampleExhibition } from '../src/core/exhibitionSample';
+import { resolveRef } from '../src/core/library';
+import { boothAnnotations } from '../src/export/boothAnnotations';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let rh: any;
@@ -42,5 +46,28 @@ describe('Rhino export', () => {
     expect(block.bbox!.max[0] - block.bbox!.min[0]).toBeCloseTo(482.3, 1);
     const counter = back.instances.find((i) => i.user['maestro.ref']?.startsWith('kit:kit-demo-counter'))!;
     expect(counter.user['maestro.verification']).toBe('estimated'); // kit parameters are design inputs until a project approves them
+  });
+});
+
+describe('Rhino export of a booth', () => {
+  it('adds the plot, service points and approach zones as curves on their layers, beside the module instances', () => {
+    const c = sampleExhibition();
+    const a = analyseBooth(c, (p: Placement) => resolveRef(p.ref, [])?.shape ?? null)!;
+    const notes = boothAnnotations(c, a);
+    const r = exportComposition(rh, c, (p) => exportItemFor(p, []), 'test', notes);
+    const back = readBack(rh, r.bytes);
+    for (const l of ['50_EXHIBITION_ARCHITECTURE::BOOTH_PLOT', '60_TECHNICAL_INFRASTRUCTURE::SERVICE_POINTS', '91_CLEARANCES::APPROACH_ZONES']) expect(back.layers).toContain(`NVIDIA_MAESTRO::${l}`);
+    expect(r.instances).toBe(c.items.length);
+    expect(back.groups).toBe(c.groups.length);
+    expect(back.composition?.booth?.services).toHaveLength(2);
+    expect(notes.filter((n) => n.layer.endsWith('APPROACH_ZONES'))).toHaveLength(6);
+    const doc = rh.File3dm.fromByteArray(r.bytes);
+    let plot = null as null | Record<string, string>;
+    for (let i = 0; i < doc.objects().count; i++) {
+      const o = doc.objects().get(i);
+      const at = o.attributes();
+      if (at.name === 'BOOTH_PLOT') { const g = o.geometry(); const bb = g.getBoundingBox(); plot = { w: String(Math.round(bb.max[0] - bb.min[0])), d: String(Math.round(bb.max[1] - bb.min[1])), u: at.getUserString('maestro.width_mm') }; }
+    }
+    expect(plot).toEqual({ w: '10000', d: '8000', u: '10000' });
   });
 });

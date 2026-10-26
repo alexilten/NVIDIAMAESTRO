@@ -8,6 +8,7 @@ import { boxSize, shapeBounds } from '../core/geometry/shape';
 import type { Placement, Vec3 } from '../core/schema';
 import { ComposeCanvas } from '../viewport/ComposeCanvas';
 import { Catalog } from './Catalog';
+import { BoothPanel, ModulesToPlace, useModuleFlags } from './Exhibition';
 import { Icon, KV, Section, VBadge, dims3, mm } from './common';
 import { extentOf, useStore } from './store';
 
@@ -36,6 +37,7 @@ export function Compose() {
       <ComposeCanvas mode={mode} />
       <aside className="panel left glass">
         <ModuleTree />
+        {st.comp.kind === 'exhibition' && <ModulesToPlace />}
         <div className="sub-head">Library</div>
         <Catalog compact onPick={(e) => st.addToCanvas(e.ref, e.name)} />
       </aside>
@@ -55,6 +57,8 @@ export function Compose() {
         <span className="tool-sep" />
         <button className={`chip ${st.snap ? 'on' : ''}`} onClick={() => st.toggle('snap')} title="Snap edges and centres to nearby items within 40 mm">Snap</button>
         <button className={`chip ${st.xray ? 'on' : ''}`} onClick={() => st.toggle('xray')}>X-ray</button>
+        {st.comp.booth && <button className={`chip ${st.circulation ? 'on' : ''}`} onClick={() => st.toggle('circulation')} title="Show the accessible route, turning space and narrow floor">Circulation</button>}
+        {st.comp.booth && <button className="chip" onClick={() => st.setCamera('top')}>Plan</button>}
         <button className="chip" onClick={() => st.setCamera('perspective')}>Frame all</button>
       </div>
     </>
@@ -72,6 +76,8 @@ function ModuleTree() {
     if (!r?.shape) return null;
     return { dims: boxSize(shapeBounds(r.shape)), version: p.ref.kind === 'ingested' ? Math.max(...parts.filter((x) => x.id === p.ref.id).map((x) => x.version)) : 1 };
   }).map((s) => [s.id, s.reason])), [comp, parts]);
+  const flags = useModuleFlags();
+  const expo = comp.kind === 'exhibition';
   const loose = comp.items.filter((i) => !i.groupId);
   const row = (p: Placement) => (
     <button key={p.id} className={`tree-item ${selection.includes(p.id) ? 'on' : ''}`} onClick={(e) => selectItems([p.id], e.shiftKey || e.metaKey, true)} title="Selects this item alone; click the group name for the whole group">
@@ -81,12 +87,12 @@ function ModuleTree() {
   );
   return (
     <div className="tree">
-      <input className="name-input" value={comp.name} onChange={(e) => setComp({ ...comp, name: e.target.value }, false)} aria-label="Module name" />
-      <div className="muted small">{comp.items.length} item{comp.items.length === 1 ? '' : 's'} · {comp.groups.length} group{comp.groups.length === 1 ? '' : 's'}</div>
+      <input className="name-input" value={comp.name} onChange={(e) => setComp({ ...comp, name: e.target.value }, false)} aria-label={expo ? 'Exhibition name' : 'Module name'} />
+      <div className="muted small">{comp.items.length} item{comp.items.length === 1 ? '' : 's'} · {comp.groups.length} {expo ? 'module' : 'group'}{comp.groups.length === 1 ? '' : 's'}</div>
       <div className="tree-list">
         {comp.groups.map((g) => (
           <div key={g.id} className="tree-group">
-            <button className="tree-group-title" onClick={() => selectItems(comp.items.filter((i) => i.groupId === g.id).map((i) => i.id))}><Icon name="group" size={12} /> {g.name}</button>
+            <button className="tree-group-title" onClick={() => selectItems(comp.items.filter((i) => i.groupId === g.id).map((i) => i.id))}><Icon name="group" size={12} /> {g.name}{(flags.get(g.id) ?? []).map((f) => <span key={f.text} className={`stale ${f.level}`} title={f.title}>{f.text}</span>)}</button>
             {comp.items.filter((i) => i.groupId === g.id).map(row)}
           </div>
         ))}
@@ -104,7 +110,7 @@ function SelectionPanel() {
   const st = useStore();
   const sel = comp.items.filter((i) => selection.includes(i.id));
 
-  if (!sel.length) return <ModulePanel />;
+  if (!sel.length) return comp.kind === 'exhibition' ? <BoothPanel /> : <ModulePanel />;
   if (sel.length === 1) {
     const p = sel[0];
     const r = resolveRef(p.ref, parts);
@@ -214,8 +220,8 @@ function ModulePanel() {
         <Section title="Templates" summary={`${TEMPLATES.length}`}>
           {TEMPLATES.map((t) => <button key={t.id} className="link-row" title={t.description} onClick={() => st.insertTemplate(t)}>{t.name}<span className="muted small"> · {t.description}</span></button>)}
         </Section>
-        <Section title="Saved modules" summary={`${saved.length}`} open={saved.length > 0}>
-          {saved.map((c) => <button key={c.id} className="link-row" onClick={() => st.openComp(c)}>{c.name}<span className="muted small"> · {c.items.length} items</span></button>)}
+        <Section title="Saved modules" summary={`${saved.filter((c) => c.kind === 'module').length}`} open={saved.length > 0}>
+          {saved.filter((c) => c.kind === 'module').map((c) => <button key={c.id} className="link-row" onClick={() => st.openComp(c)}>{c.name}<span className="muted small"> · {c.items.length} items</span></button>)}
           {!saved.length && <p className="note">Save a module to reuse it. Modules are kept in this browser.</p>}
         </Section>
         <div className="pad col">

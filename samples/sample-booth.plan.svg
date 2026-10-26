@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="297mm" viewBox="0 0 420 297">
+<title>Sample corner booth</title>
+<style>
+    .frame{stroke:#111;stroke-width:.35;fill:none}
+    .part{fill:#fff;stroke:#1a1a1a;stroke-width:.18;stroke-linejoin:round}
+    .floor{stroke:#1a1a1a;stroke-width:.5}
+    .dim{stroke:#555;stroke-width:.13}
+    .tick{stroke:#555;stroke-width:.25}
+    .tag{fill:#fff;stroke:#3b6400;stroke-width:.25}
+    text{font-family:Inter,Helvetica,Arial,sans-serif;fill:#111}
+    .dimtext{font-size:2.5px;fill:#333}
+    .tagtext{font-size:2.3px;font-weight:600;fill:#3b6400}
+    .view{font-size:3px;font-weight:700;letter-spacing:.3px}
+    .title{font-size:4.2px;font-weight:700}
+    .small{font-size:2.6px}
+    .tiny{font-size:2.1px;fill:#555}
+    .note{font-size:2.1px;fill:#555}
+    .wall{stroke:#111;stroke-width:.7;fill:none}
+    .open{stroke:#111;stroke-width:.25;stroke-dasharray:2 1.2;fill:none}
+    .aisle{fill:#f2f2f4;stroke:none}
+    .tight{fill:#f2a33a;fill-opacity:.55;stroke:none}
+    .zone{fill:none;stroke:#3b6400;stroke-width:.2;stroke-dasharray:1 .8}
+    .zone.bad{stroke:#d33;stroke-width:.35}
+    .svc{fill:#fff;stroke:#c77700;stroke-width:.3}
+    .svctext{font-size:2.1px;font-weight:600;fill:#a35f00}
+    .err{fill:#d33}
+    .warn{fill:#c77700}</style>
+<rect x="0" y="0" width="420" height="297" fill="#fff"/>
+<rect x="10" y="10" width="400" height="277" class="frame"/>
+<g id="aisles">
+<rect x="27" y="199.5" width="260" height="60" class="aisle"/>
+<text x="187" y="230.5" class="tiny" text-anchor="middle">HALL AISLE · 3000</text>
+<rect x="27" y="39.5" width="60" height="220" class="aisle"/>
+<text x="57" y="119.5" class="tiny" text-anchor="middle" transform="rotate(-90 57 119.5)">HALL AISLE · 3000</text>
+</g>
+<g id="tight">
+<rect x="286.2" y="125.9" width="0.8" height="0.8" class="tight"/>
+<rect x="285.4" y="125.1" width="1.6" height="0.8" class="tight"/>
+<rect x="283.8" y="124.3" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="123.5" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="122.7" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="121.9" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="121.1" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="120.3" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="119.5" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="118.7" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="117.9" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="117.1" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="116.3" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="115.5" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="114.7" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="113.9" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="113.1" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="112.3" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="111.5" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="110.7" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="109.9" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="109.1" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="108.3" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="107.5" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="106.7" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="105.9" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="105.1" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="104.3" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="103.5" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="102.7" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="101.9" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="101.1" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="100.3" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="99.5" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="98.7" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="97.9" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="97.1" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="96.3" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="95.5" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="94.7" width="3.2" height="0.8" class="tight"/>
+<rect x="283.8" y="93.9" width="3.2" height="0.8" class="tight"/>
+<rect x="285.4" y="93.1" width="1.6" height="0.8" class="tight"/>
+<rect x="286.2" y="92.3" width="0.8" height="0.8" class="tight"/>
+<rect x="206.2" y="44.3" width="20.8" height="0.8" class="tight"/>
+<rect x="206.2" y="43.5" width="21.6" height="0.8" class="tight"/>
+<rect x="206.2" y="42.7" width="21.6" height="0.8" class="tight"/>
+<rect x="205.4" y="41.9" width="23.2" height="0.8" class="tight"/>
+<rect x="205.4" y="41.1" width="23.2" height="0.8" class="tight"/>
+<rect x="204.6" y="40.3" width="24.8" height="0.8" class="tight"/>
+<rect x="203.8" y="39.5" width="26.4" height="0.8" class="tight"/>
+</g>
+<g id="approach">
+<rect x="112" y="45.5" width="30" height="24.4" class="zone"/>
+<rect x="148" y="45.5" width="30" height="24.4" class="zone"/>
+<rect x="203" y="61.5" width="28" height="24.4" class="zone"/>
+<rect x="245.6" y="91.5" width="24.4" height="36" class="zone"/>
+<rect x="159" y="122.5" width="24" height="24.4" class="zone"/>
+<rect x="195" y="178.5" width="48" height="24.4" class="zone"/>
+</g>
+<g id="plan">
+<rect x="271.2" y="92.7" width="12.8" height="33.6" class="part"/>
+<rect x="214.2" y="164.5" width="27.6" height="12.8" class="part"/>
+<rect x="203" y="45.5" width="28" height="16" class="part"/>
+<rect x="204" y="46.5" width="26" height="14" class="part"/>
+<rect x="203" y="60.5" width="28" height="1" class="part"/>
+<rect x="203" y="45.5" width="28" height="1" class="part"/>
+<rect x="203" y="46.5" width="1" height="14" class="part"/>
+<rect x="230" y="46.5" width="1" height="14" class="part"/>
+<rect x="208.18" y="47.64" width="4.45" height="11.72" class="part"/>
+<rect x="221.25" y="48.4" width="4.7" height="10.2" class="part"/>
+<rect x="221.64" y="58.79" width="3.92" height="0.05" class="part"/>
+<rect x="195" y="164.5" width="18" height="2.4" class="part"/>
+<rect x="221.89" y="48.19" width="3.43" height="0.05" class="part"/>
+<rect x="195" y="164.5" width="18" height="14" class="part"/>
+<rect x="202.77" y="172.37" width="0.36" height="0.36" class="part"/>
+<rect x="204.87" y="172.37" width="0.36" height="0.36" class="part"/>
+<rect x="202.77" y="170.27" width="0.36" height="0.36" class="part"/>
+<rect x="204.87" y="170.27" width="0.36" height="0.36" class="part"/>
+<rect x="208.55" y="59.59" width="3.71" height="0.05" class="part"/>
+<rect x="202.8" y="170" width="2.4" height="0.05" class="part"/>
+<rect x="159" y="100.5" width="24" height="22" class="part"/>
+<rect x="208.78" y="47.4" width="3.24" height="0.05" class="part"/>
+<rect x="160" y="101.5" width="22" height="20" class="part"/>
+<rect x="221.15" y="48.19" width="4.9" height="10.6" class="part"/>
+<rect x="159" y="121.5" width="24" height="1" class="part"/>
+<rect x="159" y="100.5" width="24" height="1" class="part"/>
+<rect x="159" y="101.5" width="1" height="20" class="part"/>
+<rect x="182" y="101.5" width="1" height="20" class="part"/>
+<rect x="202.62" y="172.98" width="2.76" height="0.05" class="part"/>
+<rect x="202.5" y="170" width="3" height="2.98" class="part"/>
+<rect x="283.96" y="103.5" width="0.05" height="12" class="part"/>
+<rect x="222" y="164.5" width="12" height="0.05" class="part"/>
+<rect x="208.08" y="47.4" width="4.63" height="12.19" class="part"/>
+<rect x="270" y="91.5" width="14" height="36" class="part"/>
+<rect x="213" y="164.5" width="30" height="14" class="part"/>
+<rect x="172.35" y="120.48" width="7.71" height="0.05" class="part"/>
+<rect x="171.82" y="102.5" width="8.76" height="17.4" class="part"/>
+<rect x="171.82" y="119.9" width="8.76" height="0.6" class="part"/>
+<rect x="270" y="91.5" width="14" height="36" class="part"/>
+<rect x="213" y="164.5" width="30" height="14" class="part"/>
+<rect x="275.77" y="102.27" width="0.36" height="0.36" class="part"/>
+<rect x="275.77" y="104.37" width="0.36" height="0.36" class="part"/>
+<rect x="277.87" y="102.27" width="0.36" height="0.36" class="part"/>
+<rect x="277.87" y="104.37" width="0.36" height="0.36" class="part"/>
+<rect x="275.77" y="114.27" width="0.36" height="0.36" class="part"/>
+<rect x="275.77" y="116.37" width="0.36" height="0.36" class="part"/>
+<rect x="277.87" y="114.27" width="0.36" height="0.36" class="part"/>
+<rect x="277.87" y="116.37" width="0.36" height="0.36" class="part"/>
+<rect x="226.77" y="172.37" width="0.36" height="0.36" class="part"/>
+<rect x="228.87" y="172.37" width="0.36" height="0.36" class="part"/>
+<rect x="226.77" y="170.27" width="0.36" height="0.36" class="part"/>
+<rect x="228.87" y="170.27" width="0.36" height="0.36" class="part"/>
+<rect x="278.48" y="102.3" width="0.05" height="2.4" class="part"/>
+<rect x="278.48" y="114.3" width="0.05" height="2.4" class="part"/>
+<rect x="226.8" y="170" width="2.4" height="0.05" class="part"/>
+<rect x="275.5" y="102.12" width="0.05" height="2.76" class="part"/>
+<rect x="275.5" y="114.12" width="0.05" height="2.76" class="part"/>
+<rect x="226.62" y="172.98" width="2.76" height="0.05" class="part"/>
+<rect x="275.52" y="102" width="2.98" height="3" class="part"/>
+<rect x="275.52" y="114" width="2.98" height="3" class="part"/>
+<rect x="226.5" y="170" width="3" height="2.98" class="part"/>
+<rect x="161.95" y="120.48" width="7.71" height="0.05" class="part"/>
+<rect x="115" y="45.14" width="24" height="0.36" class="part"/>
+<rect x="151" y="45.14" width="24" height="0.36" class="part"/>
+<rect x="115" y="39.86" width="24" height="5.28" class="part"/>
+<rect x="151" y="39.86" width="24" height="5.28" class="part"/>
+<rect x="161.42" y="102.5" width="8.76" height="17.4" class="part"/>
+<rect x="161.42" y="119.9" width="8.76" height="0.6" class="part"/>
+<rect x="125.63" y="42.48" width="2.13" height="0.05" class="part"/>
+<rect x="161.63" y="42.48" width="2.13" height="0.05" class="part"/>
+<rect x="125.35" y="42.89" width="1.48" height="0.05" class="part"/>
+<rect x="127.79" y="42.89" width="1.48" height="0.05" class="part"/>
+<rect x="161.35" y="42.89" width="1.48" height="0.05" class="part"/>
+<rect x="163.79" y="42.89" width="1.48" height="0.05" class="part"/>
+<rect x="124.27" y="42.09" width="5.78" height="0.81" class="part"/>
+<rect x="123.95" y="42.09" width="0.16" height="0.81" class="part"/>
+<rect x="160.27" y="42.09" width="5.78" height="0.81" class="part"/>
+<rect x="159.95" y="42.09" width="0.16" height="0.81" class="part"/>
+<rect x="115.36" y="39.86" width="23.28" height="5.08" class="part"/>
+<rect x="151.36" y="39.86" width="23.28" height="5.08" class="part"/>
+<rect x="125.8" y="42.38" width="1.87" height="0.05" class="part"/>
+<rect x="161.8" y="42.38" width="1.87" height="0.05" class="part"/>
+<rect x="127.91" y="42.79" width="1.17" height="0.05" class="part"/>
+<rect x="163.91" y="42.79" width="1.17" height="0.05" class="part"/>
+<rect x="124.65" y="41.99" width="5.01" height="0.81" class="part"/>
+<rect x="124.33" y="41.99" width="0.16" height="0.81" class="part"/>
+<rect x="160.65" y="41.99" width="5.01" height="0.81" class="part"/>
+<rect x="160.33" y="41.99" width="0.16" height="0.81" class="part"/>
+<rect x="282.8" y="108.7" width="0.8" height="1.6" class="part"/>
+<rect x="227.2" y="164.9" width="1.6" height="0.8" class="part"/>
+<rect x="115.36" y="39.86" width="23.28" height="5.08" class="part"/>
+<rect x="151.36" y="39.86" width="23.28" height="5.08" class="part"/>
+<rect x="125.8" y="42.38" width="1.87" height="0.05" class="part"/>
+<rect x="161.8" y="42.38" width="1.87" height="0.05" class="part"/>
+<rect x="127.91" y="42.79" width="1.17" height="0.05" class="part"/>
+<rect x="163.91" y="42.79" width="1.17" height="0.05" class="part"/>
+<rect x="124.65" y="41.99" width="5.01" height="0.81" class="part"/>
+<rect x="124.33" y="41.99" width="0.16" height="0.81" class="part"/>
+<rect x="160.65" y="41.99" width="5.01" height="0.81" class="part"/>
+<rect x="160.33" y="41.99" width="0.16" height="0.81" class="part"/>
+<rect x="282.2" y="97.08" width="0.6" height="24.83" class="part"/>
+<rect x="215.58" y="165.7" width="24.83" height="0.6" class="part"/>
+<rect x="115" y="39.5" width="24" height="0.36" class="part"/>
+<rect x="115" y="39.86" width="0.36" height="5.28" class="part"/>
+<rect x="138.64" y="39.86" width="0.36" height="5.28" class="part"/>
+<rect x="115" y="39.86" width="24" height="5.28" class="part"/>
+<rect x="151" y="39.5" width="24" height="0.36" class="part"/>
+<rect x="151" y="39.86" width="0.36" height="5.28" class="part"/>
+<rect x="174.64" y="39.86" width="0.36" height="5.28" class="part"/>
+<rect x="151" y="39.86" width="24" height="5.28" class="part"/>
+<rect x="112" y="45.14" width="3" height="0.36" class="part"/>
+<rect x="139" y="45.14" width="3" height="0.36" class="part"/>
+<rect x="115" y="45.14" width="24" height="0.36" class="part"/>
+<rect x="148" y="45.14" width="3" height="0.36" class="part"/>
+<rect x="175" y="45.14" width="3" height="0.36" class="part"/>
+<rect x="151" y="45.14" width="24" height="0.36" class="part"/>
+</g>
+<g id="plot">
+<line x1="87" y1="199.5" x2="287" y2="199.5" class="open"/>
+<line x1="87" y1="39.5" x2="287" y2="39.5" class="wall"/>
+<line x1="87" y1="199.5" x2="87" y2="39.5" class="open"/>
+<line x1="287" y1="199.5" x2="287" y2="39.5" class="wall"/>
+</g>
+<g id="dimensions">
+<line x1="87" y1="34.5" x2="287" y2="34.5" class="dim"/>
+<line x1="87" y1="33" x2="87" y2="36" class="tick"/>
+<line x1="287" y1="33" x2="287" y2="36" class="tick"/>
+<text x="187" y="33.1" class="dimtext" text-anchor="middle">10000</text>
+<line x1="21" y1="39.5" x2="21" y2="199.5" class="dim"/>
+<line x1="19.5" y1="39.5" x2="22.5" y2="39.5" class="tick"/>
+<line x1="19.5" y1="199.5" x2="22.5" y2="199.5" class="tick"/>
+<text x="19.4" y="119.5" class="dimtext" text-anchor="middle" transform="rotate(-90 19.4 119.5)">8000</text>
+</g>
+<g id="tags">
+<circle cx="127" cy="42.5" r="2.4" class="tag"/>
+<text x="127" y="43.4" class="tagtext" text-anchor="middle">A</text>
+<circle cx="163" cy="42.5" r="2.4" class="tag"/>
+<text x="163" y="43.4" class="tagtext" text-anchor="middle">B</text>
+<circle cx="217" cy="53.5" r="2.4" class="tag"/>
+<text x="217" y="54.4" class="tagtext" text-anchor="middle">C</text>
+<circle cx="277" cy="109.5" r="2.4" class="tag"/>
+<text x="277" y="110.4" class="tagtext" text-anchor="middle">D</text>
+<circle cx="171" cy="111.5" r="2.4" class="tag"/>
+<text x="171" y="112.4" class="tagtext" text-anchor="middle">E</text>
+<circle cx="219" cy="171.5" r="2.4" class="tag"/>
+<text x="219" y="172.4" class="tagtext" text-anchor="middle">F</text>
+<circle cx="227" cy="95.5" r="1.6" class="svc"/>
+<line x1="225.9" y1="94.4" x2="228.1" y2="96.6" class="tick"/>
+<line x1="225.9" y1="96.6" x2="228.1" y2="94.4" class="tick"/>
+<text x="229.4" y="93.9" class="svctext" text-anchor="start">S1</text>
+<circle cx="97" cy="49.5" r="1.6" class="svc"/>
+<line x1="95.9" y1="48.4" x2="98.1" y2="50.6" class="tick"/>
+<line x1="95.9" y1="50.6" x2="98.1" y2="48.4" class="tick"/>
+<text x="99.4" y="47.9" class="svctext" text-anchor="start">S2</text>
+</g>
+<text x="26" y="18" class="view" text-anchor="start">BOOTH PLAN</text>
+<text x="52" y="18" class="tiny" text-anchor="start">Front (−Y) at the bottom</text>
+<g id="list">
+<line x1="298" y1="10" x2="298" y2="287" class="frame"/>
+<text x="302" y="17" class="view" text-anchor="start">MODULES</text>
+<circle cx="304" cy="22" r="2.1" class="tag"/>
+<text x="304" y="22.9" class="tagtext" text-anchor="middle">A</text>
+<text x="308" y="23" class="small" text-anchor="start">Board niche</text>
+<text x="308" y="26.4" class="tiny" text-anchor="start">1500 × 300 mm · static</text>
+<text x="308" y="29.4" class="tiny" text-anchor="start">Accessible approach and turning circle</text>
+<circle cx="304" cy="32" r="2.1" class="tag"/>
+<text x="304" y="32.9" class="tagtext" text-anchor="middle">B</text>
+<text x="308" y="33" class="small" text-anchor="start">Board niche 2</text>
+<text x="308" y="36.4" class="tiny" text-anchor="start">1500 × 300 mm · static</text>
+<text x="308" y="39.4" class="tiny" text-anchor="start">Accessible approach and turning circle</text>
+<circle cx="304" cy="42" r="2.1" class="tag"/>
+<text x="304" y="42.9" class="tagtext" text-anchor="middle">C</text>
+<text x="308" y="43" class="small" text-anchor="start">Station podium</text>
+<text x="308" y="46.4" class="tiny" text-anchor="start">1400 × 800 mm · 1.60 kW + 2 unknown from S1 (2.6 m)</text>
+<text x="308" y="49.4" class="tiny" text-anchor="start">Accessible approach and turning circle</text>
+<circle cx="304" cy="52" r="2.1" class="tag"/>
+<text x="304" y="52.9" class="tagtext" text-anchor="middle">D</text>
+<text x="308" y="53" class="small" text-anchor="start">Spark counter</text>
+<text x="308" y="56.4" class="tiny" text-anchor="start">700 × 1800 mm · 0.48 kW + 1 unknown from S1 (3.2 m)</text>
+<text x="308" y="59.4" class="tiny" text-anchor="start">Accessible approach and turning circle</text>
+<circle cx="304" cy="62" r="2.1" class="tag"/>
+<text x="304" y="62.9" class="tagtext" text-anchor="middle">E</text>
+<text x="308" y="63" class="small" text-anchor="start">Switch table</text>
+<text x="308" y="66.4" class="tiny" text-anchor="start">1200 × 1100 mm · 0.00 kW + 3 unknown from S1 (3.6 m)</text>
+<text x="308" y="69.4" class="tiny" text-anchor="start">Accessible approach and turning circle</text>
+<circle cx="304" cy="72" r="2.1" class="tag"/>
+<text x="304" y="72.9" class="tagtext" text-anchor="middle">F</text>
+<text x="308" y="73" class="small" text-anchor="start">Accessible counter</text>
+<text x="308" y="76.4" class="tiny" text-anchor="start">2400 × 700 mm · 0.48 kW + 1 unknown from S1 (4.2 m)</text>
+<text x="308" y="79.4" class="tiny" text-anchor="start">Accessible approach and turning circle</text>
+<text x="302" y="85" class="view" text-anchor="start">SERVICE POINTS</text>
+<text x="304" y="90" class="tiny" text-anchor="start">S1 · Power + data · 2.56 kW stated, capacity not stated</text>
+<text x="304" y="93.6" class="tiny" text-anchor="start">S2 · Power · 0.00 kW stated, capacity not stated</text>
+<text x="302" y="99.2" class="view" text-anchor="start">CHECKS</text>
+<text x="304" y="104.2" class="tiny" text-anchor="start">i</text>
+<text x="307.5" y="104.2" class="tiny" text-anchor="start">1% of the open floor is narrower than the 915 mm route or cut off</text>
+<text x="307.5" y="107.4" class="tiny" text-anchor="start">from it.</text>
+</g>
+<g id="legend">
+<rect x="26" y="279.8" width="4" height="2.4" class="tight"/>
+<text x="31.5" y="282" class="tiny" text-anchor="start">Floor narrower than the 915 mm route</text>
+<rect x="88" y="279.8" width="4" height="2.4" class="zone"/>
+<text x="93.5" y="282" class="tiny" text-anchor="start">Approach zone, 1220 mm</text>
+<circle cx="138" cy="281" r="1.4" class="svc"/>
+<text x="141" y="282" class="tiny" text-anchor="start">Service point</text>
+<line x1="166" y1="281" x2="176" y2="281" class="wall"/>
+<text x="178" y="282" class="tiny" text-anchor="start">Closed side</text>
+<line x1="198" y1="281" x2="208" y2="281" class="open"/>
+<text x="210" y="282" class="tiny" text-anchor="start">Open side</text>
+</g>
+<g id="title">
+<line x1="298" y1="253" x2="410" y2="253" class="frame"/>
+<text x="302" y="261" class="title" text-anchor="start">Sample corner booth</text>
+<text x="302" y="267" class="small" text-anchor="start">Booth 10000 × 8000 mm · height limit 4000 mm · 6 modules</text>
+<text x="302" y="272.5" class="small" text-anchor="start">Scale 1:50 at A3 · millimetres · 2026-10-26</text>
+<text x="302" y="278" class="tiny" text-anchor="start">Plot, limits and clearances: Placeholder. Check with the venue before submission.</text>
+<text x="302" y="282" class="tiny" text-anchor="start">MAESTRO 0.1.0 · sample</text>
+</g>
+</svg>

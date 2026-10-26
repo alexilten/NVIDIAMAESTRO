@@ -12,7 +12,10 @@ import type { Composition, ItemRef, Vec3 } from '../src/core/schema';
 import { MODEL_BY_ID } from '../src/core/catalog/products';
 import { exportComposition, readBack } from '../src/export/rhino';
 import { TEMPLATES, insertComposition } from '../src/core/templates';
-import { buildSheet } from '../src/core/sheet';
+import { buildBoothSheet, buildSheet } from '../src/core/sheet';
+import { analyseBooth, boothCsv } from '../src/core/booth';
+import { sampleExhibition } from '../src/core/exhibitionSample';
+import { boothAnnotations } from '../src/export/boothAnnotations';
 import { schedule, scheduleCsv } from '../src/core/services';
 
 const rh = await rhino3dm();
@@ -82,10 +85,18 @@ writeFileSync('samples/demo-modules.sheet.svg', sheet.svg);
 writeFileSync('samples/demo-modules.services.csv', scheduleCsv(schedule(modules, (p) => resolveRef(p.ref, [])!.entry.name), modules.name));
 console.log(`samples/demo-modules.sheet.svg: 1:${sheet.scale}, ${sheet.items.length} items`);
 
-for (const [file, comp] of [['spark-demo-station.3dm', sparkStation()], ['hardware-lineup.3dm', hardwareLineup()], ['lineup-r02.3dm', lineupR02()], ['demo-modules.3dm', modules]] as const) {
-  const r = exportComposition(rh, comp, (p) => exportItemFor(p, []), pkg.version);
+const expo = sampleExhibition();
+const shapeOf = (p: Composition['items'][number]) => resolveRef(p.ref, [])?.shape ?? null;
+const analysis = analyseBooth(expo, shapeOf, (p) => resolveRef(p.ref, [])!.entry.name)!;
+const plan = buildBoothSheet(expo, analysis, shapeOf, { appLabel: `MAESTRO ${pkg.version} · sample`, date: '2026-10-26' })!;
+writeFileSync('samples/sample-booth.plan.svg', plan.svg);
+writeFileSync('samples/sample-booth.schedule.csv', boothCsv(expo, analysis));
+console.log(`samples/sample-booth.plan.svg: 1:${plan.scale}, ${analysis.units.length} modules, ${analysis.issues.length} checks open`);
+
+for (const [file, comp] of [['spark-demo-station.3dm', sparkStation()], ['hardware-lineup.3dm', hardwareLineup()], ['lineup-r02.3dm', lineupR02()], ['demo-modules.3dm', modules], ['sample-booth.3dm', expo]] as const) {
+  const r = exportComposition(rh, comp, (p) => exportItemFor(p, []), pkg.version, comp === expo ? boothAnnotations(expo, analysis) : []);
   const back = readBack(rh, r.bytes);
   writeFileSync(`samples/${file}`, r.bytes);
   writeFileSync(`samples/${file.replace('.3dm', '.maestro.json')}`, JSON.stringify(comp, null, 2));
-  console.log(`samples/${file}: ${r.instances} instances, ${r.blocks} blocks, ${back.units}, ${(r.bytes.length / 1024).toFixed(0)} KB${r.skipped.length ? `, skipped ${r.skipped.join('; ')}` : ''}`);
+  console.log(`samples/${file}: ${r.instances} instances, ${r.blocks} blocks, ${back.units}, ${(r.bytes.length / 1024).toFixed(0)} KB${r.annotations ? `, ${r.annotations} booth curves` : ''}${r.skipped.length ? `, skipped ${r.skipped.join('; ')}` : ''}`);
 }

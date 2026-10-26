@@ -26,10 +26,10 @@ export const LAYER_TREE: { name: string; color: [number, number, number]; childr
   { name: '20_DEMO_MODULES', color: [60, 60, 70], children: [] },
   { name: '30_DISPLAY_FURNITURE', color: [90, 90, 96], children: ['COUNTERS', 'KIOSKS', 'PEDESTALS', 'NICHES', 'DESKS'] },
   { name: '40_MEDIA', color: [20, 20, 24], children: ['DISPLAYS'] },
-  { name: '50_EXHIBITION_ARCHITECTURE', color: [120, 120, 128], children: ['WALLS', 'SIGNAGE', 'ROBOT_CELLS', 'OTHER'] },
-  { name: '60_TECHNICAL_INFRASTRUCTURE', color: [230, 170, 30], children: [] },
+  { name: '50_EXHIBITION_ARCHITECTURE', color: [120, 120, 128], children: ['BOOTH_PLOT', 'WALLS', 'SIGNAGE', 'ROBOT_CELLS', 'OTHER'] },
+  { name: '60_TECHNICAL_INFRASTRUCTURE', color: [230, 170, 30], children: ['SERVICE_POINTS'] },
   { name: '90_DIMENSIONS', color: [10, 132, 255], children: ['LABELS'] },
-  { name: '91_CLEARANCES', color: [230, 40, 40], children: [] },
+  { name: '91_CLEARANCES', color: [230, 40, 40], children: ['APPROACH_ZONES', 'NARROW_FLOOR'] },
   { name: '95_SOURCE_LAYERS', color: [160, 160, 160], children: [] },
 ];
 
@@ -53,9 +53,15 @@ export interface ExportItem {
 
 export type Resolver = (p: Placement) => ExportItem | null;
 
-export interface ExportResult { bytes: Uint8Array; blocks: number; instances: number; skipped: string[] }
+export interface ExportResult { bytes: Uint8Array; blocks: number; instances: number; skipped: string[]; annotations: number }
 
-export function exportComposition(rh: RhinoModule, comp: Composition, resolve: Resolver, appVersion = 'dev'): ExportResult {
+/** Plain drawing objects that go with a composition, such as a booth plot, clearance zones or service points. */
+export type Annotation =
+  | { kind: 'polyline'; layer: string; name: string; points: Vec3[]; closed?: boolean; user?: Record<string, string | number> }
+  | { kind: 'circle'; layer: string; name: string; center: Vec3; radius: number; user?: Record<string, string | number> }
+  | { kind: 'dot'; layer: string; name: string; text: string; at: Vec3 };
+
+export function exportComposition(rh: RhinoModule, comp: Composition, resolve: Resolver, appVersion = 'dev', annotations: Annotation[] = []): ExportResult {
   const doc = new rh.File3dm();
   doc.settings().modelUnitSystem = rh.UnitSystem.Millimeters;
   doc.settings().modelAbsoluteTolerance = 0.01;
@@ -221,6 +227,24 @@ export function exportComposition(rh: RhinoModule, comp: Composition, resolve: R
     addObj(dot, attrs(labels, `${p.name}.LABEL`));
   }
 
+  for (const an of annotations) {
+    const layer = L(an.layer);
+    if (an.kind === 'polyline') {
+      const pts = an.closed ? [...an.points, an.points[0]] : an.points;
+      const pl = new rh.Polyline(pts.length);
+      for (const p of pts) pl.add(p[0], p[1], p[2]);
+      const curve = pl.toNurbsCurve();
+      addObj(curve, attrs(layer, an.name, undefined, an.user));
+      free(pl);
+    } else if (an.kind === 'circle') {
+      const ci = new rh.Circle(an.center, an.radius);
+      addObj(ci.toNurbsCurve(), attrs(layer, an.name, undefined, an.user));
+      free(ci);
+    } else {
+      addObj(new rh.TextDot(an.text, an.at), attrs(layer, an.name));
+    }
+  }
+
   doc.strings().set('maestro.schema', 'maestro.composition');
   doc.strings().set('maestro.appVersion', appVersion);
   doc.strings().set('maestro.composition', JSON.stringify(comp));
@@ -228,7 +252,7 @@ export function exportComposition(rh: RhinoModule, comp: Composition, resolve: R
 
   const bytes: Uint8Array = doc.toByteArray();
   free(doc);
-  return { bytes, blocks: defIds.size, instances, skipped };
+  return { bytes, blocks: defIds.size, instances, skipped, annotations: annotations.length };
 }
 
 export function placementXform(rh: RhinoModule, p: Placement) {

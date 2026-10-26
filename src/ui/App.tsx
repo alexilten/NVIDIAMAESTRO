@@ -18,7 +18,7 @@ export function App() {
       <Toolbar onAbout={() => setAbout(true)} />
       <Guard key={workspace} area={workspace}>
         {workspace === 'discover' && <Discover />}
-        {workspace === 'compose' && <Compose />}
+        {(workspace === 'compose' || workspace === 'exhibition') && <Compose />}
         {workspace === 'ingest' && <Ingest />}
       </Guard>
       {about && <About onClose={() => setAbout(false)} />}
@@ -27,10 +27,10 @@ export function App() {
   );
 }
 
-const TABS: { id: Workspace | 'exhibition'; label: string; title?: string }[] = [
+const TABS: { id: Workspace; label: string; title?: string }[] = [
   { id: 'discover', label: 'Discover' },
-  { id: 'compose', label: 'Compose' },
-  { id: 'exhibition', label: 'Exhibition', title: 'Exhibition layouts arrive in Round 04' },
+  { id: 'compose', label: 'Compose', title: 'Compose demo modules' },
+  { id: 'exhibition', label: 'Exhibition', title: 'Lay modules out on a booth and check circulation and services' },
   { id: 'ingest', label: 'Import' },
 ];
 
@@ -53,20 +53,18 @@ function Toolbar({ onAbout }: { onAbout: () => void }) {
         <span className="tb-sep" />
         <nav className="segmented" aria-label="Workspace">
           {TABS.map((t) => (
-            <button key={t.id} className={workspace === t.id ? 'on' : ''} disabled={t.id === 'exhibition'} title={t.title} onClick={() => t.id !== 'exhibition' && setWorkspace(t.id)}>
-              {t.label}{t.id === 'exhibition' && <span className="soon">R04</span>}
-            </button>
+            <button key={t.id} className={workspace === t.id ? 'on' : ''} title={t.title} onClick={() => setWorkspace(t.id)}>{t.label}</button>
           ))}
         </nav>
       </div>
       <div className="tb-group">
-        {workspace === 'compose' && (
+        {(workspace === 'compose' || workspace === 'exhibition') && (
           <>
             <button className="ghost" onClick={() => saveCompositionJson(comp)} disabled={!comp.items.length}>Save .json</button>
             <button className="primary" onClick={exportModule} disabled={!comp.items.length || busy}><Icon name="download" /> {busy ? 'Exporting…' : 'Export .3dm'}</button>
           </>
         )}
-        {workspace !== 'compose' && <span className="tb-note">{parts.filter((p) => p.status === 'approved').length} project parts in this browser</span>}
+        {workspace !== 'compose' && workspace !== 'exhibition' && <span className="tb-note">{parts.filter((p) => p.status === 'approved').length} project parts in this browser</span>}
       </div>
     </header>
   );
@@ -82,7 +80,7 @@ function About({ onClose }: { onClose: () => void }) {
     <div className="modal" onClick={onClose}>
       <div className="modal-body glass about" onClick={(e) => e.stopPropagation()}>
         <div className="modal-head"><b>About MAESTRO</b><button className="icon-btn" onClick={onClose} aria-label="Close"><Icon name="x" /></button></div>
-        <p className="prose">MAESTRO is a working tool for designing exhibition demos around NVIDIA hardware: a catalog of products with their sources, a kit of display parts, a composer for demo modules, and an import path for parts from earlier projects. Everything exports to Rhino in millimetres.</p>
+        <p className="prose">MAESTRO is a working tool for designing exhibition demos around NVIDIA hardware: a catalog of products with their sources, a kit of display parts, a composer for demo modules, an exhibition planner that checks circulation and services, and an import path for parts from earlier projects. Everything exports to Rhino in millimetres.</p>
         <p className="prose"><b>MAESTRO is an internal working title. It is not an NVIDIA product and is not endorsed by NVIDIA.</b> Product names belong to their owners. Specifications are taken from the public documents listed with each product, and every value carries its status.</p>
         <dl className="legend-list">
           <dt><span className="vbadge verified">Verified</span></dt><dd>Read from a published manufacturer document, cited with the value.</dd>

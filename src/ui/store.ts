@@ -1,17 +1,21 @@
 import { create } from 'zustand';
 import { placeOn, snapDelta, supportSurfaces } from '../core/arrange';
+import { freeSpot, newExhibition, placeModule, planExtent } from '../core/booth';
+import { sampleExhibition } from '../core/exhibitionSample';
 import { insertComposition, type Template } from '../core/templates';
 import { addItem, alignItems, distributeX, duplicateItems, expandToGroups, groupItems, moveItems, newComposition, nextSlot, removeItems, rotateItems, ungroup, updateItem } from '../core/compose';
 import { resolveRef, type LibraryEntry } from '../core/library';
 import { boxSize, shapeBounds } from '../core/geometry/shape';
-import type { Composition, ItemRef, Placement, Vec3 } from '../core/schema';
+import type { Booth, Composition, ItemRef, Placement, Vec3 } from '../core/schema';
 import { compStore, partsStore, docsStore, type DocIndex } from '../ingest/store';
 import type { IngestedPart } from '../ingest/types';
 
-export type Workspace = 'discover' | 'compose' | 'ingest';
+export type Workspace = 'discover' | 'compose' | 'exhibition' | 'ingest';
 export type CameraPreset = 'perspective' | 'front' | 'rear' | 'side' | 'top' | 'iso';
 
 const COMP_KEY = 'maestro.composition.v1';
+const EXPO_KEY = 'maestro.exhibition.v1';
+const keyOf = (c: Composition) => (c.kind === 'exhibition' ? EXPO_KEY : COMP_KEY);
 const FAV_KEY = 'maestro.favorites.v1';
 
 function readLocal<T>(k: string, fallback: T): T {
@@ -36,7 +40,7 @@ interface State {
   dims: boolean;
   autoRotate: boolean;
   scaleFigure: boolean;
-  toggle: (k: 'ortho' | 'xray' | 'dims' | 'autoRotate' | 'scaleFigure' | 'snap') => void;
+  toggle: (k: 'ortho' | 'xray' | 'dims' | 'autoRotate' | 'scaleFigure' | 'snap' | 'circulation') => void;
   favorites: string[];
   toggleFavorite: (key: string) => void;
 
@@ -78,6 +82,12 @@ interface State {
   openComp: (c: Composition) => void;
   newComp: () => void;
 
+  // exhibition
+  setBooth: (patch: Partial<Booth>) => void;
+  placeModuleOnBooth: (src: Composition, template?: boolean) => void;
+  loadSampleBooth: () => void;
+  circulation: boolean;
+
   toast: string | null;
   notify: (s: string | null) => void;
 }
@@ -95,12 +105,21 @@ export function extentOf(p: Placement, parts: IngestedPart[]) {
 export const useStore = create<State>((set, get) => {
   const commit = (c: Composition) => {
     const { comp, history } = get();
-    writeLocal(COMP_KEY, c);
-    set({ comp: c, history: [...history.slice(-80), comp], future: [] });
+    writeLocal(keyOf(c), c);
+    // switching between a module and an exhibition starts a fresh undo history
+    set({ comp: c, history: comp.kind === c.kind ? [...history.slice(-80), comp] : [], future: [] });
+  };
+  /** the composition a workspace edits: Compose a module, Exhibition an exhibition; each is kept on its own */
+  const docFor = (w: Workspace): Composition | null => {
+    const { comp } = get();
+    const want = w === 'exhibition' ? 'exhibition' : w === 'compose' ? 'module' : null;
+    if (!want || comp.kind === want) return null;
+    writeLocal(keyOf(comp), comp);
+    return want === 'exhibition' ? readLocal<Composition>(EXPO_KEY, sampleExhibition()) : readLocal<Composition>(COMP_KEY, newComposition());
   };
   return {
     workspace: 'discover',
-    setWorkspace: (w) => set({ workspace: w }),
+    setWorkspace: (w) => { const next = docFor(w); set({ workspace: w, ...(next ? { comp: next, history: [], future: [], selection: [] } : {}) }); },
 
     selectedKey: 'product:nv-dgx-spark',
     selectedRef: { kind: 'product', id: 'nv-dgx-spark' },
@@ -148,9 +167,9 @@ export const useStore = create<State>((set, get) => {
     selection: [],
     history: [],
     future: [],
-    setComp: (c, record = true) => { if (record) commit(c); else { writeLocal(COMP_KEY, c); set({ comp: c }); } },
-    undo: () => { const { history, comp, future } = get(); if (!history.length) return; const prev = history[history.length - 1]; writeLocal(COMP_KEY, prev); set({ comp: prev, history: history.slice(0, -1), future: [comp, ...future] }); },
-    redo: () => { const { history, comp, future } = get(); if (!future.length) return; writeLocal(COMP_KEY, future[0]); set({ comp: future[0], history: [...history, comp], future: future.slice(1) }); },
+    setComp: (c, record = true) => { if (record) commit(c); else { writeLocal(keyOf(c), c); set({ comp: c }); } },
+    undo: () => { const { history, comp, future } = get(); if (!history.length) return; const prev = history[history.length - 1]; writeLocal(keyOf(prev), prev); set({ comp: prev, history: history.slice(0, -1), future: [comp, ...future] }); },
+    redo: () => { const { history, comp, future } = get(); if (!future.length) return; writeLocal(keyOf(future[0]), future[0]); set({ comp: future[0], history: [...history, comp], future: future.slice(1) }); },
     selectItems: (ids, additive, exact) => {
       const { comp, selection } = get();
       const exp = exact ? ids : expandToGroups(comp, ids);
@@ -175,7 +194,7 @@ export const useStore = create<State>((set, get) => {
         if (on) { c = on.comp; where = `${host.name}${on.overhang ? ' (it overhangs the surface)' : ''}`; }
       }
       commit(c);
-      set({ selection: [id], workspace: 'compose' });
+      set({ selection: [id], workspace: c.kind === 'exhibition' ? 'exhibition' : 'compose' });
       get().notify(`${name} added to ${where}.`);
     },
     duplicate: () => {
@@ -255,6 +274,7 @@ export const useStore = create<State>((set, get) => {
       const w = Math.max(...srcEx.map((e) => e.max[0])) - minX;
       const slot = nextSlot(comp, (p) => extentOf(p, parts), w);
       const r = insertComposition(comp, src, [Math.round(slot[0] - w / 2 - minX), 0, 0], tpl.name);
+      if (comp.kind === 'exhibition') { get().placeModuleOnBooth(src, true); return; }
       commit(r.comp);
       set({ selection: r.ids, workspace: 'compose' });
       get().notify(`${tpl.name} inserted as a group of ${r.ids.length}.`);
@@ -267,8 +287,27 @@ export const useStore = create<State>((set, get) => {
         get().notify(`Saved “${c.name}” in this browser.`);
       } catch { get().notify('Could not save: browser storage is unavailable.'); }
     },
-    openComp: (c) => { commit(c); set({ selection: [], workspace: 'compose' }); },
-    newComp: () => { commit(newComposition()); set({ selection: [] }); },
+    openComp: (c) => { commit(c); set({ selection: [], workspace: c.kind === 'exhibition' ? 'exhibition' : 'compose' }); },
+    newComp: () => { commit(get().comp.kind === 'exhibition' ? newExhibition() : newComposition()); set({ selection: [] }); },
+
+    setBooth: (patch) => { const { comp } = get(); if (comp.booth) commit({ ...comp, booth: { ...comp.booth, ...patch }, updatedAt: new Date().toISOString() }); },
+    placeModuleOnBooth: (src, template = false) => {
+      const { comp, parts } = get();
+      const shapeOf = (p: Placement) => resolveRef(p.ref, parts)?.shape ?? null;
+      const e = planExtent(src.items, shapeOf);
+      if (!e) { get().notify('This module has nothing with geometry to place.'); return; }
+      const size: [number, number] = [e.max[0] - e.min[0], e.max[1] - e.min[1]];
+      const others = comp.items.map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[];
+      const spot = freeSpot(comp, others, size);
+      // no room left: beside the plot, to be moved in by hand
+      const at: [number, number] = spot ?? [Math.round((comp.booth?.width.value ?? 0) / 2 + 1000 + size[0] / 2), 0];
+      const r = placeModule(comp, src, shapeOf, at, 0, template);
+      commit(r.comp);
+      set({ selection: r.ids });
+      get().notify(spot ? `${src.name} placed on the booth.` : `${src.name} placed beside the booth: there is no free spot ${Math.round(comp.booth?.rules.route.value ?? 0)} mm clear of the others.`);
+    },
+    loadSampleBooth: () => { commit(sampleExhibition()); set({ selection: [] }); get().notify('Sample corner booth loaded. Its plot, limits and service points are placeholders.'); },
+    circulation: true,
 
     toast: null,
     notify: (s) => {

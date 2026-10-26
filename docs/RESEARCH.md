@@ -100,6 +100,14 @@ Round 02 catalogs the current NVIDIA exhibition line-up. Values were read from t
 - **HP ZGX Fury G1n** dimensions need HP's QuickSpecs read by hand.
 - The 19-inch MGX switches (the "-LD" models) have no stated rack-unit height and are left without one.
 
+## Exhibition checks (Round 04)
+
+The circulation check rasterises the booth on a plan grid (40 mm for a booth up to 10 m, coarser above). Every part whose bottom is below the headroom is an obstacle; floor-thin parts (15 mm or less) are walked over. Closed sides are walls; the hall aisle beyond each open side is free floor where visitors enter. An exact Euclidean distance transform (Felzenszwalb and Huttenlocher) gives each cell its clearance. A wheelchair is modelled as a disc of the route width: the cells it can be centred on are flooded from the aisle, and the floor those discs sweep is the accessible area, with square corners allowed for. A second flood with the turning-circle diameter marks where a full turn fits. Each module needs a reachable route cell inside the approach zone in front of the side its largest item faces.
+
+The default clearances are the 2010 ADA Standards values: 36 in (915 mm) route width (403.5.1), 60 in (1525 mm) turning circle (304.3.1), 30 × 48 in clear floor space (305.3, 1220 mm depth used here) and 80 in (2030 mm) headroom (307.4). The ADA pages could not be read by the fetch tool during this round, so the values are marked **Estimated** until checked against the document. Venues publish their own rules (many European venues use 1500 mm turning space); those replace the defaults per project.
+
+Limits: rotated parts are taken by their axis-aligned box, so a part at 45° blocks a little more floor than it covers; service runs are plan distances from a module's centre, without rise, slack or routing around obstacles.
+
 ## Audit of Stagework and ManicAI
 
 Both are Alex's earlier generative design tools with the same shape: a Vite + React + R3F single-page app, glass panels over a full-screen 3D view, native Rhino export through rhino3dm, vitest, and GitHub Pages deployment.
@@ -123,6 +131,6 @@ The first project model is large (tens of thousands of objects, many blocks, aut
 |---|---|
 | 02 | Done: the current exhibition line-up (see above). Still open from the original plan: HGX and more Jetson SKUs, partner robots, LOD 2 assets where licensing allows, clearances and power and data needs on every product |
 | 03 | Done: edge and centre snapping, place on surface, templates, power and data schedule, A3 plan and elevation sheet. Still open: cable routing, per-project power figures for kit parts (displays, lighting), side elevations |
-| 04 | Exhibition: floor plans, aisles and circulation checks, accessibility, services, module instances across a booth |
+| 04 | Done: booth plot with open sides and limits, module placement as tracked groups, circulation and accessible-approach checks on a plan grid, service points with runs and loads, A3 booth plan, booth schedule and booth layers in the `.3dm`. Still open: checking the clearance values against the ADA document and adding venue rule sets, multi-level and island booths with columns, cable routes rather than straight runs, refreshing a placed module from its edited source |
 | 05 | Import at scale: batch extraction, revision diffs between two versions of a source model, shared private library for a team |
 | 06 | Presentation: renders, client view, links to project documents |

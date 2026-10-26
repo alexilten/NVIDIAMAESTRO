@@ -219,6 +219,55 @@ export interface Placement {
 export interface Group {
   id: string;
   name: string;
+  /** the module or template this group was placed from (exhibitions), so a later edit of it can be flagged */
+  source?: { id: string; name: string; updatedAt: string; template?: boolean };
+}
+
+// ── exhibition booth ───────────────────────────────────────────────────────────────────────────────
+
+export type BoothSide = 'front' | 'back' | 'left' | 'right';
+
+/** a stated value with its status: booth figures come from the venue or the project, never from the catalog */
+export interface BoothValue { value: number; status: Verification; note?: string }
+
+/** clearances the circulation check uses; reference defaults that a venue's own rules replace */
+export interface AccessRules {
+  /** minimum clear width of an accessible route */
+  route: BoothValue;
+  /** diameter of a wheelchair turning circle */
+  turning: BoothValue;
+  /** depth of the clear floor space in front of a demo */
+  approach: BoothValue;
+  /** parts lower than this are obstacles; parts wholly above it are overhead */
+  headroom: BoothValue;
+}
+
+export interface ServicePoint {
+  id: string;
+  name: string;
+  kind: 'power' | 'data' | 'power-data';
+  /** mm, on the booth floor */
+  x: number;
+  y: number;
+  /** what the point can supply, when the venue states it */
+  capacityW?: number;
+  status: Verification;
+}
+
+/**
+ * The booth plot an exhibition sits on: a rectangle centred on the origin, front edge toward −Y. A side is open
+ * when visitors can walk in from the hall aisle along it; a closed side is a neighbour's wall or a hall wall.
+ */
+export interface Booth {
+  width: BoothValue;
+  depth: BoothValue;
+  open: Record<BoothSide, boolean>;
+  /** hall aisle width outside each open side, drawn for context */
+  aisle: BoothValue;
+  /** the venue's construction height limit */
+  heightLimit: BoothValue;
+  rules: AccessRules;
+  services: ServicePoint[];
 }
 
 export interface Composition {
@@ -230,6 +279,8 @@ export interface Composition {
   kind: 'module' | 'exhibition';
   items: Placement[];
   groups: Group[];
+  /** the booth plot (exhibitions only) */
+  booth?: Booth;
   updatedAt: string;
 }
 
