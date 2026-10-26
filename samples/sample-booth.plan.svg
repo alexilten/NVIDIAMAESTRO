@@ -309,7 +309,7 @@
 <g id="title">
 <line x1="298" y1="253" x2="410" y2="253" class="frame"/>
 <text x="302" y="261" class="title" text-anchor="start">Sample corner booth</text>
-<text x="302" y="267" class="small" text-anchor="start">Booth 10000 × 8000 mm · height limit 4000 mm · 6 modules</text>
+<text x="302" y="267" class="small" text-anchor="start">Corner · Booth 10000 × 8000 mm · height limit 4000 mm · 6 modules</text>
 <text x="302" y="272.5" class="small" text-anchor="start">Scale 1:50 at A3 · millimetres · 2026-10-26</text>
 <text x="302" y="278" class="tiny" text-anchor="start">Plot, limits and clearances: Placeholder. Check with the venue before submission.</text>
 <text x="302" y="282" class="tiny" text-anchor="start">MAESTRO 0.1.0 · sample</text>

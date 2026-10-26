@@ -74,6 +74,41 @@ export function boothRect(b: Booth) {
   return { min: [-w, -d] as [number, number], max: [w, d] as [number, number] };
 }
 
+// ── booth types ────────────────────────────────────────────────────────────────────────────────────
+
+/** stand types by how many sides open onto a hall aisle */
+export type BoothType = 'inline' | 'corner' | 'peninsula' | 'island';
+export const BOOTH_TYPES: { id: BoothType; name: string; open: Record<BoothSide, boolean>; note: string }[] = [
+  { id: 'inline', name: 'Inline', open: { front: true, right: false, back: false, left: false }, note: 'One side open, to the front aisle.' },
+  { id: 'corner', name: 'Corner', open: { front: true, right: false, back: false, left: true }, note: 'Two adjacent sides open, at the end of a row.' },
+  { id: 'peninsula', name: 'Peninsula', open: { front: true, right: true, back: false, left: true }, note: 'Three sides open, backing onto one neighbour.' },
+  { id: 'island', name: 'Island', open: { front: true, right: true, back: true, left: true }, note: 'Open on all four sides, aisles all round.' },
+];
+
+/** the type a booth's open sides make; two opposite open sides (a pass-through stand) have no type here */
+export function boothTypeOf(open: Record<BoothSide, boolean>): BoothType | null {
+  const n = SIDES.filter((s) => open[s]).length;
+  if (n === 1) return 'inline';
+  if (n === 3) return 'peninsula';
+  if (n === 4) return 'island';
+  if (n === 2) return (open.front && open.back) || (open.left && open.right) ? null : 'corner';
+  return null;
+}
+
+const quarter = (s: BoothSide) => SIDES.indexOf(s);
+/** the plan distance from a point to each open plot edge, nearest first */
+export function openEdges(b: Booth, x: number, y: number): { side: BoothSide; distance: number }[] {
+  const W = b.width.value / 2, D = b.depth.value / 2;
+  const d: Record<BoothSide, number> = { front: y + D, back: D - y, left: x + W, right: W - x };
+  return SIDES.filter((s) => b.open[s]).map((side) => ({ side, distance: d[side] })).sort((a, z) => a.distance - z.distance);
+}
+
+/** the quarter turn (−90, 90 or 180) that makes a unit facing `front` face `target`; 0 when it already does */
+export function turnToFace(front: BoothSide, target: BoothSide): number {
+  const q = (((quarter(target) - quarter(front)) % 4) + 4) % 4;
+  return [0, 90, 180, -90][q];
+}
+
 /** a 600 × 600 mm column at the plot centre, Placeholder until the hall plan gives its size and position */
 export function addColumn(b: Booth, x = 0, y = 0, w = 600, d = 600): Booth {
   const n = (b.columns ?? []).length + 1;
@@ -200,7 +235,11 @@ function flood(seeds: number[], ok: (i: number) => boolean, nx: number, ny: numb
 // ── the analysis ────────────────────────────────────────────────────────────────────────────────────
 
 export type IssueLevel = 'error' | 'warn' | 'info';
-export interface Issue { level: IssueLevel; text: string; unit?: string; at?: [number, number] }
+export interface Issue {
+  level: IssueLevel; text: string; unit?: string; at?: [number, number];
+  /** a quarter turn, in degrees, that would make the unit face the nearest aisle */
+  turn?: number;
+}
 
 export interface UnitAccess { unit: string; approach: boolean; turning: boolean; zone: { min: [number, number]; max: [number, number] } }
 
@@ -321,8 +360,16 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
     const cells = cellsIn(zone);
     const approach = cells.some((i) => routeC[i]);
     const turn = cells.some((i) => turnC[i]);
-    if (!approach) issues.push({ level: 'error', text: `${u.name}: no accessible approach in front (${Math.round(route)} mm route).`, unit: u.id, at: [(zone.min[0] + zone.max[0]) / 2, (zone.min[1] + zone.max[1]) / 2] });
+    const ucx = (u.extent.min[0] + u.extent.max[0]) / 2, ucy = (u.extent.min[1] + u.extent.max[1]) / 2;
+    const near = openEdges(b, ucx, ucy)[0];
+    const toAisle = near && near.side !== u.front ? turnToFace(u.front, near.side) : undefined;
+    if (!approach) issues.push({ level: 'error', text: `${u.name}: no accessible approach in front (${Math.round(route)} mm route).`, unit: u.id, at: [(zone.min[0] + zone.max[0]) / 2, (zone.min[1] + zone.max[1]) / 2], turn: toAisle });
     else if (!turn) issues.push({ level: 'warn', text: `${u.name}: no ${Math.round(turning)} mm turning circle in front.`, unit: u.id });
+    // on open stands a module near an aisle with its back to it shows visitors only its back
+    const behind = SIDES[(quarter(u.front) + 2) % 4];
+    const back = openEdges(b, ucx, ucy).find((x) => x.side === behind);
+    const depthOf = behind === 'front' || behind === 'back' ? (u.extent.max[1] - u.extent.min[1]) / 2 : (u.extent.max[0] - u.extent.min[0]) / 2;
+    if (approach && back && back.distance - depthOf < b.rules.approach.value) issues.push({ level: 'info', text: `${u.name} has its back to the ${SIDE_LABEL[behind].replace(/ \(.*\)/, '').toLowerCase()} aisle; visitors there see only its back.`, unit: u.id, turn: toAisle ?? 180 });
     return { unit: u.id, approach, turning: turn, zone };
   });
   const accessibleShare = free ? reach / free : 0;

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { RULE_PRESETS, SIDES, SIDE_LABEL, addColumn, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
+import { BOOTH_TYPES, RULE_PRESETS, SIDES, boothTypeOf, SIDE_LABEL, addColumn, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
 import { moduleTag } from '../core/sheet';
 import { TEMPLATES } from '../core/templates';
 import { VERIFICATION, VERIFICATION_RANK, type BoothColumn, type BoothValue, type ServicePoint, type Verification } from '../core/schema';
@@ -69,6 +69,8 @@ export function BoothPanel() {
   const errors = a.issues.filter((i) => i.level === 'error').length, warns = a.issues.filter((i) => i.level === 'warn').length;
   const open = unconfirmed(b);
   const selectUnit = (id?: string) => { if (!id) return; const ids = comp.items.filter((i) => i.groupId === id || i.id === id).map((i) => i.id); if (ids.length) st.selectItems(ids); };
+  const turnUnit = (id: string, deg: number) => { selectUnit(id); st.rotate(deg); };
+  const type = boothTypeOf(b.open);
   const exhibitions = saved.filter((c) => c.kind === 'exhibition');
   const changed = changedModules(comp, saved);
   const cols = b.columns ?? [];
@@ -82,7 +84,10 @@ export function BoothPanel() {
       <div className="panel-scroll">
         <Section title="Checks" summary={errors || warns ? `${errors} to fix · ${warns} to review` : 'clear'}>
           {a.issues.map((i, k) => (
-            <button key={k} className={`issue ${i.level}`} onClick={() => selectUnit(i.unit)} disabled={!i.unit}>{i.text}</button>
+            <div key={k} className="issue-row">
+              <button className={`issue ${i.level}`} onClick={() => selectUnit(i.unit)} disabled={!i.unit}>{i.text}</button>
+              {i.unit && i.turn ? <button className="text-btn turn-btn" onClick={() => turnUnit(i.unit!, i.turn!)} title={`Turn ${Math.abs(i.turn)}° so it faces the nearest aisle`}>Face aisle</button> : null}
+            </div>
           ))}
           {!a.issues.length && <p className="note">Every module has an accessible approach, everything is inside the plot and under the height limit.</p>}
           <KV k="Accessible floor">{Math.round(a.accessibleShare * 100)}% of {(a.freeArea / 1e6).toFixed(1)} m² open floor</KV>
@@ -95,6 +100,12 @@ export function BoothPanel() {
           <ValueRow label="Depth" v={b.depth} onChange={(v) => st.setBooth({ depth: v })} />
           <ValueRow label="Height limit" v={b.heightLimit} onChange={(v) => st.setBooth({ heightLimit: v })} />
           <ValueRow label="Hall aisle" v={b.aisle} onChange={(v) => st.setBooth({ aisle: v })} />
+          <label className="num-row"><span>Stand type</span>
+            <select value={type ?? ''} onChange={(e) => { const t = BOOTH_TYPES.find((x) => x.id === e.target.value); if (t) st.setBooth({ open: { ...t.open } }); }} aria-label="Stand type">
+              {!type && <option value="">Custom open sides</option>}
+              {BOOTH_TYPES.map((t) => <option key={t.id} value={t.id} title={t.note}>{t.name}</option>)}
+            </select>
+          </label>
           <div className="sides">
             {SIDES.map((s) => <label key={s} className="check-row"><input type="checkbox" checked={b.open[s]} onChange={(e) => st.setBooth({ open: { ...b.open, [s]: e.target.checked } })} /> {SIDE_LABEL[s]} open</label>)}
           </div>
@@ -197,7 +208,10 @@ export function BoothPanel() {
           </div>
           <button className="ghost wide" onClick={st.saveComp}>Save exhibition</button>
           <button className="ghost wide" onClick={st.newComp}>New exhibition</button>
-          <button className="ghost wide" onClick={st.loadSampleBooth}>Load sample booth</button>
+          <div className="btn-grid two">
+            <button className="ghost" onClick={() => st.loadSampleBooth('corner')}>Sample corner booth</button>
+            <button className="ghost" onClick={() => st.loadSampleBooth('island')}>Sample island booth</button>
+          </div>
         </div>
       </div>
     </div>

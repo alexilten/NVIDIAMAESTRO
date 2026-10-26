@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { placeOn, snapDelta, supportSurfaces } from '../core/arrange';
 import { freeSpot, newExhibition, placeModule, planExtent, refreshModule } from '../core/booth';
-import { sampleExhibition } from '../core/exhibitionSample';
+import { sampleExhibition, sampleIsland } from '../core/exhibitionSample';
 import { insertComposition, type Template } from '../core/templates';
 import { addItem, alignItems, distributeX, duplicateItems, expandToGroups, groupItems, moveItems, newComposition, nextSlot, removeItems, rotateItems, ungroup, updateItem } from '../core/compose';
 import { resolveRef, type LibraryEntry } from '../core/library';
@@ -87,7 +87,7 @@ interface State {
   // exhibition
   setBooth: (patch: Partial<Booth>) => void;
   placeModuleOnBooth: (src: Composition, template?: boolean) => void;
-  loadSampleBooth: () => void;
+  loadSampleBooth: (kind?: 'corner' | 'island') => void;
   /** replace a placed module with the current version of its saved source */
   refreshPlaced: (groupId: string) => void;
   circulation: boolean;
@@ -334,7 +334,7 @@ export const useStore = create<State>((set, get) => {
       set({ selection: r.ids });
       get().notify(`${g.name} now matches the saved ${src.name}. Undo puts the earlier version back.`);
     },
-    loadSampleBooth: () => { commit(sampleExhibition()); set({ selection: [] }); get().notify('Sample corner booth loaded. Its plot, limits and service points are placeholders.'); },
+    loadSampleBooth: (kind = 'corner') => { commit(kind === 'island' ? sampleIsland() : sampleExhibition()); set({ selection: [] }); get().notify(`Sample ${kind} booth loaded. Its plot, limits and service points are placeholders.`); },
     circulation: true,
 
     presentKind: (k) => { const next = docFor(k); if (next) set({ comp: next, history: [], future: [], selection: [] }); },
