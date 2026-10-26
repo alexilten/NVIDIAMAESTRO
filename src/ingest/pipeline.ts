@@ -14,7 +14,7 @@ export function cleanName(block: string): string {
   return block.replace(/^NV_(HW|KIOSK|PART|DESK|ROBOT|SIGN|AV|SUB|HWALL|HERO|CES|VEH)_/, '').replace(/_/g, ' ').trim();
 }
 
-export function proposePart(summary: SourceSummary, c: BlockCandidate, x: ExtractedPart, project: string): IngestedPart {
+export function proposePart(summary: SourceSummary, c: BlockCandidate, x: ExtractedPart, project: string, geometryHash?: string): IngestedPart {
   return {
     schema: 'maestro.ingested-part',
     id: uid('part'),
@@ -27,7 +27,7 @@ export function proposePart(summary: SourceSummary, c: BlockCandidate, x: Extrac
     createdAt: new Date().toISOString(),
     source: {
       fileName: summary.fileName, fileSize: summary.fileSize, sha256: summary.sha256, units: summary.units,
-      block: c.name, description: c.description, derivedFrom: c.derivedFrom, originNote: c.originNote,
+      block: c.name, description: c.description, derivedFrom: c.derivedFrom, originNote: c.originNote, geometryHash,
     },
     bbox: x.bbox,
     dims: boxSize(x.bbox),

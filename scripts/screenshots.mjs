@@ -77,6 +77,21 @@ await plan.close();
 console.log('saved 22-booth-plan-sheet');
 await page.locator('.segmented button', { hasText: 'Import' }).click();
 await shot('08-import-intro');
+// Round 05: batch extraction and a revision diff, on the synthetic two-revision model (scripts/fixture-files.ts)
+const fx = process.argv[4];
+if (fx) {
+  await page.locator('input[type=file][accept=".3dm"]').first().setInputFiles(`${fx}/synthetic-show-r1.3dm`);
+  await page.waitForSelector('.batch-bar');
+  await page.locator('button', { hasText: 'Select new kit candidates' }).click();
+  await shot('23-import-batch-plan');
+  await page.locator('.sheet-actions button.primary').click();
+  await page.waitForSelector('.pstate.proposed');
+  await page.locator('.source-card').first().click();
+  await shot('24-import-batch-done');
+  await page.locator('input[type=file][accept=".3dm"]').nth(1).setInputFiles(`${fx}/synthetic-show-r2.3dm`);
+  await page.waitForSelector('.impact');
+  await shot('25-import-revision-diff');
+}
 await page.locator('.logo').click(); await shot('09-about');
 await browser.close();
 if (errors.length) { console.log('page errors:\n' + errors.join('\n')); process.exitCode = 1; }

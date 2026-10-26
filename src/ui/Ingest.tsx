@@ -2,29 +2,37 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { KIT_CATEGORY_LABEL, type KitCategory } from '../core/schema';
 import { resolveRef } from '../core/library';
 import { ProductViewer, type DimLabel } from '../viewport/ProductViewer';
-import { addCheck, approvalBlockers, approve, checkState, measures, proposePart, suggestDocs } from '../ingest/pipeline';
-import { extractPart, inspectSource, openDoc, type SourceSummary } from '../ingest/rhino';
+import { addCheck, approvalBlockers, approve, checkState, measures, suggestDocs } from '../ingest/pipeline';
+import { inspectSource, openDoc, type SourceSummary } from '../ingest/rhino';
 import { download, loadRhino } from '../ingest/rhinoBrowser';
 import type { DimCheck, DocLink, IngestedPart } from '../ingest/types';
 import { applyReview, exportReview, parseReview } from '../ingest/review';
+import { kitCandidates, planBatch, reviseFromSource, runBatch, type BatchResult, type PlanState } from '../ingest/batch';
+import { exportBundle, readBundle } from '../ingest/bundle';
+import { CHANGE_LABEL, blockPrints, diffCsv, diffSources, libraryImpact, type Change, type DiffRow, type SourcePrint } from '../ingest/revision';
 import { Icon, KV, Section, VBadge, dims3, mm } from './common';
 import { useStore } from './store';
 
 /** Files opened in this session. They are read in the browser and never stored or sent; only extracted parts are kept. */
-const sessionFiles = { rhino: new Map<string, { file: File; bytes: Uint8Array; summary: SourceSummary }>(), pdf: new Map<string, File>() };
+const sessionFiles = { rhino: new Map<string, { file: File; bytes: Uint8Array; summary: SourceSummary; prints: SourcePrint | null }>(), pdf: new Map<string, File>() };
+
+/** two versions of a source model being compared */
+interface Revision { from: SourceSummary; to: SourceSummary; rows: DiffRow[] }
 
 export function Ingest() {
   const parts = useStore((s) => s.parts);
   const [summary, setSummary] = useState<SourceSummary | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [revision, setRevision] = useState<Revision | null>(null);
   const part = parts.find((p) => `${p.id}@${p.version}` === selected) ?? null;
   const shape = useMemo(() => (part ? resolveRef({ kind: 'ingested', id: part.id, version: part.version }, parts)?.shape ?? null : null), [part, parts]);
   const dims = part ? (part.dims.map((v) => ({ value: v, status: part.status === 'approved' ? 'project' : 'estimated' })) as [DimLabel, DimLabel, DimLabel]) : undefined;
   return (
     <>
       {part ? <ProductViewer shape={shape} dims={dims} partNames={part.mesh.map((m) => m.material)} /> : <div className="viewer blank" />}
-      <aside className="panel left glass"><SourcesPanel summary={summary} setSummary={(s) => { setSummary(s); setSelected(null); }} selected={selected} setSelected={setSelected} /></aside>
-      {summary && !part && <BlockSheet summary={summary} onDone={(k) => setSelected(k)} />}
+      <aside className="panel left glass"><SourcesPanel summary={summary} setSummary={(s) => { setSummary(s); setSelected(null); setRevision(null); }} selected={selected} setSelected={(k) => { setSelected(k); if (k) setRevision(null); }} onRevision={(r) => { setRevision(r); setSelected(null); }} revision={revision} /></aside>
+      {revision && !part && <RevisionSheet rev={revision} onClose={() => setRevision(null)} onOpen={(k) => setSelected(k)} />}
+      {summary && !part && !revision && <BlockSheet summary={summary} onDone={(k) => setSelected(k)} />}
       {!summary && !part && <IngestIntro />}
       <aside className="panel right glass">{part ? <ReviewPanel part={part} /> : <div className="inspector empty small muted">Open a Rhino model, extract blocks, then select a proposed part to review it here.</div>}</aside>
     </>
@@ -47,7 +55,7 @@ function IngestIntro() {
   );
 }
 
-function SourcesPanel({ summary, setSummary, selected, setSelected }: { summary: SourceSummary | null; setSummary: (s: SourceSummary | null) => void; selected: string | null; setSelected: (k: string | null) => void }) {
+function SourcesPanel({ summary, setSummary, selected, setSelected, revision, onRevision }: { summary: SourceSummary | null; setSummary: (s: SourceSummary | null) => void; selected: string | null; setSelected: (k: string | null) => void; revision: Revision | null; onRevision: (r: Revision) => void }) {
   const parts = useStore((s) => s.parts);
   const docs = useStore((s) => s.docs);
   const saveDoc = useStore((s) => s.saveDoc);
@@ -57,6 +65,8 @@ function SourcesPanel({ summary, setSummary, selected, setSelected }: { summary:
   const rhinoInput = useRef<HTMLInputElement>(null);
   const pdfInput = useRef<HTMLInputElement>(null);
   const reviewInput = useRef<HTMLInputElement>(null);
+  const revisionInput = useRef<HTMLInputElement>(null);
+  const bundleInput = useRef<HTMLInputElement>(null);
 
   const openRhino = async (f: File) => {
     setBusy(`Reading ${f.name}…`);
@@ -64,7 +74,9 @@ function SourcesPanel({ summary, setSummary, selected, setSelected }: { summary:
       const rh = await loadRhino();
       const bytes = new Uint8Array(await f.arrayBuffer());
       const s = await inspectSource(rh, bytes, f.name);
-      sessionFiles.rhino.set(s.sha256, { file: f, bytes, summary: s });
+      setBusy(`Fingerprinting ${s.blocks.length} blocks…`);
+      const prints = fingerprint(rh, bytes, f.name);
+      sessionFiles.rhino.set(s.sha256, { file: f, bytes, summary: s, prints });
       setSummary(s);
     } catch (e) { notify(`Could not read ${f.name}: ${(e as Error).message}`); }
     setBusy(null);
@@ -83,6 +95,29 @@ function SourcesPanel({ summary, setSummary, selected, setSelected }: { summary:
     } catch (e) { notify(`Could not read ${f.name}: ${(e as Error).message}`); }
     setBusy(null);
   };
+  const openRevision = async (f: File) => {
+    if (!summary) return;
+    const base = sessionFiles.rhino.get(summary.sha256);
+    setBusy(`Comparing ${f.name}…`);
+    try {
+      const rh = await loadRhino();
+      const bytes = new Uint8Array(await f.arrayBuffer());
+      const s = await inspectSource(rh, bytes, f.name);
+      const prints = fingerprint(rh, bytes, f.name);
+      sessionFiles.rhino.set(s.sha256, { file: f, bytes, summary: s, prints });
+      if (!base?.prints || !prints) throw new Error('One of the files could not be fingerprinted.');
+      onRevision({ from: summary, to: s, rows: diffSources(base.prints, prints) });
+    } catch (e) { notify(`Could not compare ${f.name}: ${(e as Error).message}`); }
+    setBusy(null);
+  };
+  const importBundle = async (f: File) => {
+    try {
+      const r = readBundle(await f.text(), parts, f.name);
+      for (const p of r.add) await savePart(p);
+      const extra = [r.same.length ? `${r.same.length} already here` : '', r.conflicts.length ? `${r.conflicts.length} kept as they are here because the bundle’s version differs (${r.conflicts.map((c) => `${c.local.name} v${c.local.version}`).join(', ')})` : '', r.damaged.length ? `${r.damaged.length} damaged and skipped` : ''].filter(Boolean).join('; ');
+      notify(`Added ${r.add.length} part${r.add.length === 1 ? '' : 's'} from ${f.name}.${extra ? ` ${extra}.` : ''}`);
+    } catch (e) { notify((e as Error).message); }
+  };
   const importReview = async (f: File) => {
     try {
       const r = parseReview(await f.text());
@@ -98,17 +133,26 @@ function SourcesPanel({ summary, setSummary, selected, setSelected }: { summary:
       <input ref={rhinoInput} type="file" accept=".3dm" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) openRhino(f); e.target.value = ''; }} />
       <input ref={pdfInput} type="file" accept="application/pdf,.pdf" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) openPdf(f); e.target.value = ''; }} />
       <input ref={reviewInput} type="file" accept=".json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) importReview(f); e.target.value = ''; }} />
+      <input ref={revisionInput} type="file" accept=".3dm" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) openRevision(f); e.target.value = ''; }} />
+      <input ref={bundleInput} type="file" accept=".json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) importBundle(f); e.target.value = ''; }} />
       <div className="pad col">
         <button className="primary wide" onClick={() => rhinoInput.current?.click()} disabled={!!busy}><Icon name="cube" /> Open Rhino model</button>
         <button className="ghost wide" onClick={() => pdfInput.current?.click()} disabled={!!busy}><Icon name="file" /> Attach fabrication PDF</button>
         {busy && <div className="busy small">{busy}</div>}
       </div>
       {summary && (
-        <button className={`source-card ${!selected ? 'on' : ''}`} onClick={() => setSelected(null)}>
+        <button className={`source-card ${!selected && !revision ? 'on' : ''}`} onClick={() => setSummary(summary)}>
           <b>{summary.fileName}</b>
           <span className="muted small">{summary.units} · {summary.blocks.length} blocks · {summary.layers.length} layers · {(summary.fileSize / 1e6).toFixed(1)} MB</span>
         </button>
       )}
+      {revision && (
+        <div className={`source-card ${!selected ? 'on' : ''}`}>
+          <b>Compared with {revision.to.fileName}</b>
+          <span className="muted small">{revision.rows.filter((r) => r.change !== 'unchanged').length} of {revision.rows.length} blocks differ</span>
+        </div>
+      )}
+      {summary && <div className="pad col"><button className="ghost wide" onClick={() => revisionInput.current?.click()} disabled={!!busy} title="Open a later version of this model and see what changed, block by block">Compare with a revision…</button></div>}
       {docs.map((d) => (
         <div key={d.id} className="source-card static">
           <b>{d.name}</b><span className="muted small">{d.pages.length} pages indexed{sessionFiles.pdf.has(d.id) ? '' : ' · re-attach to preview'}</span>
@@ -123,12 +167,13 @@ function SourcesPanel({ summary, setSummary, selected, setSelected }: { summary:
         ))}
         {!parts.length && <div className="note">None yet.</div>}
       </div>
-      {parts.length > 0 && (
-        <div className="pad col">
-          <button className="text-btn" onClick={() => download(JSON.stringify(exportReview(parts), null, 2), 'maestro-review.maestro-review.json', 'application/json')}>Export review notes</button>
-          <button className="text-btn" onClick={() => reviewInput.current?.click()}>Import review notes</button>
-        </div>
-      )}
+      <div className="pad col">
+        {parts.length > 0 && <button className="text-btn" onClick={() => download(JSON.stringify(exportReview(parts), null, 2), 'maestro-review.maestro-review.json', 'application/json')}>Export review notes</button>}
+        {parts.length > 0 && <button className="text-btn" onClick={() => reviewInput.current?.click()}>Import review notes</button>}
+        {parts.some((p) => p.status === 'approved') && <button className="text-btn" onClick={() => { const b = exportBundle(parts, `MAESTRO library ${new Date().toISOString().slice(0, 10)}`, { app: __APP_VERSION__ }); download(JSON.stringify(b), `${b.name.replace(/\s+/g, '-')}.maestro-library.json`, 'application/json'); notify(`Bundled ${b.parts.length} approved part${b.parts.length === 1 ? '' : 's'}. Share it through the project’s private storage, never the public repository.`); }}>Export library bundle</button>}
+        <button className="text-btn" onClick={() => bundleInput.current?.click()}>Import library bundle</button>
+        <p className="note">A bundle carries approved parts with their source geometry, so a teammate can use them without the original model. It is project material: keep it in private storage.</p>
+      </div>
     </div>
   );
 }
@@ -144,28 +189,38 @@ function BlockSheet({ summary, onDone }: { summary: SourceSummary; onDone: (key:
   const [busy, setBusy] = useState(false);
   const blocks = summary.blocks.filter((b) => !filter || `${b.name} ${b.description}`.toLowerCase().includes(filter.toLowerCase()));
 
+  const parts = useStore((s) => s.parts);
+  const [progress, setProgress] = useState<string | null>(null);
+  const [results, setResults] = useState<BatchResult[] | null>(null);
+  const prints = sessionFiles.rhino.get(summary.sha256)?.prints ?? null;
+  const plan = useMemo(() => new Map(planBatch(summary, prints, summary.blocks.map((b) => b.name), parts).map((r) => [r.block, r])), [summary, prints, parts]);
+
   const extract = async () => {
     const src = sessionFiles.rhino.get(summary.sha256);
     if (!src) return;
     setBusy(true);
+    setResults(null);
     try {
       const rh = await loadRhino();
       const doc = openDoc(rh, src.bytes);
-      let last = '';
-      for (const name of chosen) {
-        const c = summary.blocks.find((b) => b.name === name)!;
-        const x = extractPart(rh, doc, name);
-        let p = proposePart(summary, { ...c, category: cats[name] ?? c.category }, x, project || 'Unassigned project');
-        for (const d of docs) p = { ...p, docs: [...p.docs, ...suggestDocs(d.name, d.pages, p)] };
-        await savePart(p);
-        last = `${p.id}@${p.version}`;
-      }
+      const rows = [...chosen].map((n) => plan.get(n)!).filter(Boolean);
+      const res = await runBatch(rh, doc, summary, rows, project || 'Unassigned project', {
+        docs, categories: cats,
+        // let the browser paint the progress line between blocks
+        onProgress: async (d, t, b) => { setProgress(b ? `Extracting ${d + 1} of ${t}: ${b}` : null); await new Promise((r) => setTimeout(r, 0)); },
+      });
       doc.delete?.();
-      notify(`Extracted ${chosen.size} part${chosen.size === 1 ? '' : 's'} for review.`);
-      if (last) onDone(last);
+      for (const r of res) if (r.part) await savePart(r.part);
+      setResults(res);
+      const ok = res.filter((r) => r.ok);
+      notify(`Extracted ${ok.length} part${ok.length === 1 ? '' : 's'} for review${res.length > ok.length ? `; ${res.length - ok.length} skipped or failed` : ''}.`);
+      if (ok.length === 1) onDone(`${ok[0].part!.id}@${ok[0].part!.version}`);
+      setChosen(new Set());
     } catch (e) { notify(`Extraction failed: ${(e as Error).message}`); }
+    setProgress(null);
     setBusy(false);
   };
+  const candidates = kitCandidates(summary);
 
   return (
     <div className="sheet glass">
@@ -180,15 +235,28 @@ function BlockSheet({ summary, onDone }: { summary: SourceSummary; onDone: (key:
         </div>
       </div>
       <p className="note">Each block definition is a candidate kit-of-parts component. Blocks used only inside other blocks are sub-assemblies: they come along with their parent. Extraction keeps the exact source geometry and makes a separate viewport mesh.</p>
-      <input className="field wide" placeholder="Filter blocks" value={filter} onChange={(e) => setFilter(e.target.value)} />
+      <div className="batch-bar">
+        <input className="field" placeholder="Filter blocks" value={filter} onChange={(e) => setFilter(e.target.value)} />
+        <button className="ghost" onClick={() => setChosen(new Set(candidates.filter((n) => plan.get(n)?.state === 'new')))} title="Blocks placed in the model or not used inside another block, that the library does not hold yet">Select new kit candidates ({candidates.filter((n) => plan.get(n)?.state === 'new').length})</button>
+        <button className="ghost" onClick={() => setChosen(new Set(blocks.map((b) => b.name)))} disabled={!blocks.length}>Select shown</button>
+        <button className="ghost" onClick={() => setChosen(new Set())} disabled={!chosen.size}>Clear</button>
+      </div>
+      {progress && <div className="busy small">{progress}</div>}
+      {results && results.some((r) => !r.ok) && (
+        <div className="batch-report">
+          <b>{results.filter((r) => r.ok).length} extracted · {results.filter((r) => r.skipped).length} skipped · {results.filter((r) => r.error).length} failed</b>
+          {results.filter((r) => !r.ok).map((r) => <div key={r.block} className={`small ${r.error ? 'bad' : 'muted'}`}>{r.block}: {r.error ?? r.skipped}</div>)}
+        </div>
+      )}
       <div className="table-wrap">
         <table className="table">
-          <thead><tr><th /><th>Block</th><th>Category</th><th>Objects</th><th>Nested</th><th>Used in</th><th>Placed</th></tr></thead>
+          <thead><tr><th /><th>Block</th><th>Library</th><th>Category</th><th>Objects</th><th>Nested</th><th>Used in</th><th>Placed</th></tr></thead>
           <tbody>
             {blocks.map((b) => (
               <tr key={b.name} className={chosen.has(b.name) ? 'on' : ''}>
                 <td><input type="checkbox" checked={chosen.has(b.name)} onChange={() => { const s = new Set(chosen); if (s.has(b.name)) s.delete(b.name); else s.add(b.name); setChosen(s); }} /></td>
                 <td><div className="b-name">{b.name}</div>{b.description && <div className="b-desc">{b.description}</div>}</td>
+                <td>{(() => { const r = plan.get(b.name); return r && r.state !== 'new' ? <span className={`pstate ${STATE_CLASS[r.state]}`} title={r.note}>{STATE_LABEL[r.state]}</span> : null; })()}</td>
                 <td>
                   <select className="mini-select" value={cats[b.name] ?? b.category} onChange={(e) => setCats({ ...cats, [b.name]: e.target.value as KitCategory })}>
                     {Object.entries(KIT_CATEGORY_LABEL).map(([k, l]) => <option key={k} value={k}>{l}</option>)}
@@ -200,6 +268,104 @@ function BlockSheet({ summary, onDone }: { summary: SourceSummary; onDone: (key:
                 <td className="num">{b.placements}</td>
               </tr>
             ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+const STATE_LABEL: Record<PlanState, string> = { new: 'new', 'in-library': 'in library', 'same-geometry': 'same geometry', duplicate: 'duplicate' };
+const STATE_CLASS: Record<PlanState, string> = { new: 'proposed', 'in-library': 'approved', 'same-geometry': 'approved', duplicate: 'rejected' };
+
+/** fingerprints for a whole model, or null if this one cannot be read that way */
+function fingerprint(rh: unknown, bytes: Uint8Array, name: string): SourcePrint | null {
+  try {
+    const doc = openDoc(rh, bytes);
+    try { return blockPrints(rh, doc, name); } finally { doc.delete?.(); }
+  } catch { return null; }
+}
+
+const CHANGE_FILTERS: Change[] = ['changed', 'nested', 'renamed', 'added', 'removed', 'described', 'unchanged'];
+
+function RevisionSheet({ rev, onClose, onOpen }: { rev: Revision; onClose: () => void; onOpen: (key: string) => void }) {
+  const parts = useStore((s) => s.parts);
+  const savePart = useStore((s) => s.savePart);
+  const notify = useStore((s) => s.notify);
+  const [show, setShow] = useState<Set<Change>>(new Set(CHANGE_FILTERS.filter((c) => c !== 'unchanged')));
+  const [busy, setBusy] = useState<string | null>(null);
+  const counts = new Map<Change, number>();
+  for (const r of rev.rows) counts.set(r.change, (counts.get(r.change) ?? 0) + 1);
+  const impact = useMemo(() => libraryImpact(rev.rows, parts, rev.from.fileName), [rev, parts]);
+  const pending = (id: string) => parts.some((p) => p.id === id && p.status === 'proposed' && p.source.sha256 === rev.to.sha256);
+  const proposeRevision = async (p: IngestedPart, block: string) => {
+    const src = sessionFiles.rhino.get(rev.to.sha256);
+    if (!src) return;
+    setBusy(p.id);
+    try {
+      const rh = await loadRhino();
+      const doc = openDoc(rh, src.bytes);
+      const next = reviseFromSource(rh, doc, rev.to, src.prints, p, block);
+      doc.delete?.();
+      await savePart(next);
+      notify(`${p.name} v${next.version} proposed from ${rev.to.fileName}. v${p.version} stays in use until it is approved.`);
+      onOpen(`${next.id}@${next.version}`);
+    } catch (e) { notify(`Could not revise ${p.name}: ${(e as Error).message}`); }
+    setBusy(null);
+  };
+  const toCsv = () => {
+    const a = sessionFiles.rhino.get(rev.from.sha256)?.prints, b = sessionFiles.rhino.get(rev.to.sha256)?.prints;
+    if (a && b) download(diffCsv(a, b, rev.rows), `${rev.to.fileName.replace(/\.3dm$/i, '')}.revision.csv`, 'text/csv');
+  };
+  const rows = rev.rows.filter((r) => show.has(r.change));
+  return (
+    <div className="sheet glass">
+      <div className="sheet-head">
+        <div>
+          <h2>{rev.from.fileName} → {rev.to.fileName}</h2>
+          <div className="muted small">{rev.rows.length} blocks compared by exact geometry, nested blocks included · units {rev.from.units}{rev.to.units !== rev.from.units ? ` → ${rev.to.units}` : ''}</div>
+        </div>
+        <div className="sheet-actions">
+          <button className="ghost" onClick={toCsv}>Report .csv</button>
+          <button className="ghost" onClick={onClose}>Back to blocks</button>
+        </div>
+      </div>
+      {impact.length > 0 && (
+        <div className="impact">
+          <div className="sub-head">Library parts affected</div>
+          {impact.map((i) => (
+            <div key={i.part.id} className="impact-row">
+              <div><b>{i.part.name}</b> <span className="muted small">v{i.part.version} · {i.part.status} · from {i.part.source.block}</span><div className="small muted">{i.row.detail}</div></div>
+              {i.action === 'revise' && (pending(i.part.id)
+                ? <span className="pstate proposed">revision proposed</span>
+                : <button className="primary" disabled={busy === i.part.id} onClick={() => proposeRevision(i.part, i.row.name)}>{busy === i.part.id ? 'Extracting…' : `Propose v${i.part.version + 1}`}</button>)}
+              {i.action === 'relink' && <button className="ghost" onClick={() => savePart({ ...i.part, source: { ...i.part.source, block: i.row.name, revision: rev.to.fileName } }).then(() => notify(`${i.part.name} now points at ${i.row.name}; its geometry is unchanged.`))}>Follow rename</button>}
+              {i.action === 'orphaned' && <span className="pstate rejected" title="The block is gone from the revision; the part stays in the library as it is">source removed</span>}
+            </div>
+          ))}
+          <p className="note">A revised block becomes a new proposed version with fresh dimension checks; the approved version stays in use until the new one is reviewed and approved.</p>
+        </div>
+      )}
+      <div className="chip-row">
+        {CHANGE_FILTERS.map((c) => (
+          <button key={c} className={`chip ${show.has(c) ? 'on' : ''}`} disabled={!counts.get(c)} onClick={() => { const n = new Set(show); if (n.has(c)) n.delete(c); else n.add(c); setShow(n); }}>{CHANGE_LABEL[c]} {counts.get(c) ?? 0}</button>
+        ))}
+      </div>
+      <div className="table-wrap">
+        <table className="table">
+          <thead><tr><th>Block</th><th>Change</th><th>Before</th><th>After</th><th>Δ W × D × H</th><th>Detail</th></tr></thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={`${r.change}:${r.name}`}>
+                <td><div className="b-name">{r.name}</div>{r.from && <div className="b-desc">was {r.from}</div>}</td>
+                <td><span className={`chg ${r.change}`}>{CHANGE_LABEL[r.change]}</span></td>
+                <td className="small">{r.before ? dims3(r.before.dims) : '—'}</td>
+                <td className="small">{r.after ? dims3(r.after.dims) : '—'}</td>
+                <td className="small num">{r.delta && r.delta.some((d) => Math.abs(d) > 0.05) ? r.delta.map((d) => (d > 0 ? `+${d}` : `${d}`)).join(' × ') : ''}</td>
+                <td className="small">{r.detail}</td>
+              </tr>
+            ))}
+            {!rows.length && <tr><td colSpan={6} className="muted small">Nothing to show with these filters.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -233,6 +399,9 @@ function ReviewPanel({ part }: { part: IngestedPart }) {
       <div className="panel-scroll">
         <Section title="Source">
           <KV k="Block">{part.source.block}</KV>
+          {part.source.revision && <KV k="Revision">{part.source.revision}</KV>}
+          {part.supersedes && <KV k="Replaces">v{part.supersedes}</KV>}
+          {part.sharedFrom && <KV k="Shared from">{part.sharedFrom.bundle}{part.sharedFrom.by ? ` · ${part.sharedFrom.by}` : ''}</KV>}
           {part.source.derivedFrom && <KV k="Derived from">{part.source.derivedFrom}</KV>}
           {part.source.originNote && <KV k="Origin">{part.source.originNote}</KV>}
           <KV k="Units">{part.source.units} → mm</KV>
