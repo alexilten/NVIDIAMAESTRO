@@ -76,6 +76,12 @@ await page.selectOption('select[aria-label="Rule set"]', 'din-18040-1');
 await page.locator('select[aria-label="Rule set"]').scrollIntoViewIfNeeded();
 await shot('30-exhibition-din-rule-set');
 await page.selectOption('select[aria-label="Rule set"]', 'ada-2010');
+// Round 08: a hall column at the plot centre runs into a module
+await page.locator('summary', { hasText: 'Columns' }).click();
+await page.locator('button', { hasText: '+ Column' }).click();
+await page.locator('.section', { hasText: 'Checks' }).first().scrollIntoViewIfNeeded();
+await shot('32-exhibition-column-clash');
+await page.locator('.svc-row', { has: page.locator('input[aria-label="Column name"]') }).locator('button[title="Remove"]').click();
 const plan = await browser.newPage({ viewport: { width: 1587, height: 1123 } });
 await plan.goto(new URL('../samples/sample-booth.plan.svg', import.meta.url).href);
 await plan.screenshot({ path: `${out}/22-booth-plan-sheet.png` });
@@ -133,6 +139,18 @@ if (fx) {
   await page.locator('input[type=file][accept=".3dm"]').nth(1).setInputFiles(`${fx}/synthetic-show-r2.3dm`);
   await page.waitForSelector('.impact');
   await shot('25-import-revision-diff');
+  // Round 08: the synthetic drawing PDF links both parts to one page, reviewed together
+  await page.locator('input[type=file][accept="application/pdf,.pdf"]').setInputFiles(`${fx}/synthetic-show-drawings.pdf`);
+  await page.locator('.tree-item', { hasText: 'p.2' }).click();
+  await page.waitForSelector('text=Confirm page for all');
+  await page.locator('button', { hasText: 'Confirm page for all' }).click();
+  await page.selectOption('select[aria-label="Measure"]', 'overall height');
+  await page.fill('input[aria-label="Drawing value in mm"]', '945');
+  await page.locator('button', { hasText: 'Check all' }).click();
+  await shot('33-import-group-review');
+  await page.locator('button', { hasText: 'Approve ready parts' }).click();
+  await page.waitForSelector('.batch-report');
+  await shot('34-import-group-approved');
 }
 await page.locator('.logo').click(); await shot('09-about');
 await browser.close();

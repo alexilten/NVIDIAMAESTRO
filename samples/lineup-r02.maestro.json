@@ -1,12 +1,12 @@
 {
   "schema": "maestro.composition",
   "version": 1,
-  "id": "comp-mvpnj6ky-3htsmx",
+  "id": "comp-mvpr8wep-3hz1wk",
   "name": "DGX Station, RTX PRO and Spectrum-X line-up (sample)",
   "kind": "module",
   "items": [
     {
-      "id": "it-mvpnj6ky-3izfsl",
+      "id": "it-mvpr8wep-3ilbjz",
       "ref": {
         "kind": "product",
         "id": "dell-pro-max-gb300"
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3jxyeo",
+      "id": "it-mvpr8wep-3j492i",
       "ref": {
         "kind": "product",
         "id": "gb-w775-v10"
@@ -46,7 +46,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3k6m65",
+      "id": "it-mvpr8wep-3kbqev",
       "ref": {
         "kind": "product",
         "id": "msi-ws300"
@@ -66,7 +66,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3ltvlo",
+      "id": "it-mvpr8wep-3lfarj",
       "ref": {
         "kind": "product",
         "id": "smc-ars-511gd"
@@ -86,7 +86,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3mult7",
+      "id": "it-mvpr8wep-3mxqqd",
       "ref": {
         "kind": "product",
         "id": "nv-rtx-pro-6000-ws"
@@ -106,7 +106,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3nzqnt",
+      "id": "it-mvpr8wep-3nv9oa",
       "ref": {
         "kind": "product",
         "id": "nv-rtx-pro-5000"
@@ -126,7 +126,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3ofocy",
+      "id": "it-mvpr8wep-3o8zoq",
       "ref": {
         "kind": "product",
         "id": "nv-connectx-9"
@@ -146,7 +146,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3pigbr",
+      "id": "it-mvpr8wep-3pgqu4",
       "ref": {
         "kind": "product",
         "id": "dell-rtx-pro-server"
@@ -166,7 +166,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3q1ap6",
+      "id": "it-mvpr8wep-3qawjc",
       "ref": {
         "kind": "product",
         "id": "hpe-rtx-pro-server"
@@ -186,7 +186,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3rj4lq",
+      "id": "it-mvpr8wep-3rrhd4",
       "ref": {
         "kind": "product",
         "id": "nv-sn6600"
@@ -206,7 +206,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3sfbj9",
+      "id": "it-mvpr8weq-3sa4di",
       "ref": {
         "kind": "product",
         "id": "nv-sn6600-ld"
@@ -226,7 +226,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3tpyly",
+      "id": "it-mvpr8weq-3tnz9q",
       "ref": {
         "kind": "product",
         "id": "nv-sn6810-ld"
@@ -246,7 +246,7 @@
       }
     },
     {
-      "id": "it-mvpnj6ky-3uu3aq",
+      "id": "it-mvpr8weq-3u7kas",
       "ref": {
         "kind": "product",
         "id": "nv-sn6800-ld"
@@ -267,5 +267,5 @@
     }
   ],
   "groups": [],
-  "updatedAt": "2026-10-26T19:30:43.090Z"
+  "updatedAt": "2026-10-26T21:14:41.810Z"
 }

@@ -9,6 +9,7 @@ import type { DimCheck, DocLink, IngestedPart } from '../ingest/types';
 import { applyReview, exportReview, parseReview } from '../ingest/review';
 import { kitCandidates, planBatch, reviseFromSource, runBatch, type BatchResult, type PlanState } from '../ingest/batch';
 import { exportBundle, readBundle } from '../ingest/bundle';
+import { approveReady, checkAll, confirmPage, drawingGroups, sharedMeasures, type DrawingGroup } from '../ingest/groupReview';
 import { CHANGE_LABEL, blockPrints, diffCsv, diffSources, libraryImpact, type Change, type DiffRow, type SourcePrint } from '../ingest/revision';
 import { Icon, KV, Section, VBadge, dims3, mm } from './common';
 import { useStore } from './store';
@@ -24,16 +25,21 @@ export function Ingest() {
   const [summary, setSummary] = useState<SourceSummary | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
   const [revision, setRevision] = useState<Revision | null>(null);
+  const [groupKey, setGroupKey] = useState<string | null>(null);
+  const groups = useMemo(() => drawingGroups(parts), [parts]);
+  // the open group keeps its approved parts, so the sheet shows what happened to each
+  const group = useMemo(() => (groupKey ? drawingGroups(parts, true).find((g) => g.key === groupKey) ?? null : null), [parts, groupKey]);
   const part = parts.find((p) => `${p.id}@${p.version}` === selected) ?? null;
   const shape = useMemo(() => (part ? resolveRef({ kind: 'ingested', id: part.id, version: part.version }, parts)?.shape ?? null : null), [part, parts]);
   const dims = part ? (part.dims.map((v) => ({ value: v, status: part.status === 'approved' ? 'project' : 'estimated' })) as [DimLabel, DimLabel, DimLabel]) : undefined;
   return (
     <>
       {part ? <ProductViewer shape={shape} dims={dims} partNames={part.mesh.map((m) => m.material)} /> : <div className="viewer blank" />}
-      <aside className="panel left glass"><SourcesPanel summary={summary} setSummary={(s) => { setSummary(s); setSelected(null); setRevision(null); }} selected={selected} setSelected={(k) => { setSelected(k); if (k) setRevision(null); }} onRevision={(r) => { setRevision(r); setSelected(null); }} revision={revision} /></aside>
-      {revision && !part && <RevisionSheet rev={revision} onClose={() => setRevision(null)} onOpen={(k) => setSelected(k)} />}
-      {summary && !part && !revision && <BlockSheet summary={summary} onDone={(k) => setSelected(k)} />}
-      {!summary && !part && <IngestIntro />}
+      <aside className="panel left glass"><SourcesPanel summary={summary} setSummary={(s) => { setSummary(s); setSelected(null); setRevision(null); setGroupKey(null); }} selected={selected} setSelected={(k) => { setSelected(k); if (k) { setRevision(null); setGroupKey(null); } }} onRevision={(r) => { setRevision(r); setSelected(null); setGroupKey(null); }} revision={revision} groups={groups} groupKey={groupKey} onGroup={(k) => { setGroupKey(k); setSelected(null); setRevision(null); }} /></aside>
+      {group && !part && <GroupSheet group={group} onClose={() => setGroupKey(null)} onOpen={(k) => setSelected(k)} />}
+      {revision && !part && !group && <RevisionSheet rev={revision} onClose={() => setRevision(null)} onOpen={(k) => setSelected(k)} />}
+      {summary && !part && !revision && !group && <BlockSheet summary={summary} onDone={(k) => setSelected(k)} />}
+      {!summary && !part && !group && <IngestIntro />}
       <aside className="panel right glass">{part ? <ReviewPanel part={part} /> : <div className="inspector empty small muted">Open a Rhino model, extract blocks, then select a proposed part to review it here.</div>}</aside>
     </>
   );
@@ -55,7 +61,7 @@ function IngestIntro() {
   );
 }
 
-function SourcesPanel({ summary, setSummary, selected, setSelected, revision, onRevision }: { summary: SourceSummary | null; setSummary: (s: SourceSummary | null) => void; selected: string | null; setSelected: (k: string | null) => void; revision: Revision | null; onRevision: (r: Revision) => void }) {
+function SourcesPanel({ summary, setSummary, selected, setSelected, revision, onRevision, groups, groupKey, onGroup }: { summary: SourceSummary | null; setSummary: (s: SourceSummary | null) => void; selected: string | null; setSelected: (k: string | null) => void; revision: Revision | null; onRevision: (r: Revision) => void; groups: DrawingGroup[]; groupKey: string | null; onGroup: (k: string) => void }) {
   const parts = useStore((s) => s.parts);
   const docs = useStore((s) => s.docs);
   const saveDoc = useStore((s) => s.saveDoc);
@@ -158,6 +164,18 @@ function SourcesPanel({ summary, setSummary, selected, setSelected, revision, on
           <b>{d.name}</b><span className="muted small">{d.pages.length} pages indexed{sessionFiles.pdf.has(d.id) ? '' : ' · re-attach to preview'}</span>
         </div>
       ))}
+      {groups.length > 0 && (
+        <>
+          <div className="sub-head">Review together</div>
+          <div className="tree-list">
+            {groups.map((g) => (
+              <button key={g.key} className={`tree-item ${groupKey === g.key ? 'on' : ''}`} onClick={() => onGroup(g.key)} title={`${g.parts.length} proposed parts are linked to ${g.document}, page ${g.page}`}>
+                <span>{g.document} · p.{g.page}</span><span className="pstate proposed">{g.parts.length} parts</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
       <div className="sub-head">Proposed &amp; approved parts</div>
       <div className="tree-list">
         {[...parts].sort((a, b) => a.name.localeCompare(b.name)).map((p) => (
@@ -366,6 +384,93 @@ function RevisionSheet({ rev, onClose, onOpen }: { rev: Revision; onClose: () =>
               </tr>
             ))}
             {!rows.length && <tr><td colSpan={6} className="muted small">Nothing to show with these filters.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/** review the proposed parts that share one drawing page in a single pass; each part still has to clear the usual approval rules */
+function GroupSheet({ group, onClose, onOpen }: { group: DrawingGroup; onClose: () => void; onOpen: (key: string) => void }) {
+  const savePart = useStore((s) => s.savePart);
+  const notify = useStore((s) => s.notify);
+  // only proposed parts are changed; approved ones are shown as they are
+  const open = useMemo(() => group.parts.filter((p) => p.status === 'proposed'), [group.parts]);
+  const shared = useMemo(() => sharedMeasures(group.parts), [group.parts]);
+  const [measure, setMeasure] = useState(shared[0] ?? '');
+  const [drawing, setDrawing] = useState('');
+  const [tolerance, setTolerance] = useState('2');
+  const [blocked, setBlocked] = useState<{ name: string; blockers: string[] }[]>([]);
+  const m = shared.includes(measure) ? measure : shared[0] ?? '';
+  const value = Number(drawing);
+  const saveAll = async (ps: IngestedPart[]) => { for (const p of ps) await savePart(p); };
+
+  const confirm = async () => {
+    await saveAll(confirmPage(group, open));
+    notify(`Confirmed ${group.document} p.${group.page} for ${open.length} part${open.length === 1 ? '' : 's'}.`);
+  };
+  const check = async () => {
+    const r = checkAll(group, open, m, value, Number(tolerance) || 0);
+    await saveAll(r.parts);
+    notify(`Compared ${m} with ${value} mm on ${r.parts.length} part${r.parts.length === 1 ? '' : 's'}.${r.skipped.length ? ` ${r.skipped.length} had no such measure.` : ''}`);
+  };
+  const approveAll = async () => {
+    const r = approveReady(open, 'Reviewer');
+    await saveAll(r.approved);
+    setBlocked(r.blocked.map((b) => ({ name: b.part.name, blockers: b.blockers })));
+    notify(`Approved ${r.approved.length} part${r.approved.length === 1 ? '' : 's'}.${r.blocked.length ? ` ${r.blocked.length} still blocked.` : ''}`);
+  };
+
+  return (
+    <div className="sheet glass">
+      <div className="sheet-head">
+        <div>
+          <h2>{group.document} · page {group.page}</h2>
+          <div className="muted small">{group.title}{group.reference ? ` · ${group.reference}` : ''} · {open.length} of {group.parts.length} parts still proposed · page confirmed on {group.confirmed}</div>
+        </div>
+        <div className="sheet-actions">
+          <button className="ghost" onClick={onClose}>Close</button>
+        </div>
+      </div>
+      <p className="note">These parts all point at the same drawing page. Confirm the page and compare a shared dimension for all of them at once, then approve the ones that are clear. Each part still has to meet the usual rules on its own: a discrepancy on one part blocks only that part.</p>
+      <div className="batch-bar">
+        <button className="ghost" onClick={confirm} disabled={!open.some((p) => p.docs.some((d) => d.document === group.document && d.page === group.page && d.origin === 'suggested'))}>Confirm page for all</button>
+        <select className="mini-select" value={m} onChange={(e) => setMeasure(e.target.value)} disabled={!shared.length} aria-label="Measure">
+          {shared.map((x) => <option key={x} value={x}>{x}</option>)}
+        </select>
+        <input className="field num-field" inputMode="decimal" placeholder="Drawing mm" value={drawing} onChange={(e) => setDrawing(e.target.value)} aria-label="Drawing value in mm" />
+        <input className="field num-field" inputMode="decimal" value={tolerance} onChange={(e) => setTolerance(e.target.value)} aria-label="Tolerance in mm" title="Tolerance, mm" />
+        <button className="ghost" onClick={check} disabled={!open.length || !m || !drawing || !Number.isFinite(value)}>Check all</button>
+        <button className="primary" onClick={approveAll} disabled={!open.length}>Approve ready parts</button>
+      </div>
+      {blocked.length > 0 && (
+        <div className="batch-report">
+          <b>{blocked.length} part{blocked.length === 1 ? '' : 's'} still blocked</b>
+          {blocked.map((b) => <div key={b.name} className="small bad">{b.name}: {b.blockers.join(' ')}</div>)}
+        </div>
+      )}
+      <div className="table-wrap">
+        <table className="table">
+          <thead><tr><th>Part</th><th>Page</th><th>{m || 'Measure'}</th><th>Drawing</th><th>Check</th><th>Status</th></tr></thead>
+          <tbody>
+            {group.parts.map((p) => {
+              const link = p.docs.find((d) => d.document === group.document && d.page === group.page);
+              const mv = measures(p).find((x) => x.measure === m)?.value;
+              const c = p.checks.find((x) => x.measure === m && x.docLinkId === link?.id) ?? p.checks.find((x) => x.measure === m);
+              const st = c ? checkState(c) : 'missing';
+              const b = p.status === 'approved' ? [] : approvalBlockers(p);
+              return (
+                <tr key={`${p.id}@${p.version}`}>
+                  <td><button className="text-btn" onClick={() => onOpen(`${p.id}@${p.version}`)}>{p.name}</button></td>
+                  <td className="small">{link?.origin === 'suggested' ? 'suggested' : 'confirmed'}</td>
+                  <td className="num">{mv != null ? mm(mv) : '—'}</td>
+                  <td className="num">{c?.drawing != null ? mm(c.drawing) : '—'}</td>
+                  <td><span className={`pstate ${st === 'match' ? 'approved' : st === 'discrepancy' ? (c?.resolution === 'open' ? 'rejected' : 'approved') : 'proposed'}`}>{st === 'discrepancy' && c?.resolution !== 'open' ? 'resolved' : st}</span></td>
+                  <td className="small">{p.status === 'approved' ? <span className="pstate approved">v{p.version} ✓</span> : b.length ? <span className="muted" title={b.join(' ')}>{b.length} to do</span> : '✓ ready'}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -1,12 +1,12 @@
 {
   "schema": "maestro.composition",
   "version": 1,
-  "id": "comp-mvpnj6hw-020gw",
+  "id": "comp-mvpr8wbm-0nvq9",
   "name": "Demo module templates (sample)",
   "kind": "module",
   "items": [
     {
-      "id": "it-mvpnj6i0-7c32x",
+      "id": "it-mvpr8wbq-70k4a",
       "ref": {
         "kind": "kit",
         "id": "kit-demo-counter",
@@ -33,10 +33,10 @@
         "height": 2004.4474758833423,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i0-6b7l6"
+      "groupId": "grp-mvpr8wbq-6s0ub"
     },
     {
-      "id": "it-mvpnj6i0-82qh2",
+      "id": "it-mvpr8wbq-86itr",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -54,10 +54,10 @@
         "height": 50.5,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i0-6b7l6"
+      "groupId": "grp-mvpr8wbq-6s0ub"
     },
     {
-      "id": "it-mvpnj6i0-9nz41",
+      "id": "it-mvpr8wbq-9axfw",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -75,10 +75,10 @@
         "height": 50.5,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i0-6b7l6"
+      "groupId": "grp-mvpr8wbq-6s0ub"
     },
     {
-      "id": "it-mvpnj6i1-g40sa",
+      "id": "it-mvpr8wbr-g85lt",
       "ref": {
         "kind": "kit",
         "id": "kit-demo-counter",
@@ -105,10 +105,10 @@
         "height": 2004.4474758833423,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i1-fpbko"
+      "groupId": "grp-mvpr8wbr-fqrw7"
     },
     {
-      "id": "it-mvpnj6i1-h9xew",
+      "id": "it-mvpr8wbr-hqkel",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -126,10 +126,10 @@
         "height": 50.5,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i1-fpbko"
+      "groupId": "grp-mvpr8wbr-fqrw7"
     },
     {
-      "id": "it-mvpnj6i1-iguyr",
+      "id": "it-mvpr8wbr-i00zk",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -147,10 +147,10 @@
         "height": 50.5,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i1-fpbko"
+      "groupId": "grp-mvpr8wbr-fqrw7"
     },
     {
-      "id": "it-mvpnj6i2-pt96e",
+      "id": "it-mvpr8wbt-ph7ic",
       "ref": {
         "kind": "kit",
         "id": "kit-light-table",
@@ -174,10 +174,10 @@
         "height": 400,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i2-o7yyf"
+      "groupId": "grp-mvpr8wbt-oa0ai"
     },
     {
-      "id": "it-mvpnj6i2-q7inu",
+      "id": "it-mvpr8wbt-qty4n",
       "ref": {
         "kind": "product",
         "id": "dell-pro-max-gb300"
@@ -195,10 +195,10 @@
         "height": 569,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i2-o7yyf"
+      "groupId": "grp-mvpr8wbt-oa0ai"
     },
     {
-      "id": "it-mvpnj6i2-r706i",
+      "id": "it-mvpr8wbt-r2dwm",
       "ref": {
         "kind": "product",
         "id": "gb-w775-v10"
@@ -216,10 +216,10 @@
         "height": 500.4,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i2-o7yyf"
+      "groupId": "grp-mvpr8wbt-oa0ai"
     },
     {
-      "id": "it-mvpnj6i4-z7ft3",
+      "id": "it-mvpr8wbu-zwtuk",
       "ref": {
         "kind": "kit",
         "id": "kit-gallery-niche",
@@ -246,10 +246,10 @@
         "height": 2700,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i4-ya6qm"
+      "groupId": "grp-mvpr8wbu-y8ib4"
     },
     {
-      "id": "it-mvpnj6i4-10p1ia",
+      "id": "it-mvpr8wbu-10akjq",
       "ref": {
         "kind": "product",
         "id": "nv-rtx-pro-6000-ws"
@@ -267,10 +267,10 @@
         "height": 137.16,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i4-ya6qm"
+      "groupId": "grp-mvpr8wbu-y8ib4"
     },
     {
-      "id": "it-mvpnj6i4-11owus",
+      "id": "it-mvpr8wbu-11ft8p",
       "ref": {
         "kind": "product",
         "id": "nv-rtx-pro-5000"
@@ -288,10 +288,10 @@
         "height": 111.76,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i4-ya6qm"
+      "groupId": "grp-mvpr8wbu-y8ib4"
     },
     {
-      "id": "it-mvpnj6i4-1287l0",
+      "id": "it-mvpr8wbu-121v57",
       "ref": {
         "kind": "product",
         "id": "nv-rtx-pro-6000-maxq"
@@ -309,10 +309,10 @@
         "height": 111.76,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i4-ya6qm"
+      "groupId": "grp-mvpr8wbu-y8ib4"
     },
     {
-      "id": "it-mvpnj6i5-19hkup",
+      "id": "it-mvpr8wbv-19fwn7",
       "ref": {
         "kind": "kit",
         "id": "kit-light-table",
@@ -336,10 +336,10 @@
         "height": 900,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i5-18n9zy"
+      "groupId": "grp-mvpr8wbv-18502g"
     },
     {
-      "id": "it-mvpnj6i5-1arl1f",
+      "id": "it-mvpr8wbv-1a2nzz",
       "ref": {
         "kind": "product",
         "id": "nv-sn6800-ld"
@@ -357,10 +357,10 @@
         "height": 220,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i5-18n9zy"
+      "groupId": "grp-mvpr8wbv-18502g"
     },
     {
-      "id": "it-mvpnj6i5-1b76cm",
+      "id": "it-mvpr8wbv-1bl2p5",
       "ref": {
         "kind": "product",
         "id": "nv-sn6810-ld"
@@ -378,30 +378,30 @@
         "height": 87,
         "version": 1
       },
-      "groupId": "grp-mvpnj6i5-18n9zy"
+      "groupId": "grp-mvpr8wbv-18502g"
     }
   ],
   "groups": [
     {
-      "id": "grp-mvpnj6i0-6b7l6",
+      "id": "grp-mvpr8wbq-6s0ub",
       "name": "DGX Spark demo counter"
     },
     {
-      "id": "grp-mvpnj6i1-fpbko",
+      "id": "grp-mvpr8wbr-fqrw7",
       "name": "Accessible demo counter"
     },
     {
-      "id": "grp-mvpnj6i2-o7yyf",
+      "id": "grp-mvpr8wbt-oa0ai",
       "name": "DGX Station podium"
     },
     {
-      "id": "grp-mvpnj6i4-ya6qm",
+      "id": "grp-mvpr8wbu-y8ib4",
       "name": "RTX PRO board niche"
     },
     {
-      "id": "grp-mvpnj6i5-18n9zy",
+      "id": "grp-mvpr8wbv-18502g",
       "name": "Spectrum-X switch table"
     }
   ],
-  "updatedAt": "2026-10-26T19:30:42.989Z"
+  "updatedAt": "2026-10-26T21:14:41.707Z"
 }

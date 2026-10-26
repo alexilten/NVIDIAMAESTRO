@@ -1,7 +1,7 @@
 import { extentOfShape, worldBoxes, type ShapeOf, type WorldBox } from './arrange';
 import { newComposition, uid, type Extent } from './compose';
 import { schedule } from './services';
-import type { AccessRules, Booth, BoothSide, BoothValue, Composition, Placement, ServicePoint, Vec3, Verification } from './schema';
+import type { AccessRules, Booth, BoothColumn, BoothSide, BoothValue, Composition, Placement, ServicePoint, Vec3, Verification } from './schema';
 
 /**
  * The exhibition booth: its plot, the circulation and accessibility check, and the service points that feed the
@@ -73,6 +73,16 @@ export function boothRect(b: Booth) {
   const w = b.width.value / 2, d = b.depth.value / 2;
   return { min: [-w, -d] as [number, number], max: [w, d] as [number, number] };
 }
+
+/** a 600 × 600 mm column at the plot centre, Placeholder until the hall plan gives its size and position */
+export function addColumn(b: Booth, x = 0, y = 0, w = 600, d = 600): Booth {
+  const n = (b.columns ?? []).length + 1;
+  const col: BoothColumn = { id: uid('col'), name: `C${n}`, x, y, w, d, status: 'placeholder' };
+  return { ...b, columns: [...(b.columns ?? []), col] };
+}
+
+/** a column's plan extent, as an obstacle full height */
+export const columnExtent = (k: BoothColumn): Extent => ({ min: [k.x - k.w / 2, k.y - k.d / 2, 0], max: [k.x + k.w / 2, k.y + k.d / 2, 100000] });
 
 export function addServicePoint(b: Booth, kind: ServicePoint['kind'], x = 0, y = 0): Booth {
   const n = b.services.length + 1;
@@ -244,7 +254,8 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
   const blocked = new Uint8Array(nx * ny);
   for (let i = 0; i < nx * ny; i++) if (!inside(cx(i), cy(i)) && !beyondOpen(cx(i), cy(i))) blocked[i] = 1;
   const boxes: WorldBox[] = c.items.flatMap((p) => { const s = shapeOf(p); return s ? worldBoxes(p, s) : []; });
-  for (const bx2 of boxes) {
+  const columns = b.columns ?? [];
+  for (const bx2 of [...boxes, ...columns.map(columnExtent)]) {
     if (bx2.min[2] >= b.rules.headroom.value || bx2.max[2] - Math.max(bx2.min[2], 0) <= 15) continue;
     const i0 = Math.max(0, Math.ceil((bx2.min[0] - x0) / g)), i1 = Math.min(nx - 1, Math.floor((bx2.max[0] - x0) / g));
     const j0 = Math.max(0, Math.ceil((bx2.min[1] - y0) / g)), j1 = Math.min(ny - 1, Math.floor((bx2.max[1] - y0) / g));
@@ -288,6 +299,13 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
     const e = extentOfShape(p, s);
     if (e.min[0] < -W / 2 - 1 || e.max[0] > W / 2 + 1 || e.min[1] < -D / 2 - 1 || e.max[1] > D / 2 + 1) issues.push({ level: 'error', text: `${p.name} stands outside the booth plot.`, unit: p.groupId ?? p.id, at: [(e.min[0] + e.max[0]) / 2, (e.min[1] + e.max[1]) / 2] });
     if (e.max[2] > b.heightLimit.value + 0.5) issues.push({ level: 'error', text: `${p.name} is ${Math.round(e.max[2])} mm high, over the ${Math.round(b.heightLimit.value)} mm height limit.`, unit: p.groupId ?? p.id });
+    for (const k of columns) {
+      const ke = columnExtent(k);
+      if (e.min[0] < ke.max[0] - 1 && e.max[0] > ke.min[0] + 1 && e.min[1] < ke.max[1] - 1 && e.max[1] > ke.min[1] + 1) issues.push({ level: 'error', text: `${p.name} runs into column ${k.name}.`, unit: p.groupId ?? p.id, at: [k.x, k.y] });
+    }
+  }
+  for (const k of columns) {
+    if (Math.abs(k.x) + k.w / 2 > W / 2 + 1 || Math.abs(k.y) + k.d / 2 > D / 2 + 1) issues.push({ level: 'warn', text: `Column ${k.name} is not wholly inside the plot; check its position on the hall plan.`, at: [k.x, k.y] });
   }
 
   // an accessible approach in front of each module
@@ -356,6 +374,7 @@ export function freeSpot(c: Composition, extents: Extent[], size: [number, numbe
   if (!b) return null;
   const W = b.width.value, D = b.depth.value, gap = b.rules.route.value;
   const [w, d] = size;
+  extents = [...extents, ...(b.columns ?? []).map(columnExtent)];
   if (w > W || d > D) return null;
   const step = 100;
   for (let y = D / 2 - d / 2; y >= -D / 2 + d / 2; y -= step) {
