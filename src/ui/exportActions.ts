@@ -1,12 +1,14 @@
 import { exportItemFor, resolveRef } from '../core/library';
 import { newComposition, addItem } from '../core/compose';
 import { boxSize, shapeBounds } from '../core/geometry/shape';
-import type { Composition, ItemRef } from '../core/schema';
+import type { Composition, ItemRef, Placement, Vec3 } from '../core/schema';
+import { auditText, buildClientPackage, clientHtml, secretsFor, type ClientPackage, type Secret } from '../core/presentation';
+import { extentOf } from './store';
 import { exportComposition, readBack } from '../export/rhino';
 import { boothAnnotations } from '../export/boothAnnotations';
 import { boothCsv } from '../core/booth';
 import { boothAnalysis } from './useBooth';
-import { buildBoothSheet, buildSheet } from '../core/sheet';
+import { buildBoothSheet, buildSheet, moduleTag } from '../core/sheet';
 import { schedule, scheduleCsv } from '../core/services';
 import { download, loadRhino } from '../ingest/rhinoBrowser';
 import type { IngestedPart } from '../ingest/types';
@@ -93,4 +95,54 @@ export function downloadBoothSchedule(comp: Composition, parts: IngestedPart[]) 
 export function downloadSchedule(comp: Composition, parts: IngestedPart[]) {
   const s = schedule(comp, (p) => resolveRef(p.ref, parts)?.entry.name ?? p.name);
   download(scheduleCsv(s, comp.name), `${slug(comp.name)}.services.csv`, 'text/csv');
+}
+
+// ── client view ─────────────────────────────────────────────────────────────────────────────────────
+
+export interface ClientBuild { html: string; pkg: ClientPackage; checked: number; leaks: Secret[] }
+
+/** Build the client view and check it against every private value of the parts it shows. */
+export function clientViewFor(comp: Composition, parts: IngestedPart[], stills: { name: string; src: string }[], preparedBy?: string): ClientBuild {
+  const resolve = (p: Placement) => {
+    const r = resolveRef(p.ref, parts);
+    return r ? { name: r.entry.name, source: r.entry.section, status: r.entry.verification, dims: r.entry.dims, category: r.entry.group } : null;
+  };
+  const ex = comp.items.map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[];
+  const overall: Vec3 | null = ex.length ? [0, 1, 2].map((k) => Math.max(...ex.map((e) => e.max[k])) - Math.min(...ex.map((e) => e.min[k]))) as Vec3 : null;
+  const s = schedule(comp, (p) => resolveRef(p.ref, parts)?.entry.name ?? p.name);
+  const a = comp.booth ? boothAnalysis(comp, parts) : null;
+  const pkg = buildClientPackage(comp, {
+    resolve, overall, stills, preparedBy, moduleTag,
+    power: { statedW: s.knownWatts, live: s.liveCount, unknownLive: s.unknownLive },
+    access: a ? { accessibleShare: a.accessibleShare, open: a.issues.length } : undefined,
+  });
+  const html = clientHtml(pkg);
+  const used = parts.filter((p) => comp.items.some((i) => i.ref.kind === 'ingested' && i.ref.id === p.id && i.ref.version === p.version));
+  // item names are shown on purpose (an imported part is named after its block); names typed for the
+  // composition and its modules are not exempt, so a pasted file name or drawing number is still caught
+  const shown = [...pkg.items.map((r) => r.name), ...(comp.docs ?? []).filter((d) => !d.confidential).flatMap((d) => [d.title, d.url ?? '', d.reference ?? ''])];
+  const secrets = secretsFor(comp, used, shown);
+  return { html, pkg, checked: secrets.length, leaks: auditText(html, secrets) };
+}
+
+export function downloadClientView(b: ClientBuild, comp: Composition): string {
+  if (b.leaks.length) return `Not saved: the client view would show ${b.leaks.map((l) => l.what).slice(0, 3).join('; ')}.`;
+  download(b.html, `${slug(comp.name)}.client.html`, 'text/html');
+  return `Client view saved: ${b.pkg.stills.length} still${b.pkg.stills.length === 1 ? '' : 's'}, ${b.pkg.items.length} item row${b.pkg.items.length === 1 ? '' : 's'}, ${b.pkg.docs.length + b.pkg.modules.reduce((n, m) => n + m.docs.length, 0)} shared document link(s). Checked against ${b.checked} private values.`;
+}
+
+export function previewClientView(b: ClientBuild): string {
+  if (b.leaks.length) return 'The client view shows private values; fix them first.';
+  const url = URL.createObjectURL(new Blob([b.html], { type: 'text/html' }));
+  const w = window.open(url, '_blank', 'noopener');
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+  void w;
+  return 'Client view opened in a new tab.';
+}
+
+export function downloadStill(name: string, compName: string, src: string) {
+  const a = document.createElement('a');
+  a.href = src;
+  a.download = `${slug(compName)}.${slug(name)}.png`;
+  a.click();
 }

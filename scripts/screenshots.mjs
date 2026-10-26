@@ -75,6 +75,35 @@ await plan.goto(new URL('../samples/sample-booth.plan.svg', import.meta.url).hre
 await plan.screenshot({ path: `${out}/22-booth-plan-sheet.png` });
 await plan.close();
 console.log('saved 22-booth-plan-sheet');
+// Round 06: presentation of the sample booth
+await page.locator('.segmented button', { hasText: 'Present' }).click();
+await page.waitForSelector('.view-row');
+await shot('26-present-three-quarter');
+const doc = async (title, url, shared) => {
+  await page.fill('.doc-form input[aria-label="Document title"]', title);
+  await page.fill('.doc-form input[aria-label="Document link"]', url);
+  if (shared) await page.locator('.doc-form .check-row input').uncheck();
+  await page.locator('.doc-form button', { hasText: 'Add link' }).click();
+};
+await page.selectOption('.doc-form select[aria-label="Document kind"]', 'venue');
+await doc('Venue exhibitor manual', 'https://example.com/venue-manual.pdf', true);
+await doc('Internal cost plan', 'https://example.com/private/cost-plan', false);
+await page.locator('.view-row', { hasText: 'Visitor eye level' }).locator('button').click();
+await page.locator('.doc-form').scrollIntoViewIfNeeded();
+await shot('27-present-visitor-document-links');
+await page.locator('button', { hasText: 'Render all' }).click();
+await page.waitForSelector('.still', { timeout: 180000 });
+await page.locator('.audit').scrollIntoViewIfNeeded();
+await shot('28-present-stills-audit');
+const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('button', { hasText: 'Save .html' }).click()]);
+const clientFile = `${out}/.client-view.html`;
+await dl.saveAs(clientFile);
+const cv = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+await cv.goto(new URL(clientFile, `file://${process.cwd()}/`).href);
+await cv.screenshot({ path: `${out}/29-client-view.png`, fullPage: true });
+await cv.close();
+(await import('node:fs')).rmSync(clientFile);
+console.log('saved 29-client-view');
 await page.locator('.segmented button', { hasText: 'Import' }).click();
 await shot('08-import-intro');
 // Round 05: batch extraction and a revision diff, on the synthetic two-revision model (scripts/fixture-files.ts)

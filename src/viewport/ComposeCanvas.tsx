@@ -6,12 +6,16 @@ import { resolveRef } from '../core/library';
 import type { Placement, Vec3 } from '../core/schema';
 import { extentOf, useStore } from '../ui/store';
 import { BoothLayer } from './BoothLayer';
+import { Capture } from './Capture';
 import { Label } from './Label';
 import { MM, ShapeView, WORLD_ROTATION } from './ShapeView';
 import { Studio } from './Studio';
 
-/** The Compose canvas: placed items at their composition transforms, selection, and a move/rotate gizmo. */
-export function ComposeCanvas({ mode }: { mode: 'translate' | 'rotate' }) {
+/**
+ * The Compose canvas: placed items at their composition transforms, selection, and a move/rotate gizmo.
+ * `present` shows the same scene for presentation: no grid, gizmo, selection or analysis overlays.
+ */
+export function ComposeCanvas({ mode, present = false }: { mode: 'translate' | 'rotate'; present?: boolean }) {
   const comp = useStore((s) => s.comp);
   const parts = useStore((s) => s.parts);
   const selection = useStore((s) => s.selection);
@@ -23,34 +27,36 @@ export function ComposeCanvas({ mode }: { mode: 'translate' | 'rotate' }) {
 
   return (
     <div className="viewer">
-      <Canvas shadows dpr={[1, 2]} gl={{ antialias: true, toneMapping: THREE.NeutralToneMapping, preserveDrawingBuffer: true }} onPointerMissed={(e) => { if (e.type === 'click') selectItems([]); }}>
+      <Canvas shadows dpr={[1, 2]} gl={{ antialias: true, toneMapping: THREE.NeutralToneMapping, preserveDrawingBuffer: true }} onPointerMissed={(e) => { if (!present && e.type === 'click') selectItems([]); }}>
         <PerspectiveCamera makeDefault fov={30} near={0.02} far={800} position={[6, 5, 9]} />
         <Studio span={span * MM} shadows />
-        <Grid position={[0, 0.0002, 0]} args={[60, 60]} cellSize={0.1} cellThickness={0.5} cellColor="#d9d9de" sectionSize={1} sectionThickness={1} sectionColor="#c3c3ca" fadeDistance={40} fadeStrength={1.2} infiniteGrid />
+        {!present && <Grid position={[0, 0.0002, 0]} args={[60, 60]} cellSize={0.1} cellThickness={0.5} cellColor="#d9d9de" sectionSize={1} sectionThickness={1} sectionColor="#c3c3ca" fadeDistance={40} fadeStrength={1.2} infiniteGrid />}
         <group rotation={WORLD_ROTATION} scale={MM}>
-          {comp.booth && <BoothLayer />}
-          {comp.items.map((p) => <Item key={p.id} p={p} selected={selection.includes(p.id)} xray={xray} />)}
+          {comp.booth && <BoothLayer present={present} />}
+          {comp.items.map((p) => <Item key={p.id} p={p} selected={!present && selection.includes(p.id)} xray={!present && xray} present={present} />)}
         </group>
-        <Gizmo mode={mode} />
-        <FrameAll />
+        {!present && <Gizmo mode={mode} />}
+        <FrameAll auto={!present} />
+        <Capture />
       </Canvas>
-      {!comp.items.length && <div className="viewer-empty">{comp.kind === 'exhibition' ? 'Place modules from the left, or load the sample booth.' : 'Add products, kit parts or project parts from the library to start a module.'}</div>}
+      {!comp.items.length && !present && <div className="viewer-empty">{comp.kind === 'exhibition' ? 'Place modules from the left, or load the sample booth.' : 'Add products, kit parts or project parts from the library to start a module.'}</div>}
     </div>
   );
 }
 
-function Item({ p, selected, xray }: { p: Placement; selected: boolean; xray: boolean }) {
+function Item({ p, selected, xray, present }: { p: Placement; selected: boolean; xray: boolean; present: boolean }) {
   const parts = useStore((s) => s.parts);
   const selectItems = useStore((s) => s.selectItems);
   const r = useMemo(() => resolveRef(p.ref, parts), [p.ref, parts]);
   if (!r?.shape) {
+    if (present) return null;
     return (
       <Label position={p.position} text={`${p.name}: missing from library`} className="dim-label warn" />
     );
   }
   return (
     <group position={p.position} rotation={[0, 0, (p.rotation * Math.PI) / 180]}>
-      <ShapeView shape={r.shape} xray={xray} highlight={selected} onPartClick={(_i, e) => { e.stopPropagation(); selectItems([p.id], e.shiftKey); }} />
+      <ShapeView shape={r.shape} xray={xray} highlight={selected} onPartClick={present ? undefined : (_i, e) => { e.stopPropagation(); selectItems([p.id], e.shiftKey); }} />
     </group>
   );
 }
@@ -108,7 +114,7 @@ function Gizmo({ mode }: { mode: 'translate' | 'rotate' }) {
   );
 }
 
-function FrameAll() {
+function FrameAll({ auto }: { auto: boolean }) {
   const [c, setC] = useState<CameraControls | null>(null);
   const comp = useStore((s) => s.comp);
   const parts = useStore((s) => s.parts);
@@ -116,7 +122,7 @@ function FrameAll() {
   const preset = useStore((s) => s.camera);
   const id = comp.id;
   useEffect(() => {
-    if (!c) return;
+    if (!c || !auto) return;
     const ex = comp.items.map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[];
     if (comp.booth) ex.push({ min: [-comp.booth.width.value / 2, -comp.booth.depth.value / 2, 0], max: [comp.booth.width.value / 2, comp.booth.depth.value / 2, 2500] });
     if (!ex.length) { c.setLookAt(5, 4, 7, 0, 0.8, 0, true); return; }

@@ -5,6 +5,7 @@ import { TEMPLATES } from '../core/templates';
 import { VERIFICATION, VERIFICATION_RANK, type BoothValue, type ServicePoint, type Verification } from '../core/schema';
 import { KV, Section, VBadge, mm } from './common';
 import { downloadBoothSchedule, downloadBoothSheet, printBoothSheet } from './exportActions';
+import { ProjectDocs } from './Present';
 import { useStore } from './store';
 import { useBoothAnalysis } from './useBooth';
 
@@ -143,6 +144,7 @@ export function BoothPanel() {
             );
           })}
         </Section>
+        <ProjectDocs open={false} />
         <Section title="Saved exhibitions" summary={`${exhibitions.length}`} open={exhibitions.length > 0}>
           {exhibitions.map((c) => <button key={c.id} className="link-row" onClick={() => st.openComp(c)}>{c.name}<span className="muted small"> · {c.groups.length} modules</span></button>)}
           {!exhibitions.length && <p className="note">Save an exhibition to keep it in this browser.</p>}

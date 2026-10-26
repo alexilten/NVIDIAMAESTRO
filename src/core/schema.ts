@@ -11,6 +11,8 @@
  * verification status and a source; `description` / `purpose` hold prose.
  */
 
+import type { ProjectDoc, SavedView } from './presentation';
+
 export type Vec3 = [number, number, number];
 
 /** How much a value can be trusted. Shown on every value in the interface. */
@@ -281,6 +283,10 @@ export interface Composition {
   groups: Group[];
   /** the booth plot (exhibitions only) */
   booth?: Booth;
+  /** camera views saved for presentation (core/presentation.ts) */
+  views?: SavedView[];
+  /** links to project documents kept elsewhere; MAESTRO stores the reference, never the document */
+  docs?: ProjectDoc[];
   updatedAt: string;
 }
 

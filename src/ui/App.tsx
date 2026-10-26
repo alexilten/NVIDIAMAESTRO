@@ -2,6 +2,7 @@ import { Component, useEffect, useState, type ReactNode } from 'react';
 import { Compose } from './Compose';
 import { Discover } from './Discover';
 import { Ingest } from './Ingest';
+import { Present } from './Present';
 import { Icon } from './common';
 import { exportCompositionFile, saveCompositionJson } from './exportActions';
 import { useStore, type Workspace } from './store';
@@ -19,6 +20,7 @@ export function App() {
       <Guard key={workspace} area={workspace}>
         {workspace === 'discover' && <Discover />}
         {(workspace === 'compose' || workspace === 'exhibition') && <Compose />}
+        {workspace === 'present' && <Present />}
         {workspace === 'ingest' && <Ingest />}
       </Guard>
       {about && <About onClose={() => setAbout(false)} />}
@@ -31,6 +33,7 @@ const TABS: { id: Workspace; label: string; title?: string }[] = [
   { id: 'discover', label: 'Discover' },
   { id: 'compose', label: 'Compose', title: 'Compose demo modules' },
   { id: 'exhibition', label: 'Exhibition', title: 'Lay modules out on a booth and check circulation and services' },
+  { id: 'present', label: 'Present', title: 'Views, stills, document links and the client view' },
   { id: 'ingest', label: 'Import' },
 ];
 
@@ -64,7 +67,8 @@ function Toolbar({ onAbout }: { onAbout: () => void }) {
             <button className="primary" onClick={exportModule} disabled={!comp.items.length || busy}><Icon name="download" /> {busy ? 'Exporting…' : 'Export .3dm'}</button>
           </>
         )}
-        {workspace !== 'compose' && workspace !== 'exhibition' && <span className="tb-note">{parts.filter((p) => p.status === 'approved').length} project parts in this browser</span>}
+        {workspace === 'present' && <span className="tb-note">Concept visualisation · not for construction</span>}
+        {workspace !== 'compose' && workspace !== 'exhibition' && workspace !== 'present' && <span className="tb-note">{parts.filter((p) => p.status === 'approved').length} project parts in this browser</span>}
       </div>
     </header>
   );
