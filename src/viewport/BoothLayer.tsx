@@ -34,6 +34,8 @@ export function BoothLayer({ present = false }: { present?: boolean }) {
   const W = booth.width.value, D = booth.depth.value, A = booth.aisle.value;
   const g = a.grid;
   const wallH = 2500;
+  // columns run to the hall ceiling; drawn a little over the height limit so they read as building, not stand
+  const colH = Math.max(booth.heightLimit.value + 1500, 5000);
   const wall: Record<BoothSide, { pos: [number, number, number]; size: [number, number, number] }> = {
     front: { pos: [0, -D / 2, wallH / 2], size: [W, 20, wallH] }, back: { pos: [0, D / 2, wallH / 2], size: [W, 20, wallH] },
     left: { pos: [-W / 2, 0, wallH / 2], size: [20, D, wallH] }, right: { pos: [W / 2, 0, wallH / 2], size: [20, D, wallH] },
@@ -66,6 +68,12 @@ export function BoothLayer({ present = false }: { present?: boolean }) {
         </mesh>
       )}
       {show && a.access.map((z) => <Zone key={z.unit} min={z.zone.min} max={z.zone.max} ok={z.approach} />)}
+      {(booth.columns ?? []).map((k) => (
+        <group key={k.id} position={[k.x, k.y, 0]}>
+          <mesh position={[0, 0, colH / 2]} castShadow receiveShadow><boxGeometry args={[k.w, k.d, colH]} /><meshStandardMaterial color="#b9bab7" roughness={0.85} /></mesh>
+          {!present && <Label position={[0, 0, colH + 80]} text={`${k.name}\t${Math.round(k.w)} × ${Math.round(k.d)}`} />}
+        </group>
+      ))}
       {!present && booth.services.map((sp) => (
         <group key={sp.id} position={[sp.x, sp.y, 0]}>
           <mesh position={[0, 0, 12]} rotation={[Math.PI / 2, 0, 0]}><cylinderGeometry args={[130, 130, 24, 24]} /><meshStandardMaterial color="#e39a1a" /></mesh>

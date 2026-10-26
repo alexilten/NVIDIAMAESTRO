@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { RULE_PRESETS, SIDES, SIDE_LABEL, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
+import { RULE_PRESETS, SIDES, SIDE_LABEL, addColumn, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
 import { moduleTag } from '../core/sheet';
 import { TEMPLATES } from '../core/templates';
-import { VERIFICATION, VERIFICATION_RANK, type BoothValue, type ServicePoint, type Verification } from '../core/schema';
+import { VERIFICATION, VERIFICATION_RANK, type BoothColumn, type BoothValue, type ServicePoint, type Verification } from '../core/schema';
 import { KV, Section, VBadge, mm } from './common';
 import { downloadBoothSchedule, downloadBoothSheet, printBoothSheet } from './exportActions';
 import { ProjectDocs } from './Present';
@@ -71,6 +71,8 @@ export function BoothPanel() {
   const selectUnit = (id?: string) => { if (!id) return; const ids = comp.items.filter((i) => i.groupId === id || i.id === id).map((i) => i.id); if (ids.length) st.selectItems(ids); };
   const exhibitions = saved.filter((c) => c.kind === 'exhibition');
   const changed = changedModules(comp, saved);
+  const cols = b.columns ?? [];
+  const setCol = (id: string, patch: Partial<BoothColumn>) => st.setBooth({ columns: cols.map((c) => (c.id === id ? { ...c, ...patch } : c)) });
   return (
     <div className="inspector">
       <div className="insp-head"><div className="insp-kicker">Exhibition</div><h2 className="insp-title">{comp.name}</h2>
@@ -135,6 +137,27 @@ export function BoothPanel() {
             <button className="ghost" onClick={() => st.setBooth(addServicePoint(b, 'data'))}>+ Data</button>
           </div>
           <p className="note">Each module is fed from the nearest point of the right kind; runs are plan distances along the floor from the module’s centre, without rise or slack. Loads sum stated figures only.</p>
+        </Section>
+        <Section title="Columns" summary={`${cols.length}`} open={cols.length > 0}>
+          {cols.map((k) => (
+            <div key={k.id} className="svc-row">
+              <div className="svc-head">
+                <input className="name-input" value={k.name} onChange={(e) => setCol(k.id, { name: e.target.value })} aria-label="Column name" />
+                <select className={`vselect ${k.status}`} value={k.status} onChange={(e) => setCol(k.id, { status: e.target.value as Verification })} aria-label={`${k.name} status`}>
+                  {statuses.map((x) => <option key={x} value={x}>{VERIFICATION[x].label}</option>)}
+                </select>
+                <button className="icon-btn" title="Remove" onClick={() => st.setBooth({ columns: cols.filter((c) => c.id !== k.id) })}>×</button>
+              </div>
+              <div className="svc-grid four">
+                {(['x', 'y', 'w', 'd'] as const).map((f) => (
+                  <label key={f}>{f === 'w' ? 'Width' : f === 'd' ? 'Depth' : f.toUpperCase()}<input type="number" step={50} defaultValue={Math.round(k[f])} key={`${f}${k[f]}`}
+                    onBlur={(e) => { const v = +e.target.value; if (!Number.isFinite(v) || ((f === 'w' || f === 'd') && v <= 0)) return; setCol(k.id, { [f]: v, status: k.status === 'placeholder' ? 'project' : k.status }); }} /></label>
+                ))}
+              </div>
+            </div>
+          ))}
+          <button className="ghost wide" onClick={() => st.setBooth(addColumn(b))}>+ Column</button>
+          <p className="note">Hall columns from the hall plan, centred on the booth origin. They block the route like any part, and a module that runs into one is an error. A typed value becomes Project-specific.</p>
         </Section>
         {changed.size > 0 && (
           <Section title="Edited since placed" summary={`${changed.size}`}>

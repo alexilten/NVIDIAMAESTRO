@@ -18,6 +18,9 @@ export function boothAnnotations(c: Composition, a: BoothAnalysis): Annotation[]
   });
   const edge: Record<string, Vec3[]> = { front: [[-W, -D, 0], [W, -D, 0]], back: [[-W, D, 0], [W, D, 0]], left: [[-W, -D, 0], [-W, D, 0]], right: [[W, -D, 0], [W, D, 0]] };
   for (const s of SIDES) if (b.open[s]) out.push({ kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::BOOTH_PLOT', name: `OPEN_SIDE_${s.toUpperCase()}`, points: edge[s] });
+  for (const k of b.columns ?? []) {
+    out.push({ kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::COLUMNS', name: k.name, points: rect(k.x - k.w / 2, k.y - k.d / 2, k.x + k.w / 2, k.y + k.d / 2), closed: true, user: { width_mm: k.w, depth_mm: k.d, status: k.status } });
+  }
   for (const l of a.loads) {
     const sp = l.point;
     out.push({ kind: 'circle', layer: '60_TECHNICAL_INFRASTRUCTURE::SERVICE_POINTS', name: sp.name, center: [sp.x, sp.y, 0], radius: 150, user: { kind: sp.kind, capacity_w: sp.capacityW ?? 'not stated', status: sp.status, stated_load_w: l.watts } });

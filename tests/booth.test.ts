@@ -1,11 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { CELL, addServicePoint, analyseBooth, approachZone, boothCsv, changedModules, freeSpot, frontSide, newExhibition, placeModule, planExtent } from '../src/core/booth';
+import { CELL, addColumn, addServicePoint, analyseBooth, approachZone, boothCsv, changedModules, freeSpot, frontSide, newExhibition, placeModule, planExtent } from '../src/core/booth';
 import { addItem } from '../src/core/compose';
 import { sampleExhibition } from '../src/core/exhibitionSample';
 import { defaultParams } from '../src/core/geometry/kit';
 import { boxSize, shapeBounds } from '../src/core/geometry/shape';
 import { resolveRef } from '../src/core/library';
 import { buildBoothSheet } from '../src/core/sheet';
+import { boothAnnotations } from '../src/export/boothAnnotations';
 import { TEMPLATES } from '../src/core/templates';
 import type { Composition, ItemRef, Placement, Vec3 } from '../src/core/schema';
 
@@ -216,5 +217,36 @@ describe('refreshing a placed module', () => {
     expect(mine[0].rotation).toBe(placed.comp.items.find((i) => i.groupId === placed.groupId)!.rotation);
     expect(Math.hypot(mid(after)[0] - mid(before)[0], mid(after)[1] - mid(before)[1])).toBeLessThan(200);
     expect(r.comp.items.length).toBe(c.items.length + 1);
+  });
+});
+
+describe('booth columns', () => {
+  it('flags a module that runs into a column, and a column outside the plot', () => {
+    let c = booth();
+    c = { ...c, booth: addColumn(c.booth!, 0, 0) };
+    const ref = kit('kit-light-table', { width: 1600, depth: 800, height: 900 });
+    c = addItem(c, ref, 'table', dimsOf(ref), [0, 0, 0]).comp;
+    const a = analyseBooth(c, shapeOf)!;
+    expect(a.issues.some((i) => i.level === 'error' && /runs into column C1/.test(i.text))).toBe(true);
+    const out = { ...c, booth: addColumn(c.booth!, 2900, 0) };
+    expect(analyseBooth(out, shapeOf)!.issues.some((i) => /Column C2 is not wholly inside/.test(i.text))).toBe(true);
+  });
+
+  it('takes column floor out of the reachable area, and new modules avoid it', () => {
+    const open = analyseBooth(booth(), shapeOf)!;
+    let c = booth();
+    c = { ...c, booth: addColumn(c.booth!, 0, 0, 1000, 1000) };
+    const a = analyseBooth(c, shapeOf)!;
+    expect(a.freeArea).toBeLessThan(open.freeArea - 0.9e6);
+    const at = freeSpot(c, [], [1200, 1200])!;
+    const k = c.booth!.columns![0];
+    expect(Math.abs(at[0] - k.x) >= (1200 + k.w) / 2 || Math.abs(at[1] - k.y) >= (1200 + k.d) / 2).toBe(true);
+  });
+
+  it('writes each column to the COLUMNS layer of the booth annotations', () => {
+    let c = booth();
+    c = { ...c, booth: addColumn(addColumn(c.booth!, -2000, 1000), 2000, 1000) };
+    const notes = boothAnnotations(c, analyseBooth(c, shapeOf)!).filter((n) => n.layer.endsWith('::COLUMNS'));
+    expect(notes.map((n) => n.name)).toEqual(['C1', 'C2']);
   });
 });

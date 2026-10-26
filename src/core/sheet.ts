@@ -223,6 +223,11 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
   side(b.open.back, -W / 2, D / 2, W / 2, D / 2);
   side(b.open.left, -W / 2, -D / 2, -W / 2, D / 2);
   side(b.open.right, W / 2, -D / 2, W / 2, D / 2);
+  // hall columns, solid, with their names
+  for (const col of b.columns ?? []) {
+    rectW(col.x - col.w / 2, col.y - col.d / 2, col.x + col.w / 2, col.y + col.d / 2, 'column');
+    text(px(col.x + col.w / 2) + 1, py(col.y + col.d / 2) - 0.6, col.name, 'tiny', 'start');
+  }
   out.push('</g>');
 
   // dimensions
@@ -336,6 +341,7 @@ const STYLE = `
     .wall{stroke:#111;stroke-width:.7;fill:none}
     .open{stroke:#111;stroke-width:.25;stroke-dasharray:2 1.2;fill:none}
     .aisle{fill:#f2f2f4;stroke:none}
+    .column{fill:#555;stroke:#111;stroke-width:.25}
     .tight{fill:#f2a33a;fill-opacity:.55;stroke:none}
     .zone{fill:none;stroke:#3b6400;stroke-width:.2;stroke-dasharray:1 .8}
     .zone.bad{stroke:#d33;stroke-width:.35}

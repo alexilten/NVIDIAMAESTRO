@@ -260,6 +260,19 @@ export interface ServicePoint {
  * The booth plot an exhibition sits on: a rectangle centred on the origin, front edge toward −Y. A side is open
  * when visitors can walk in from the hall aisle along it; a closed side is a neighbour's wall or a hall wall.
  */
+/** a hall column (or another fixed obstruction) standing inside the plot, full height */
+export interface BoothColumn {
+  id: string;
+  name: string;
+  /** centre, mm, on the booth floor */
+  x: number;
+  y: number;
+  /** plan size, mm */
+  w: number;
+  d: number;
+  status: Verification;
+}
+
 export interface Booth {
   width: BoothValue;
   depth: BoothValue;
@@ -270,6 +283,8 @@ export interface Booth {
   heightLimit: BoothValue;
   rules: AccessRules;
   services: ServicePoint[];
+  /** hall columns inside the plot, from the hall plan */
+  columns?: BoothColumn[];
 }
 
 export interface Composition {

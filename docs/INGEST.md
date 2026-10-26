@@ -41,6 +41,10 @@ Each check pairs a model measurement with a value read from a drawing, with a to
 
 Approval needs at least one confirmed page, at least one compared dimension and no open discrepancy. An approved part is published to the private project library as Project-specific, locked, and can be placed in Compose and exported. A revised source becomes version 2 of the same part; version 1 stays as it was, and placements that use it are flagged.
 
+### Reviewing parts that share a drawing
+
+A build drawing often shows several parts. When two or more proposed parts are linked to the same page, the page appears under **Review together**. Its sheet confirms the page for all of them, compares one shared measure (for example "overall height") with the same drawing value on each, and approves the parts that are then clear. The group never lowers the bar: every part still needs its own confirmed page, compared dimension and resolved discrepancies, and a part that is not clear is listed with what still blocks it. A check already made on that measure is updated rather than repeated.
+
 ## Review notes
 
 Review work can be exported and imported as a `*.maestro-review.json` sidecar, matched to parts by block name, so it survives re-importing a revised model. The sidecar holds project information, so it lives with the project files, never in this repository.

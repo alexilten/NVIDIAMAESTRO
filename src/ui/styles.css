@@ -337,6 +337,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 /* import at scale */
 .batch-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
 .batch-bar .field { flex: 1; min-width: 160px; }
+.batch-bar .field.num-field { flex: 0 0 96px; min-width: 0; }
 .batch-report { padding: 8px 10px; border-radius: 10px; background: var(--card); margin-bottom: 8px; display: grid; gap: 2px; }
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .impact { margin-bottom: 8px; padding: 4px 0 6px; border-bottom: 0.5px solid var(--line); }
@@ -388,3 +389,4 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .doc-form .check-row input { width: auto; height: auto; box-shadow: none; padding: 0; flex: 0 0 auto; }
 .refresh-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 12.5px; }
 .refresh-row > span { min-width: 0; }
+.svc-grid.four { grid-template-columns: repeat(4, 1fr); }
