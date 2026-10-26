@@ -1,0 +1,208 @@
+{
+  "schema": "maestro.composition",
+  "version": 1,
+  "id": "comp-mvpkimjn-0xwnv",
+  "name": "DGX Spark demo station (sample)",
+  "kind": "module",
+  "items": [
+    {
+      "id": "it-mvpkimjo-11lkd",
+      "ref": {
+        "kind": "kit",
+        "id": "kit-demo-counter",
+        "params": {
+          "width": 1800,
+          "depth": 700,
+          "height": 1000,
+          "top": 30,
+          "accessible": 900,
+          "screen": 55,
+          "screenCentre": 1650
+        }
+      },
+      "name": "Demo counter",
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 1800,
+        "depth": 700,
+        "height": 2004.4474758833423,
+        "version": 1
+      },
+      "groupId": "grp-mvpkimjp-3idof"
+    },
+    {
+      "id": "it-mvpkimjp-2xl6i",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark",
+      "position": [
+        500,
+        -150,
+        1000
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      },
+      "groupId": "grp-mvpkimjp-3idof"
+    },
+    {
+      "id": "it-mvpkimjp-5pqk1",
+      "ref": {
+        "kind": "kit",
+        "id": "kit-demo-counter",
+        "params": {
+          "width": 1800,
+          "depth": 700,
+          "height": 1000,
+          "top": 30,
+          "accessible": 900,
+          "screen": 55,
+          "screenCentre": 1650
+        }
+      },
+      "name": "Demo counter 2",
+      "position": [
+        500,
+        2050,
+        0
+      ],
+      "rotation": 180,
+      "snapshot": {
+        "width": 1800,
+        "depth": 700,
+        "height": 2004.4474758833423,
+        "version": 1
+      },
+      "groupId": "grp-mvpkimjp-415jl"
+    },
+    {
+      "id": "it-mvpkimjp-68wvv",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark 2",
+      "position": [
+        0,
+        2200,
+        1000
+      ],
+      "rotation": 180,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      },
+      "groupId": "grp-mvpkimjp-415jl"
+    },
+    {
+      "id": "it-mvpkimjq-79t41",
+      "ref": {
+        "kind": "kit",
+        "id": "kit-light-table",
+        "params": {
+          "width": 1200,
+          "depth": 700,
+          "height": 900,
+          "border": 50
+        }
+      },
+      "name": "Light table",
+      "position": [
+        2600,
+        1100,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 1200,
+        "depth": 700,
+        "height": 900,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpkimjq-83mzj",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark 3",
+      "position": [
+        2300,
+        1100,
+        900
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpkimjq-9vcu2",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark 4",
+      "position": [
+        2600,
+        1100,
+        900
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpkimjq-aroom",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark 5",
+      "position": [
+        2900,
+        1100,
+        900
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "grp-mvpkimjp-3idof",
+      "name": "Spark station"
+    },
+    {
+      "id": "grp-mvpkimjp-415jl",
+      "name": "Spark station copy"
+    }
+  ],
+  "updatedAt": "2026-10-26T18:06:18.278Z"
+}
