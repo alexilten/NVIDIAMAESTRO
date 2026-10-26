@@ -172,3 +172,49 @@ describe('sample booth and its plan sheet', () => {
     expect((r.svg.match(/<g /g) ?? []).length).toBe((r.svg.match(/<\/g>/g) ?? []).length);
   });
 });
+
+describe('venue rule sets', () => {
+  it('starts from a preset, recognises it, and stops matching once a value is edited', async () => {
+    const { RULE_PRESETS, rulePresetOf } = await import('../src/core/booth');
+    const b = newExhibition('x').booth!;
+    expect(rulePresetOf(b.rules)).toBe('ada-2010');
+    const din = RULE_PRESETS.find((p) => p.id === 'din-18040-1')!;
+    expect(rulePresetOf(din.rules)).toBe('din-18040-1');
+    expect(Object.values(din.rules).every((r) => r.status === 'estimated' && !!r.note)).toBe(true);
+    expect(rulePresetOf({ ...din.rules, route: { value: 1500, status: 'project' } })).toBeNull();
+  });
+
+  it('a wider route rule leaves less floor reachable', async () => {
+    const { RULE_PRESETS } = await import('../src/core/booth');
+    const c = sampleExhibition();
+    const ada = analyseBooth(c, shapeOf, (p) => p.name)!;
+    const din = analyseBooth({ ...c, booth: { ...c.booth!, rules: { ...RULE_PRESETS[1].rules } } }, shapeOf, (p) => p.name)!;
+    expect(din.accessibleShare).toBeLessThanOrEqual(ada.accessibleShare);
+  });
+});
+
+describe('refreshing a placed module', () => {
+  it('replaces the group with the saved module at the same spot, turned the same way, keeping id and name', async () => {
+    const { refreshModule } = await import('../src/core/booth');
+    const src: Composition = { ...tpl('tpl-spark-counter'), id: 'saved-1', updatedAt: '2026-01-01T00:00:00Z' };
+    let c = booth(8000, 6000);
+    const placed = placeModule(c, src, shapeOf, [1000, 500], 90);
+    c = { ...placed.comp, groups: placed.comp.groups.map((g) => ({ ...g, name: 'Spark A' })) };
+    const before = planExtent(c.items.filter((i) => i.groupId === placed.groupId), shapeOf)!;
+    // the saved module gains an item and is edited later
+    const extra = src.items[src.items.length - 1];
+    const edited: Composition = { ...src, items: [...src.items, { ...extra, id: 'new-1', name: 'Extra', position: [extra.position[0] + 50, extra.position[1], extra.position[2]] }], updatedAt: '2026-02-01T00:00:00Z' };
+    expect(changedModules(c, [edited]).has(placed.groupId)).toBe(true);
+    const r = refreshModule(c, placed.groupId, edited, shapeOf)!;
+    const mine = r.comp.items.filter((i) => i.groupId === placed.groupId);
+    expect(mine).toHaveLength(edited.items.length);
+    expect(r.comp.groups.find((g) => g.id === placed.groupId)?.name).toBe('Spark A');
+    expect(changedModules(r.comp, [edited]).size).toBe(0);
+    const after = planExtent(mine, shapeOf)!;
+    const mid = (e: { min: Vec3; max: Vec3 }) => [(e.min[0] + e.max[0]) / 2, (e.min[1] + e.max[1]) / 2];
+    // the same item turned the same way, and centred close to where the old group stood
+    expect(mine[0].rotation).toBe(placed.comp.items.find((i) => i.groupId === placed.groupId)!.rotation);
+    expect(Math.hypot(mid(after)[0] - mid(before)[0], mid(after)[1] - mid(before)[1])).toBeLessThan(200);
+    expect(r.comp.items.length).toBe(c.items.length + 1);
+  });
+});

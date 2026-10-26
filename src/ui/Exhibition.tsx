@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { REFERENCE_RULES, SIDES, SIDE_LABEL, addServicePoint, changedModules, unconfirmed } from '../core/booth';
+import { RULE_PRESETS, SIDES, SIDE_LABEL, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
 import { moduleTag } from '../core/sheet';
 import { TEMPLATES } from '../core/templates';
 import { VERIFICATION, VERIFICATION_RANK, type BoothValue, type ServicePoint, type Verification } from '../core/schema';
@@ -70,6 +70,7 @@ export function BoothPanel() {
   const open = unconfirmed(b);
   const selectUnit = (id?: string) => { if (!id) return; const ids = comp.items.filter((i) => i.groupId === id || i.id === id).map((i) => i.id); if (ids.length) st.selectItems(ids); };
   const exhibitions = saved.filter((c) => c.kind === 'exhibition');
+  const changed = changedModules(comp, saved);
   return (
     <div className="inspector">
       <div className="insp-head"><div className="insp-kicker">Exhibition</div><h2 className="insp-title">{comp.name}</h2>
@@ -102,8 +103,13 @@ export function BoothPanel() {
           <ValueRow label="Turning circle" v={rules.turning} step={5} onChange={(v) => st.setBooth({ rules: { ...rules, turning: v } })} />
           <ValueRow label="Approach depth" v={rules.approach} step={10} onChange={(v) => st.setBooth({ rules: { ...rules, approach: v } })} />
           <ValueRow label="Headroom" v={rules.headroom} step={10} onChange={(v) => st.setBooth({ rules: { ...rules, headroom: v } })} />
-          <p className="note">Defaults are reference values from the 2010 ADA Standards, marked Estimated until checked against the document. The venue’s own rules replace them; hover a row for its reference.</p>
-          <button className="ghost wide" onClick={() => st.setBooth({ rules: { ...REFERENCE_RULES } })}>Reset to reference values</button>
+          <label className="num-row"><span>Start from</span>
+            <select value={rulePresetOf(rules) ?? ''} onChange={(e) => { const p = RULE_PRESETS.find((x) => x.id === e.target.value); if (p) st.setBooth({ rules: { ...p.rules } }); }} aria-label="Rule set">
+              {!rulePresetOf(rules) && <option value="">Venue rules (edited)</option>}
+              {RULE_PRESETS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+          </label>
+          <p className="note">Rule sets are starting points, marked Estimated until checked against the standard; hover a row for its reference. The venue manual wins: type its figures in and they become Project-specific.</p>
         </Section>
         <Section title="Service points" summary={`${b.services.length}`}>
           {a.loads.map((l) => (
@@ -130,6 +136,17 @@ export function BoothPanel() {
           </div>
           <p className="note">Each module is fed from the nearest point of the right kind; runs are plan distances along the floor from the module’s centre, without rise or slack. Loads sum stated figures only.</p>
         </Section>
+        {changed.size > 0 && (
+          <Section title="Edited since placed" summary={`${changed.size}`}>
+            {comp.groups.filter((g) => changed.has(g.id)).map((g) => (
+              <div key={g.id} className="refresh-row">
+                <span><b>{g.name}</b><span className="muted small"> · {changed.get(g.id)}</span></span>
+                <button className="ghost" onClick={() => st.refreshPlaced(g.id)}>Refresh</button>
+              </div>
+            ))}
+            <p className="note">Refresh replaces the placed module with the saved version, at the same spot and turned the same way. Changes made to it here on the booth are replaced; undo brings them back.</p>
+          </Section>
+        )}
         <Section title="Modules" summary={`${a.units.length}`}>
           {a.units.map((u, k) => {
             const s = a.services.find((x) => x.unit === u.id)!, z = a.access.find((x) => x.unit === u.id)!;

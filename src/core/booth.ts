@@ -1,7 +1,7 @@
 import { extentOfShape, worldBoxes, type ShapeOf, type WorldBox } from './arrange';
 import { newComposition, uid, type Extent } from './compose';
 import { schedule } from './services';
-import type { Booth, BoothSide, BoothValue, Composition, Placement, ServicePoint, Vec3, Verification } from './schema';
+import type { AccessRules, Booth, BoothSide, BoothValue, Composition, Placement, ServicePoint, Vec3, Verification } from './schema';
 
 /**
  * The exhibition booth: its plot, the circulation and accessibility check, and the service points that feed the
@@ -26,6 +26,29 @@ export const REFERENCE_RULES = {
   approach: v(1220, 'estimated', 'Clear floor space depth in front of a demo, 48 in (ADA 2010, 305.3).'),
   headroom: v(2030, 'estimated', 'Parts lower than 80 in are obstacles (ADA 2010, 307.4).'),
 };
+
+/**
+ * Rule sets a booth can start from. Each value stays Estimated until it is checked against the standard and
+ * the venue's own manual, which wins; a value typed in afterwards becomes Project-specific.
+ */
+export const RULE_PRESETS: { id: string; name: string; rules: AccessRules }[] = [
+  { id: 'ada-2010', name: 'ADA 2010 (US reference)', rules: REFERENCE_RULES },
+  {
+    id: 'din-18040-1', name: 'DIN 18040-1 (Germany)',
+    rules: {
+      route: v(1200, 'estimated', 'Circulation route clear width 120 cm, with 150 × 150 cm movement areas along it (DIN 18040-1:2010-10), as summarised in secondary sources; check against the standard and the venue manual.'),
+      turning: v(1500, 'estimated', 'Movement area 150 × 150 cm for turning (DIN 18040-1:2010-10), from secondary sources; check against the standard.'),
+      approach: v(1500, 'estimated', 'Movement area 150 × 150 cm in front of counters and controls (DIN 18040-1:2010-10), from secondary sources; check against the standard.'),
+      headroom: v(2030, 'estimated', 'No figure from DIN 18040-1 is set here: this keeps the ADA reference (80 in). Take the venue manual’s figure.'),
+    },
+  },
+];
+
+/** the preset a booth's rules still match exactly, if any */
+export function rulePresetOf(rules: AccessRules): string | null {
+  const keys = ['route', 'turning', 'approach', 'headroom'] as const;
+  return RULE_PRESETS.find((p) => keys.every((k) => p.rules[k].value === rules[k].value && p.rules[k].status === rules[k].status))?.id ?? null;
+}
 
 export function defaultBooth(): Booth {
   return {
@@ -414,6 +437,29 @@ export function placeModule(target: Composition, src: Composition, shapeOf: Shap
   for (let k = 2; target.groups.some((g) => g.name === gname); k++) gname = `${base} ${k}`;
   const group = { id: gid, name: gname, source: { id: src.id, name: src.name, updatedAt: src.updatedAt, template } };
   return { comp: { ...target, items: [...target.items, ...items], groups: [...target.groups, group], updatedAt: new Date().toISOString() }, ids, groupId: gid };
+}
+
+/**
+ * Replace a placed module with the current version of the module it was placed from, at the same plan centre
+ * and turned the same way. The group keeps its id and name, so tags and document links still point at it;
+ * edits made to its items on the booth since it was placed are replaced by the source.
+ */
+export function refreshModule(target: Composition, groupId: string, src: Composition, shapeOf: ShapeOf): { comp: Composition; ids: string[] } | null {
+  const g = target.groups.find((x) => x.id === groupId);
+  const mine = target.items.filter((i) => i.groupId === groupId);
+  const e = planExtent(mine, shapeOf);
+  if (!g || !e || !src.items.length) return null;
+  const at: [number, number] = [(e.min[0] + e.max[0]) / 2, (e.min[1] + e.max[1]) / 2];
+  // how the module was turned when it was placed: an item against the same item in the source
+  const key = (i: Placement) => JSON.stringify(i.ref);
+  const pair = mine.map((m) => ({ m, s: src.items.find((x) => key(x) === key(m)) })).find((x) => x.s);
+  const rotation = pair ? ((((pair.m.rotation - pair.s!.rotation) % 360) + 360) % 360) : 0;
+  const rest: Composition = { ...target, items: target.items.filter((i) => i.groupId !== groupId), groups: target.groups.filter((x) => x.id !== groupId) };
+  const r = placeModule(rest, src, shapeOf, at, rotation, g.source?.template ?? false);
+  const placed = r.comp.groups.find((x) => x.id === r.groupId)!;
+  const groups = target.groups.map((x) => (x.id === groupId ? { ...placed, id: groupId, name: g.name } : x));
+  const items = r.comp.items.map((i) => (i.groupId === r.groupId ? { ...i, groupId } : i));
+  return { comp: { ...r.comp, items, groups }, ids: r.ids };
 }
 
 /** groups placed from a saved module that has been edited since */

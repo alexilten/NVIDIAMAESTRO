@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { placeOn, snapDelta, supportSurfaces } from '../core/arrange';
-import { freeSpot, newExhibition, placeModule, planExtent } from '../core/booth';
+import { freeSpot, newExhibition, placeModule, planExtent, refreshModule } from '../core/booth';
 import { sampleExhibition } from '../core/exhibitionSample';
 import { insertComposition, type Template } from '../core/templates';
 import { addItem, alignItems, distributeX, duplicateItems, expandToGroups, groupItems, moveItems, newComposition, nextSlot, removeItems, rotateItems, ungroup, updateItem } from '../core/compose';
@@ -9,6 +9,7 @@ import { boxSize, shapeBounds } from '../core/geometry/shape';
 import type { Booth, Composition, ItemRef, Placement, Vec3 } from '../core/schema';
 import { compStore, partsStore, docsStore, type DocIndex } from '../ingest/store';
 import type { IngestedPart } from '../ingest/types';
+import type { Look } from '../viewport/Studio';
 
 export type Workspace = 'discover' | 'compose' | 'exhibition' | 'present' | 'ingest';
 export type CameraPreset = 'perspective' | 'front' | 'rear' | 'side' | 'top' | 'iso';
@@ -17,6 +18,7 @@ const COMP_KEY = 'maestro.composition.v1';
 const EXPO_KEY = 'maestro.exhibition.v1';
 const keyOf = (c: Composition) => (c.kind === 'exhibition' ? EXPO_KEY : COMP_KEY);
 const FAV_KEY = 'maestro.favorites.v1';
+const LOOK_KEY = 'maestro.look.v1';
 
 function readLocal<T>(k: string, fallback: T): T {
   try { const raw = localStorage.getItem(k); return raw ? (JSON.parse(raw) as T) : fallback; } catch { return fallback; }
@@ -86,6 +88,8 @@ interface State {
   setBooth: (patch: Partial<Booth>) => void;
   placeModuleOnBooth: (src: Composition, template?: boolean) => void;
   loadSampleBooth: () => void;
+  /** replace a placed module with the current version of its saved source */
+  refreshPlaced: (groupId: string) => void;
   circulation: boolean;
 
   // present
@@ -95,6 +99,8 @@ interface State {
   patchComp: (patch: Partial<Pick<Composition, 'views' | 'docs' | 'name'>>) => void;
   /** rendered stills, kept in memory for this session only */
   stills: Still[];
+  presentLook: Look;
+  setLook: (l: Look) => void;
   setStills: (s: Still[]) => void;
 
   toast: string | null;
@@ -317,12 +323,25 @@ export const useStore = create<State>((set, get) => {
       set({ selection: r.ids });
       get().notify(spot ? `${src.name} placed on the booth.` : `${src.name} placed beside the booth: there is no free spot ${Math.round(comp.booth?.rules.route.value ?? 0)} mm clear of the others.`);
     },
+    refreshPlaced: (groupId) => {
+      const { comp, parts, savedComps } = get();
+      const g = comp.groups.find((x) => x.id === groupId);
+      const src = savedComps.find((s) => s.id === g?.source?.id);
+      if (!g || !src) { get().notify('The module this was placed from is no longer saved in this browser.'); return; }
+      const r = refreshModule(comp, groupId, src, (p) => resolveRef(p.ref, parts)?.shape ?? null);
+      if (!r) { get().notify('Nothing to refresh.'); return; }
+      commit(r.comp);
+      set({ selection: r.ids });
+      get().notify(`${g.name} now matches the saved ${src.name}. Undo puts the earlier version back.`);
+    },
     loadSampleBooth: () => { commit(sampleExhibition()); set({ selection: [] }); get().notify('Sample corner booth loaded. Its plot, limits and service points are placeholders.'); },
     circulation: true,
 
     presentKind: (k) => { const next = docFor(k); if (next) set({ comp: next, history: [], future: [], selection: [] }); },
     patchComp: (patch) => commit({ ...get().comp, ...patch, updatedAt: new Date().toISOString() }),
     stills: [],
+    presentLook: readLocal<Look>(LOOK_KEY, 'studio'),
+    setLook: (l) => { writeLocal(LOOK_KEY, l); set({ presentLook: l }); },
     setStills: (s) => set({ stills: s }),
 
     toast: null,
