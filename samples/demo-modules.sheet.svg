@@ -15,7 +15,17 @@
     .title{font-size:4.2px;font-weight:700}
     .small{font-size:2.6px}
     .tiny{font-size:2.1px;fill:#555}
-    .note{font-size:2.1px;fill:#555}</style>
+    .note{font-size:2.1px;fill:#555}
+    .wall{stroke:#111;stroke-width:.7;fill:none}
+    .open{stroke:#111;stroke-width:.25;stroke-dasharray:2 1.2;fill:none}
+    .aisle{fill:#f2f2f4;stroke:none}
+    .tight{fill:#f2a33a;fill-opacity:.55;stroke:none}
+    .zone{fill:none;stroke:#3b6400;stroke-width:.2;stroke-dasharray:1 .8}
+    .zone.bad{stroke:#d33;stroke-width:.35}
+    .svc{fill:#fff;stroke:#c77700;stroke-width:.3}
+    .svctext{font-size:2.1px;font-weight:600;fill:#a35f00}
+    .err{fill:#d33}
+    .warn{fill:#c77700}</style>
 <rect x="0" y="0" width="420" height="297" fill="#fff"/>
 <rect x="10" y="10" width="400" height="277" class="frame"/>
 <g id="plan">

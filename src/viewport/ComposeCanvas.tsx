@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { resolveRef } from '../core/library';
 import type { Placement, Vec3 } from '../core/schema';
 import { extentOf, useStore } from '../ui/store';
+import { BoothLayer } from './BoothLayer';
 import { Label } from './Label';
 import { MM, ShapeView, WORLD_ROTATION } from './ShapeView';
 import { Studio } from './Studio';
@@ -18,7 +19,7 @@ export function ComposeCanvas({ mode }: { mode: 'translate' | 'rotate' }) {
   const xray = useStore((s) => s.xray);
 
   const extents = useMemo(() => comp.items.map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[], [comp, parts]);
-  const span = extents.length ? Math.max(...extents.map((e) => e.max[0]), 2000) - Math.min(...extents.map((e) => e.min[0]), -2000) : 6000;
+  const span = comp.booth ? Math.max(comp.booth.width.value, comp.booth.depth.value) + 4000 : extents.length ? Math.max(...extents.map((e) => e.max[0]), 2000) - Math.min(...extents.map((e) => e.min[0]), -2000) : 6000;
 
   return (
     <div className="viewer">
@@ -27,12 +28,13 @@ export function ComposeCanvas({ mode }: { mode: 'translate' | 'rotate' }) {
         <Studio span={span * MM} shadows />
         <Grid position={[0, 0.0002, 0]} args={[60, 60]} cellSize={0.1} cellThickness={0.5} cellColor="#d9d9de" sectionSize={1} sectionThickness={1} sectionColor="#c3c3ca" fadeDistance={40} fadeStrength={1.2} infiniteGrid />
         <group rotation={WORLD_ROTATION} scale={MM}>
+          {comp.booth && <BoothLayer />}
           {comp.items.map((p) => <Item key={p.id} p={p} selected={selection.includes(p.id)} xray={xray} />)}
         </group>
         <Gizmo mode={mode} />
         <FrameAll />
       </Canvas>
-      {!comp.items.length && <div className="viewer-empty">Add products, kit parts or project parts from the library to start a module.</div>}
+      {!comp.items.length && <div className="viewer-empty">{comp.kind === 'exhibition' ? 'Place modules from the left, or load the sample booth.' : 'Add products, kit parts or project parts from the library to start a module.'}</div>}
     </div>
   );
 }
@@ -111,10 +113,12 @@ function FrameAll() {
   const comp = useStore((s) => s.comp);
   const parts = useStore((s) => s.parts);
   const nonce = useStore((s) => s.cameraNonce);
+  const preset = useStore((s) => s.camera);
   const id = comp.id;
   useEffect(() => {
     if (!c) return;
     const ex = comp.items.map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[];
+    if (comp.booth) ex.push({ min: [-comp.booth.width.value / 2, -comp.booth.depth.value / 2, 0], max: [comp.booth.width.value / 2, comp.booth.depth.value / 2, 2500] });
     if (!ex.length) { c.setLookAt(5, 4, 7, 0, 0.8, 0, true); return; }
     const min = [0, 1, 2].map((k) => Math.min(...ex.map((e) => e.min[k])));
     const max = [0, 1, 2].map((k) => Math.max(...ex.map((e) => e.max[k])));
@@ -123,9 +127,10 @@ function FrameAll() {
     const sphere = box.getBoundingSphere(new THREE.Sphere());
     const fov = ((c.camera as THREE.PerspectiveCamera).fov ?? 35) * (Math.PI / 180);
     const dist = Math.max(sphere.radius, 0.4) / Math.sin(fov / 2) * 1.35;
-    const dir = new THREE.Vector3(-0.55, 0.5, 1).normalize().multiplyScalar(dist);
+    // straight down for a plan (front at the bottom), otherwise a three-quarter view from the front left
+    const dir = (preset === 'top' ? new THREE.Vector3(0, 1, 0.0001) : new THREE.Vector3(-0.55, 0.5, 1)).normalize().multiplyScalar(preset === 'top' ? dist * 0.95 : dist);
     c.setLookAt(sphere.center.x + dir.x, sphere.center.y + dir.y, sphere.center.z + dir.z, sphere.center.x, sphere.center.y, sphere.center.z, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [c, id, nonce, comp.items.length === 0]);
+  }, [c, id, nonce, preset, comp.items.length === 0, comp.booth?.width.value, comp.booth?.depth.value]);
   return <CameraControls ref={setC} makeDefault smoothTime={0.3} maxDistance={300} />;
 }

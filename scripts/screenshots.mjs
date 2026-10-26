@@ -57,6 +57,24 @@ await sheet.goto(new URL('../samples/demo-modules.sheet.svg', import.meta.url).h
 await sheet.screenshot({ path: `${out}/17-elevation-sheet.png` });
 await sheet.close();
 console.log('saved 17-elevation-sheet');
+// Round 04: the exhibition workspace opens on the sample corner booth
+await page.locator('.segmented button', { hasText: 'Exhibition' }).click();
+await page.waitForSelector('.unit-row');
+await shot('18-exhibition-sample-booth');
+await page.locator('.chip', { hasText: 'Plan' }).click();
+await shot('19-exhibition-plan-circulation');
+// close both open sides: every module loses its approach
+for (const side of ['Front (−Y) open', 'Left (−X) open']) await page.locator('.check-row', { hasText: side }).locator('input').uncheck();
+await page.locator('.section', { hasText: 'Checks' }).first().scrollIntoViewIfNeeded();
+await shot('20-exhibition-closed-booth-checks');
+for (const side of ['Front (−Y) open', 'Left (−X) open']) await page.locator('.check-row', { hasText: side }).locator('input').check();
+await page.locator('button', { hasText: '+ Power + data' }).scrollIntoViewIfNeeded();
+await shot('21-exhibition-service-points');
+const plan = await browser.newPage({ viewport: { width: 1587, height: 1123 } });
+await plan.goto(new URL('../samples/sample-booth.plan.svg', import.meta.url).href);
+await plan.screenshot({ path: `${out}/22-booth-plan-sheet.png` });
+await plan.close();
+console.log('saved 22-booth-plan-sheet');
 await page.locator('.segmented button', { hasText: 'Import' }).click();
 await shot('08-import-intro');
 await page.locator('.logo').click(); await shot('09-about');
