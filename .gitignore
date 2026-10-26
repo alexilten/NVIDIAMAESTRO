@@ -1,0 +1,19 @@
+node_modules
+dist
+.DS_Store
+*.local
+
+# ── client-confidential material never enters this public repository ──────────
+# Source project files (Rhino models, fabrication decks, schedules, photos) stay in
+# authorised private storage. The Ingest workspace reads them in the browser only.
+private/
+*.3dm
+!samples/*.3dm
+*.3dmbak
+*.pdf
+*.dwg
+*.step
+*.stp
+*.fbx
+*.maestro-review.json
+screenshots-private/
