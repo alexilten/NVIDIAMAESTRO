@@ -3,7 +3,7 @@ import { SOURCE_BY_ID } from './catalog/sources';
 import { KIT, defaultParams, kitShape, resolveParams } from './geometry/kit';
 import { productShape } from './geometry/proxies';
 import { boxSize, shapeBounds, type Shape } from './geometry/shape';
-import { CATEGORY_LABEL, KIT_CATEGORY_LABEL, weakest, type Category, type ItemRef, type KitCategory, type ModelKind, type Placement, type Vec3, type Verification } from './schema';
+import { KIT_CATEGORY_LABEL, MODEL_KIND_LABEL, weakest, type Category, type ItemRef, type KitCategory, type ModelKind, type Placement, type Vec3, type Verification } from './schema';
 import type { IngestedPart } from '../ingest/types';
 import type { ExportItem } from '../export/rhino';
 
@@ -46,7 +46,7 @@ export function productEntries(): LibraryEntry[] {
     const lod = pa?.digitalAssets.length ? Math.max(...pa.digitalAssets.map((a) => a.lod)) : null;
     return {
       key: `product:${m.id}`, section: 'hardware' as const, ref: { kind: 'product' as const, id: m.id },
-      name: m.name, subtitle: `${fam.name} · ${m.manufacturer}`, group: CATEGORY_LABEL[fam.category as Category],
+      name: m.name, subtitle: `${MODEL_KIND_LABEL[m.kind]} · ${m.manufacturer}`, group: fam.name,
       manufacturer: m.manufacturer, dims, verification: m.kind === 'software-platform' ? 'verified' : verification, lod,
       tags: [...m.tags, fam.name, m.manufacturer, m.kind, ...m.industries], physical: !!pa, kind: m.kind, status: m.status,
     };

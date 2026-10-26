@@ -16,18 +16,24 @@ const pick = (text) => page.locator('.cat-item', { hasText: text }).first().clic
 await page.goto(url);
 await page.waitForSelector('.cat-item');
 await shot('01-discover-dgx-spark');
-await pick('GIGABYTE'); await shot('02-discover-gb200-rack');
+await pick('GIGABYTE GB200 NVL72 rack'); await shot('02-discover-gb200-rack');
 await pick('Jetson AGX Thor'); await shot('03-discover-thor-estimated');
 await page.fill('.search input', 'taller than 2m'); await shot('04-search-dimensions');
 await page.fill('.search input', '');
 await pick('Demo counter');
 await page.locator('.ctl', { hasText: 'Accessible' }).locator('input').fill('900');
 await shot('05-kit-counter-accessible');
-await pick('Vera Rubin'); await shot('06-discover-reference-architecture');
+await pick(/^NVIDIA Vera Rubin NVL72Reference/); await shot('06-discover-reference-architecture');
+// Round 02 line-up
+await page.fill('.search input', 'DGX Station'); await pick('GIGABYTE W775'); await shot('10-discover-dgx-station-gigabyte');
+await page.fill('.search input', 'spectrum'); await pick('SN6800-LD'); await shot('11-discover-sn6800-photonics');
+await page.fill('.search input', 'RTX PRO 6000 Blackwell Workstation Edition'); await pick(/^NVIDIA RTX PRO 6000 Blackwell Workstation Edition/); await shot('12-discover-rtx-pro-6000-ws');
+await page.fill('.search input', 'DGX Vera Rubin'); await pick('DGX Vera Rubin NVL72 rack'); await shot('13-discover-placeholder-rack');
+await page.fill('.search input', '');
 
 // compose a module
 await page.locator('.segmented button', { hasText: 'Compose' }).click();
-for (const n of ['Demo counter', 'DGX Spark', 'Hardware light table', 'DGX B200']) await page.locator('.panel.left .cat-item', { hasText: n }).first().click();
+for (const n of ['Demo counter', 'DGX Spark', 'Hardware light table', 'DGX B200', 'MSI XpertStation', 'SN6600 Ethernet']) await page.locator('.panel.left .cat-item', { hasText: n }).first().click();
 await page.locator('.chip', { hasText: 'Frame all' }).click();
 await page.locator('.tree-item').nth(1).click();
 await shot('07-compose-module');

@@ -51,6 +51,43 @@ function feet(w: number, d: number, foot: number): ShapePart[] {
   return [[-1, -1], [1, -1], [-1, 1], [1, 1]].map(([i, j], k) => cbox(`FOOT_${k + 1}`, 'black', i * fx, j * fy, 0, s, s, foot));
 }
 
+/** a deskside tower: plinth, body, front intake field, rear I/O band */
+const tower: Gen = (w, d, h) => {
+  const plinth = Math.min(12, h * 0.025);
+  return [
+    cbox('PLINTH', 'black', 0, 0, 0, w * 0.96, d * 0.96, plinth),
+    cbox('BODY', 'graphite', 0, 0.5, plinth, w, d - 1, h - plinth),
+    cbox('FRONT_INTAKE', 'grille', 0, -d / 2 + 0.5, plinth + h * 0.1, w * 0.8, 1, h * 0.72),
+    cbox('REAR_IO', 'ports', 0, d / 2 - 0.5, plinth + h * 0.55, w * 0.7, 1, h * 0.3),
+  ];
+};
+
+/** a rack-mount chassis between 19-inch rack ears, with a front port or intake field */
+const rackChassis = (field: string, ears: boolean): Gen => (w, d, h) => {
+  const ear = ears ? 9.65 : 0;
+  const body = w - 2 * ear;
+  const parts = [
+    cbox('CHASSIS', 'chassis', 0, 15, 0, body, d - 30, h),
+    cbox('FACEPLATE', 'graphite', 0, -d / 2 + 15, 0, body, 30, h),
+    cbox('FRONT_FIELD', field, 0, -d / 2 + 0.5, h * 0.15, body * 0.88, 1, h * 0.7),
+  ];
+  if (ears) parts.push(cbox('EAR_L', 'chassis', -w / 2 + ear / 2, -d / 2 + 15, 0, ear, 30, h), cbox('EAR_R', 'chassis', w / 2 - ear / 2, -d / 2 + 15, 0, ear, 30, h));
+  return parts;
+};
+
+/** a graphics or network board shown upright as installed: bracket at −X, PCIe edge along the bottom */
+const board = (shroud: string, intake: string, fans: number): Gen => (w, d, h) => {
+  const edge = Math.min(14, h * 0.15);
+  const parts = [
+    cbox('SHROUD', shroud, 8, 0, edge, w - 16, d, h - edge),
+    cbox('BRACKET', 'chassis', -w / 2 + 4, 0, 0, 8, d, h),
+    cbox('PCIE_EDGE', 'copper', -w * 0.05, 0, 0, w * 0.35, 2, edge),
+  ];
+  const fan = (h - edge) * 0.6;
+  for (let k = 0; k < fans; k++) parts.push(cbox(`INTAKE_${k + 1}`, intake, w * (fans === 1 ? 0.28 : k === 0 ? -0.15 : 0.25), -d / 2 + 0.5, edge + (h - edge) * 0.2, fan, 1, fan));
+  return parts;
+};
+
 const GENERATORS: Record<string, Gen> = {
   'nv-dgx-spark': desktop('champagne'),
   'nv-agx-orin-devkit': (w, d, h) => {
@@ -94,10 +131,18 @@ const GENERATORS: Record<string, Gen> = {
     }
     return parts;
   },
-  'nv-rtx-pro-6000-maxq': (w, d, h) => [
-    cbox('SHROUD', 'graphite', 8, 0, 14, w - 16, d, h - 14),
-    cbox('INTAKE', 'black', w * 0.28, -d / 2 + 0.5, h * 0.22, h * 0.6, 1, h * 0.6),
-    cbox('BRACKET', 'chassis', -w / 2 + 4, 0, 0, 8, d, h),
-    cbox('PCIE_EDGE', 'copper', -w * 0.05, 0, 0, w * 0.35, 2, 14),
-  ],
+  'nv-rtx-pro-6000-maxq': board('graphite', 'black', 1),
+  'nv-rtx-pro-6000-ws': board('graphite', 'black', 2),
+  'nv-rtx-pro-5000': board('graphite', 'black', 1),
+  'nv-connectx-9': board('grille', 'ports', 0),
+  'dell-pro-max-gb300': tower,
+  'gb-w775-v10': tower,
+  'msi-ws300': tower,
+  'smc-ars-511gd': rackChassis('grille', false),
+  'nv-sn6600': rackChassis('ports', true),
+  'dell-rtx-pro-server': rackChassis('grille', true),
+  'hpe-rtx-pro-server': rackChassis('grille', false),
+  'nv-sn6600-ld': rackChassis('ports', false),
+  'nv-sn6810-ld': rackChassis('ports', false),
+  'nv-sn6800-ld': rackChassis('ports', false),
 };

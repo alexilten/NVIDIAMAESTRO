@@ -1,0 +1,271 @@
+{
+  "schema": "maestro.composition",
+  "version": 1,
+  "id": "comp-mvpm2iyy-imh6i",
+  "name": "DGX Station, RTX PRO and Spectrum-X line-up (sample)",
+  "kind": "module",
+  "items": [
+    {
+      "id": "it-mvpm2iyy-jhbd8",
+      "ref": {
+        "kind": "product",
+        "id": "dell-pro-max-gb300"
+      },
+      "name": "Dell Pro Max with GB300",
+      "position": [
+        115.8,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 231.6,
+        "depth": 610.5,
+        "height": 569,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyy-kbcvd",
+      "ref": {
+        "kind": "product",
+        "id": "gb-w775-v10"
+      },
+      "name": "GIGABYTE W775-V10-L01",
+      "position": [
+        654.1,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 245,
+        "depth": 531,
+        "height": 500.4,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyy-li9k7",
+      "ref": {
+        "kind": "product",
+        "id": "msi-ws300"
+      },
+      "name": "MSI XpertStation WS300",
+      "position": [
+        1199.4499999999998,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 245.7,
+        "depth": 570.4,
+        "height": 529,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyy-mrwb6",
+      "ref": {
+        "kind": "product",
+        "id": "smc-ars-511gd"
+      },
+      "name": "Supermicro Super AI Station ARS-511GD-NB-LCC",
+      "position": [
+        1849.6499999999999,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 454.7,
+        "depth": 701,
+        "height": 218.4,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyz-ngfi4",
+      "ref": {
+        "kind": "product",
+        "id": "nv-rtx-pro-6000-ws"
+      },
+      "name": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "position": [
+        2529.4,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 304.79999999999995,
+        "depth": 40.64,
+        "height": 137.16,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyz-ohtn8",
+      "ref": {
+        "kind": "product",
+        "id": "nv-rtx-pro-5000"
+      },
+      "name": "NVIDIA RTX PRO 5000 Blackwell",
+      "position": [
+        3115.15,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 266.7,
+        "depth": 40.64,
+        "height": 111.76,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyz-pqmv9",
+      "ref": {
+        "kind": "product",
+        "id": "nv-connectx-9"
+      },
+      "name": "NVIDIA ConnectX-9 SuperNIC (C9180, PCIe)",
+      "position": [
+        3632.7,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 168.4,
+        "depth": 20.32,
+        "height": 68.5,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyz-qr1d3",
+      "ref": {
+        "kind": "product",
+        "id": "dell-rtx-pro-server"
+      },
+      "name": "Dell PowerEdge R7725",
+      "position": [
+        4257.9,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 482,
+        "depth": 802.4,
+        "height": 86.8,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyz-rj60c",
+      "ref": {
+        "kind": "product",
+        "id": "hpe-rtx-pro-server"
+      },
+      "name": "HPE ProLiant Compute DL380a Gen12",
+      "position": [
+        5022.799999999999,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 447.8,
+        "depth": 802.6,
+        "height": 174.8,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iyz-s6ejq",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6600"
+      },
+      "name": "NVIDIA Spectrum-X SN6600 Ethernet switch",
+      "position": [
+        5765.7,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 767,
+        "height": 133.35,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iz0-tt1zv",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6600-ld"
+      },
+      "name": "NVIDIA Spectrum-X SN6600-LD Ethernet switch",
+      "position": [
+        6503.7,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 900,
+        "height": 88,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iz0-uayvn",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6810-ld"
+      },
+      "name": "NVIDIA Spectrum-X SN6810-LD Ethernet Photonics switch",
+      "position": [
+        7241.7,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 900,
+        "height": 87,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpm2iz0-vkumq",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6800-ld"
+      },
+      "name": "NVIDIA Spectrum-X SN6800-LD Ethernet Photonics switch",
+      "position": [
+        7979.7,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 900,
+        "height": 220,
+        "version": 1
+      }
+    }
+  ],
+  "groups": [],
+  "updatedAt": "2026-10-26T18:49:46.380Z"
+}

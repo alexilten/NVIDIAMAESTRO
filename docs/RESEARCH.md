@@ -68,6 +68,38 @@ Millimetres, Z up, item front facing −Y, origin at the centre of the footprint
 
 Jetson Orin Nano Super is listed with placeholder dimensions until a primary source is read.
 
+## Public sources added in Round 02
+
+Round 02 catalogs the current NVIDIA exhibition line-up. Values were read from the documents below on 2026-10-26. Partner systems are separate physical products from the NVIDIA platform they implement, so each has its own record and source.
+
+| Id | Source | Used for |
+|---|---|---|
+| nv-sn6000-hw | NVIDIA, Spectrum-6 SN6000 Hardware User Manual, Specifications | SN6600, SN6600-LD, SN6810-LD, SN6800-LD: dimensions, weight, ports, power, cooling, rack type. The SN6600's 3U is derived from its 133.35 mm height (Estimated) |
+| nv-silicon-photonics | NVIDIA, Silicon Photonics Networking | Spectrum-X Ethernet Photonics bandwidth and SerDes |
+| nv-cx9-hw | NVIDIA, ConnectX-9 SuperNIC User Manual, Specifications | C9180 half-height card size and ports (thickness Estimated: one slot pitch) |
+| nv-bf4-ds | NVIDIA, BlueField-4 DPU datasheet page | Throughput only; the PDF could not be read |
+| nv-vr-pod-blog | NVIDIA Technical Blog, Vera Rubin POD (16 Mar 2026) | Tray counts and composition of Vera Rubin NVL72, Groq 3 LPX, Vera CPU, BlueField-4 STX and Spectrum-6 SPX racks; NVL576 composition; NVL72 rack mass ("roughly 4,000 lbs", Estimated) |
+| nv-cmx | NVIDIA, CMX Context Memory Storage Platform | BlueField-4 STX storage processor and CMX partners |
+| nv-rtx-pro-6000-ws-ds | NVIDIA, RTX PRO 6000 Blackwell Workstation Edition datasheet (3519208) | 12 in × 5.4 in, dual slot, 600 W |
+| nv-rtx-pro-5000-ds | NVIDIA, RTX PRO 5000 Blackwell datasheet (3658700) | 10.5 in × 4.4 in, dual slot, 300 W |
+| nv-rtx-pro-server | NVIDIA, RTX PRO Servers | GPU configurations and form factors |
+| nv-arc-family | NVIDIA, Aerial RAN Computer platform | ARC-Pro form factor (MGX 2U Short) and partners |
+| dell-pro-max-gb300 | Dell, Dell Pro Max with GB300 (FCT6263) | Dimensions, weight, power cord |
+| gb-w775 | GIGABYTE, W775-V10-L01 | Dimensions, weight, power, cooling, I/O |
+| msi-ws300 | MSI, DGX Station landing page | XpertStation WS300 dimensions, power, networking |
+| smc-ars-511gd | Supermicro, ARS-511GD-NB-LCC datasheet | Dimensions (listed in the 5U rack orientation), weight, power, cooling |
+| dell-r7725-ism | Dell, PowerEdge R7725 Installation and Service Manual, Chassis dimensions | R7725 width, height and depth (overall depth derived, Estimated) |
+| hpe-dl380a-qs, sr-dl380a-gen12 | HPE, DL380a Gen12 QuickSpecs; StorageReview review | 4U, up to 8 RTX PRO 6000; dimensions from the review (Estimated) |
+| qct-egn77c | QCT, QuantaEdge EGN77C-2U press release | 2U2N ARC-Pro server |
+| hp-zgx-fury | HP, ZGX Fury AI Station page | Mounting, power and ports. HP's QuickSpecs and datasheet refuse automated reading, so dimensions remain Placeholder |
+
+### Gaps after Round 02
+
+- **No mechanical data published yet:** Vera Rubin NVL72 rack and trays, Vera Rubin Ultra NVL576 trays, Vera CPU rack and tray, Groq 3 LPX rack and tray, BlueField-4 STX rack and storage processor, Spectrum-6 SPX rack, Spectrum-X Ethernet Photonics, BlueField-4 DPU. These are recorded with their stated facts and draw nothing.
+- **Partner models chosen by best judgement:** the Dell RTX PRO Server is recorded as the PowerEdge R7725 (dimensions from Dell's service manual), the HPE one as the ProLiant DL380a Gen12 (dimensions from a review, Estimated, until HPE QuickSpecs are read) and the QCT Aerial RAN Computer as the QuantaEdge EGN77C-2U (no dimensions published). Each carries an Estimated "role" spec until confirmed. The Quanta and Supermicro CMX systems have no published model numbers.
+- **HP ZGX Fury G1n** dimensions need HP's QuickSpecs read by hand.
+- The 19-inch MGX switches (the "-LD" models) have no stated rack-unit height and are left without one.
+
 ## Audit of Stagework and ManicAI
 
 Both are Alex's earlier generative design tools with the same shape: a Vite + React + R3F single-page app, glass panels over a full-screen 3D view, native Rhino export through rhino3dm, vitest, and GitHub Pages deployment.
@@ -89,7 +121,7 @@ The first project model is large (tens of thousands of objects, many blocks, aut
 
 | Round | Focus |
 |---|---|
-| 02 | Catalog breadth (more DGX, HGX, RTX and Jetson SKUs, partner robots), photographs and LOD 2 assets where licensing allows, clearances and power and data needs on every product |
+| 02 | Done: the current exhibition line-up (see above). Still open from the original plan: HGX and more Jetson SKUs, partner robots, LOD 2 assets where licensing allows, clearances and power and data needs on every product |
 | 03 | Compose: snapping to faces and edges, products placed on kit surfaces, cable and power schedule, module templates, PDF sheet with elevations |
 | 04 | Exhibition: floor plans, aisles and circulation checks, accessibility, services, module instances across a booth |
 | 05 | Import at scale: batch extraction, revision diffs between two versions of a source model, shared private library for a team |

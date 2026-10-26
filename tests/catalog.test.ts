@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { SOURCE_BY_ID } from '../src/core/catalog/sources';
-import { MODELS, PHYSICAL, PHYSICAL_BY_ID } from '../src/core/catalog/products';
+import { FAMILY_BY_ID, MODELS, MODEL_BY_ID, PHYSICAL, PHYSICAL_BY_ID } from '../src/core/catalog/products';
 import { boxSize, shapeBounds } from '../src/core/geometry/shape';
 import { hasEnvelope, productShape } from '../src/core/geometry/proxies';
 import { KIT, defaultParams, kitShape, resolveParams, ACCESSIBLE_HEIGHT } from '../src/core/geometry/kit';
@@ -39,6 +39,38 @@ describe('hardware catalog', () => {
       const want = [pa.dims.width.value!, pa.dims.depth.value!, pa.dims.height.value!];
       size.forEach((v, i) => expect(v, `${m.id} axis ${i}`).toBeCloseTo(want[i], 3));
     }
+  });
+
+  it('keeps ids unique and every cross-reference resolvable', () => {
+    expect(new Set(MODELS.map((m) => m.id)).size).toBe(MODELS.length);
+    expect(new Set(PHYSICAL.map((p) => p.id)).size).toBe(PHYSICAL.length);
+    for (const m of MODELS) {
+      expect(FAMILY_BY_ID.has(m.familyId), `${m.id} family`).toBe(true);
+      for (const r of m.related ?? []) expect(MODEL_BY_ID.has(r), `${m.id} → related ${r}`).toBe(true);
+      for (const r of m.implementations ?? []) {
+        const impl = MODEL_BY_ID.get(r);
+        expect(impl, `${m.id} → implementation ${r}`).toBeTruthy();
+        expect(impl!.kind, `${r} must be a physical product`).not.toMatch(/reference-architecture|software-platform/);
+      }
+      if (m.physicalAssetId) expect(PHYSICAL_BY_ID.get(m.physicalAssetId)?.modelId, m.id).toBe(m.id);
+      if (m.kind === 'reference-architecture' || m.kind === 'software-platform') expect(m.physicalAssetId, `${m.id} is not one object`).toBeUndefined();
+    }
+  });
+
+  it('records the Spectrum-6 switches exactly as the hardware manual states them', () => {
+    const want: Record<string, [number, number, number, number]> = {
+      'nv-sn6600': [438, 767, 133.35, 52], 'nv-sn6600-ld': [438, 900, 88, 33], 'nv-sn6810-ld': [438, 900, 87, 32.5], 'nv-sn6800-ld': [438, 900, 220, 95],
+    };
+    for (const [id, [w, d, h, kg]] of Object.entries(want)) {
+      const pa = PHYSICAL_BY_ID.get(`pa-${id}`)!;
+      expect([pa.dims.width.value, pa.dims.depth.value, pa.dims.height.value, pa.weightKg?.value]).toEqual([w, d, h, kg]);
+      expect(pa.dims.width.sourceId).toBe('nv-sn6000-hw');
+    }
+  });
+
+  it('draws nothing for a product whose dimensions are not published', () => {
+    // announced racks and trays without a published mechanical spec, and partner systems without one, stay placeholders
+    for (const id of ['qct-arc-pro-2u', 'qct-vera-cmx', 'hp-zgx-fury-g1n', 'nv-dgx-vr-nvl72', 'nv-groq3-lpx-rack', 'nv-vera-cpu-rack', 'nv-bf4-stx-rack', 'nv-vr-nvl72-compute-tray']) expect(productShape(id), id).toBeNull();
   });
 
   it('puts every model in the library with its weakest dimension status', () => {
