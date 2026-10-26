@@ -1,12 +1,12 @@
 {
   "schema": "maestro.composition",
   "version": 1,
-  "id": "comp-mvpkimjr-bm0ss",
+  "id": "comp-mvpltxtt-b1cbe",
   "name": "NVIDIA hardware line-up (sample)",
   "kind": "module",
   "items": [
     {
-      "id": "it-mvpkimjr-c8tv3",
+      "id": "it-mvpltxtt-crg3e",
       "ref": {
         "kind": "product",
         "id": "gb-gb200-nvl72-rack"
@@ -26,7 +26,7 @@
       }
     },
     {
-      "id": "it-mvpkimjr-dfch6",
+      "id": "it-mvpltxtu-dy3ft",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-b200"
@@ -46,7 +46,7 @@
       }
     },
     {
-      "id": "it-mvpkimjr-e8zr4",
+      "id": "it-mvpltxtu-e36ak",
       "ref": {
         "kind": "product",
         "id": "nv-rtx-pro-6000-maxq"
@@ -66,7 +66,7 @@
       }
     },
     {
-      "id": "it-mvpkimjr-f0zuc",
+      "id": "it-mvpltxtu-f7rb6",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -86,7 +86,7 @@
       }
     },
     {
-      "id": "it-mvpkimjs-gcwq4",
+      "id": "it-mvpltxtv-g8dii",
       "ref": {
         "kind": "product",
         "id": "nv-agx-orin-devkit"
@@ -106,7 +106,7 @@
       }
     },
     {
-      "id": "it-mvpkimjs-hkhzx",
+      "id": "it-mvpltxtv-hgmza",
       "ref": {
         "kind": "product",
         "id": "nv-agx-thor-devkit"
@@ -127,5 +127,5 @@
     }
   ],
   "groups": [],
-  "updatedAt": "2026-10-26T18:06:18.280Z"
+  "updatedAt": "2026-10-26T18:43:05.731Z"
 }

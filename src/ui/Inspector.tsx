@@ -91,7 +91,7 @@ function ProductDetail({ id }: { id: string }) {
           {pa.rackUnits && <KV k="Rack units"><SpecValue s={pa.rackUnits} unit="U" /></KV>}
           {[pa.dims.width, pa.dims.depth, pa.dims.height].filter((d) => d.note).map((d, i) => <p key={i} className="note">{d.note}</p>)}
           {pa.interfaces.length > 0 && <div className="sub-label">Interfaces</div>}
-          {pa.interfaces.map((f, i) => <KV key={i} k={f.side}>{f.name}<i className={`dot ${f.status}`} /></KV>)}
+          {pa.interfaces.map((f, i) => <KV key={i} k={f.side}>{f.name}<i className={`dot ${f.status}`} title={f.note} /></KV>)}
         </Section>
       )}
       {m.specs.length > 0 && (

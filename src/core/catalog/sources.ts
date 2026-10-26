@@ -97,6 +97,22 @@ export const SOURCES: SpecSource[] = [
     accessed: '2026-10-26',
     confidential: false,
   },
+  // Round 02: the current exhibition line-up
+  { id: 'nv-sn6000-hw', kind: 'manufacturer-doc', title: 'NVIDIA Spectrum-6 SN6000 Switch Systems Hardware User Manual — Specifications', publisher: 'NVIDIA', url: 'https://networking-docs.nvidia.com/sn6000hw/specifications', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-silicon-photonics', kind: 'manufacturer-page', title: 'Silicon Photonics Networking for Agentic AI (Spectrum-X and Quantum-X Photonics)', publisher: 'NVIDIA', url: 'https://www.nvidia.com/en-us/networking/products/silicon-photonics/', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-cx9-hw', kind: 'manufacturer-doc', title: 'NVIDIA ConnectX-9 SuperNIC User Manual — Specifications', publisher: 'NVIDIA', url: 'https://networking-docs.nvidia.com/connectx9hw/specifications', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-bf4-ds', kind: 'manufacturer-page', title: 'NVIDIA BlueField-4 DPU datasheet (landing page; the PDF could not be read)', publisher: 'NVIDIA', url: 'https://resources.nvidia.com/en-us-accelerated-networking-resource-library/bluefield-4-dpu-datasheet', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-vr-pod-blog', kind: 'manufacturer-page', title: 'NVIDIA Vera Rubin POD: Seven Chips, Five Rack-Scale Systems, One AI Supercomputer (NVIDIA Technical Blog, 16 Mar 2026)', publisher: 'NVIDIA', url: 'https://developer.nvidia.com/blog/nvidia-vera-rubin-pod-seven-chips-five-rack-scale-systems-one-ai-supercomputer/', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-cmx', kind: 'manufacturer-page', title: 'NVIDIA CMX Context Memory Storage Platform', publisher: 'NVIDIA', url: 'https://www.nvidia.com/en-us/data-center/ai-storage/cmx/', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-rtx-pro-6000-ws-ds', kind: 'manufacturer-doc', title: 'NVIDIA RTX PRO 6000 Blackwell Workstation Edition datasheet', publisher: 'NVIDIA', url: 'https://www.nvidia.com/content/dam/en-zz/Solutions/design-visualization/quadro-product-literature/workstation-datasheet-blackwell-rtx-pro6000-x-nvidia-us-3519208-web.pdf', reference: '3519208 Mar25', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-rtx-pro-5000-ds', kind: 'manufacturer-doc', title: 'NVIDIA RTX PRO 5000 Blackwell datasheet', publisher: 'NVIDIA', url: 'https://www.nvidia.com/content/dam/en-zz/Solutions/design-visualization/quadro-product-literature/workstation-datasheet-blackwell-rtx-pro-5000-gtc25-spring-nvidia-3658700.pdf', reference: '3658700', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-rtx-pro-server', kind: 'manufacturer-page', title: 'RTX PRO Servers for Building Enterprise AI Factories', publisher: 'NVIDIA', url: 'https://www.nvidia.com/en-us/data-center/products/rtx-pro-server/', accessed: '2026-10-26', confidential: false },
+  { id: 'nv-arc-family', kind: 'manufacturer-page', title: 'Aerial RAN Computer (ARC) Platform', publisher: 'NVIDIA', url: 'https://www.nvidia.com/en-us/industries/telecommunications/ai-ran/arc-family/', accessed: '2026-10-26', confidential: false },
+  { id: 'dell-pro-max-gb300', kind: 'partner-page', title: 'Dell Pro Max with GB300 (FCT6263) — product page', publisher: 'Dell Technologies', url: 'https://www.dell.com/en-ca/shop/cty/pdp/spd/dell-pro-max-fct6263-desktop', accessed: '2026-10-26', confidential: false },
+  { id: 'gb-w775', kind: 'partner-page', title: 'GIGABYTE W775-V10-L01 Workstation — specifications', publisher: 'GIGABYTE', url: 'https://www.gigabyte.com/Enterprise/Tower-Server/W775-V10-L01', accessed: '2026-10-26', confidential: false },
+  { id: 'msi-ws300', kind: 'partner-page', title: 'MSI NVIDIA DGX Station landing page (XpertStation WS300)', publisher: 'MSI', url: 'https://www.msi.com/Landing/NVIDIA-DGX-STATION', accessed: '2026-10-26', confidential: false },
+  { id: 'smc-ars-511gd', kind: 'partner-page', title: 'Supermicro GPU SuperServer ARS-511GD-NB-LCC (Super AI Station) — datasheet page', publisher: 'Supermicro', url: 'https://www.supermicro.com/en/products/system/datasheet/ars-511gd-nb-lcc', accessed: '2026-10-26', confidential: false },
+  { id: 'hp-zgx-fury', kind: 'partner-page', title: 'HP ZGX Fury AI Station (product page; HP QuickSpecs could not be read)', publisher: 'HP', url: 'https://www.hp.com/us-en/workstations/ai-stations/zgx-fury-ai-station.html', accessed: '2026-10-26', confidential: false },
 ];
 
 export const SOURCE_BY_ID = new Map(SOURCES.map((s) => [s.id, s]));

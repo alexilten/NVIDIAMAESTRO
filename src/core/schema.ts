@@ -88,11 +88,13 @@ export interface ProductFamily {
   description: string;
 }
 
-export type ModelKind = 'system' | 'rack' | 'board' | 'devkit' | 'module' | 'reference-architecture' | 'software-platform';
+export type ModelKind = 'system' | 'rack' | 'tray' | 'board' | 'component' | 'devkit' | 'module' | 'reference-architecture' | 'software-platform';
 export const MODEL_KIND_LABEL: Record<ModelKind, string> = {
   system: 'System',
   rack: 'Rack-scale system',
+  tray: 'Rack tray',
   board: 'Board / card',
+  component: 'Chip or component',
   devkit: 'Developer kit',
   module: 'Production module',
   'reference-architecture': 'Reference architecture',
@@ -128,6 +130,7 @@ export interface Interface {
   side: 'front' | 'rear' | 'left' | 'right' | 'top' | 'bottom';
   status: Verification;
   sourceId?: string;
+  note?: string;
 }
 
 export interface PhysicalAsset {

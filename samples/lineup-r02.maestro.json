@@ -1,0 +1,231 @@
+{
+  "schema": "maestro.composition",
+  "version": 1,
+  "id": "comp-mvpltxtv-izmu0",
+  "name": "DGX Station, RTX PRO and Spectrum-X line-up (sample)",
+  "kind": "module",
+  "items": [
+    {
+      "id": "it-mvpltxtw-jv1tf",
+      "ref": {
+        "kind": "product",
+        "id": "dell-pro-max-gb300"
+      },
+      "name": "Dell Pro Max with GB300",
+      "position": [
+        115.8,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 231.6,
+        "depth": 610.5,
+        "height": 569,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxtw-kgjbu",
+      "ref": {
+        "kind": "product",
+        "id": "gb-w775-v10"
+      },
+      "name": "GIGABYTE W775-V10-L01",
+      "position": [
+        654.1,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 245,
+        "depth": 531,
+        "height": 500.4,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxtw-lqy83",
+      "ref": {
+        "kind": "product",
+        "id": "msi-ws300"
+      },
+      "name": "MSI XpertStation WS300",
+      "position": [
+        1199.4499999999998,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 245.7,
+        "depth": 570.4,
+        "height": 529,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxtw-mmb72",
+      "ref": {
+        "kind": "product",
+        "id": "smc-ars-511gd"
+      },
+      "name": "Supermicro Super AI Station ARS-511GD-NB-LCC",
+      "position": [
+        1849.6499999999999,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 454.7,
+        "depth": 701,
+        "height": 218.4,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxtx-nj7ds",
+      "ref": {
+        "kind": "product",
+        "id": "nv-rtx-pro-6000-ws"
+      },
+      "name": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+      "position": [
+        2529.4,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 304.79999999999995,
+        "depth": 40.64,
+        "height": 137.16,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxtx-obiff",
+      "ref": {
+        "kind": "product",
+        "id": "nv-rtx-pro-5000"
+      },
+      "name": "NVIDIA RTX PRO 5000 Blackwell",
+      "position": [
+        3115.15,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 266.7,
+        "depth": 40.64,
+        "height": 111.76,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxtx-pmbs4",
+      "ref": {
+        "kind": "product",
+        "id": "nv-connectx-9"
+      },
+      "name": "NVIDIA ConnectX-9 SuperNIC (C9180, PCIe)",
+      "position": [
+        3632.7,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 168.4,
+        "depth": 20.32,
+        "height": 68.5,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxtx-q7vm6",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6600"
+      },
+      "name": "NVIDIA Spectrum-X SN6600 Ethernet switch",
+      "position": [
+        4235.9,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 767,
+        "height": 133.35,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxty-rjl13",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6600-ld"
+      },
+      "name": "NVIDIA Spectrum-X SN6600-LD Ethernet switch",
+      "position": [
+        4973.9,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 900,
+        "height": 88,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxty-sqjfk",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6810-ld"
+      },
+      "name": "NVIDIA Spectrum-X SN6810-LD Ethernet Photonics switch",
+      "position": [
+        5711.9,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 900,
+        "height": 87,
+        "version": 1
+      }
+    },
+    {
+      "id": "it-mvpltxty-t9mpv",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6800-ld"
+      },
+      "name": "NVIDIA Spectrum-X SN6800-LD Ethernet Photonics switch",
+      "position": [
+        6449.9,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 900,
+        "height": 220,
+        "version": 1
+      }
+    }
+  ],
+  "groups": [],
+  "updatedAt": "2026-10-26T18:43:05.734Z"
+}
