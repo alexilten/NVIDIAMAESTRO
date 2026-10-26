@@ -386,3 +386,5 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .client-qty { color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .doc-form .check-row { font-size: 12px; }
 .doc-form .check-row input { width: auto; height: auto; box-shadow: none; padding: 0; flex: 0 0 auto; }
+.refresh-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 12.5px; }
+.refresh-row > span { min-width: 0; }

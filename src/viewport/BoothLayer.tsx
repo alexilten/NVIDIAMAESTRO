@@ -5,6 +5,7 @@ import type { BoothSide } from '../core/schema';
 import { useStore } from '../ui/store';
 import { useBoothAnalysis } from '../ui/useBooth';
 import { Label } from './Label';
+import { LOOK } from './Studio';
 
 /**
  * The booth plot in the Compose canvas frame (mm, Z up): floor, aisles, closed walls, circulation and service points.
@@ -13,6 +14,8 @@ import { Label } from './Label';
 export function BoothLayer({ present = false }: { present?: boolean }) {
   const booth = useStore((s) => s.comp.booth);
   const show = useStore((s) => s.circulation) && !present;
+  const look = LOOK[useStore((s) => s.presentLook)];
+  const floor = present ? look.floor : LOOK.studio.floor, aisleColor = present ? look.aisle : LOOK.studio.aisle;
   const a = useBoothAnalysis();
   const tex = useMemo(() => {
     if (!a) return null;
@@ -45,11 +48,11 @@ export function BoothLayer({ present = false }: { present?: boolean }) {
       {/* floor, aisles and overlay are a few mm apart and pushed back in depth, so they never fight at booth scale */}
       <mesh position={[0, 0, 2]} receiveShadow>
         <planeGeometry args={[W, D]} />
-        <meshStandardMaterial color="#f4f4f1" roughness={0.9} polygonOffset polygonOffsetFactor={2} polygonOffsetUnits={2} />
+        <meshStandardMaterial color={floor} roughness={0.9} polygonOffset polygonOffsetFactor={2} polygonOffsetUnits={2} />
       </mesh>
       {SIDES.filter((s) => booth.open[s]).map((s) => (
         <group key={s}>
-          <mesh position={aisle[s].pos}><planeGeometry args={aisle[s].size} /><meshBasicMaterial color="#e6e6ea" transparent opacity={0.7} depthWrite={false} polygonOffset polygonOffsetFactor={3} polygonOffsetUnits={3} /></mesh>
+          <mesh position={aisle[s].pos}><planeGeometry args={aisle[s].size} /><meshBasicMaterial color={aisleColor} transparent opacity={0.7} depthWrite={false} polygonOffset polygonOffsetFactor={3} polygonOffsetUnits={3} /></mesh>
           {!present && <Label position={labelAt[s]} text={`Aisle\t${Math.round(A)} mm`} />}
         </group>
       ))}

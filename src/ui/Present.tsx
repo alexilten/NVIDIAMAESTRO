@@ -5,6 +5,7 @@ import type { Vec3 } from '../core/schema';
 import { moduleTag } from '../core/sheet';
 import { ComposeCanvas } from '../viewport/ComposeCanvas';
 import { viewer } from '../viewport/Capture';
+import { LOOK, type Look } from '../viewport/Studio';
 import { Icon, Section, VBadge } from './common';
 import { clientViewFor, downloadClientView, downloadStill, previewClientView } from './exportActions';
 import { extentOf, useStore } from './store';
@@ -34,10 +35,11 @@ export function Present() {
   const key = `${comp.id}|${view?.id}|${view?.eye.join(',')}`;
   useEffect(() => {
     if (!view) return;
-    // the first move after the canvas mounts is a cut; later ones glide
-    const first = !viewer.api;
+    // the first move after this canvas mounts is a cut; later ones glide
+    const ready = () => viewer.api?.owner === 'present';
+    const first = !ready();
     let raf = 0, tries = 0;
-    const go = () => { if (viewer.api) viewer.api.go(view, !first); else if (tries++ < 240) raf = requestAnimationFrame(go); };
+    const go = () => { if (ready()) viewer.api!.go(view, !first); else if (tries++ < 600) raf = requestAnimationFrame(go); };
     go();
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,7 +77,7 @@ function ViewsPanel({ views, active, onPick }: { views: SavedView[]; active?: st
     st.notify(`Saved the current camera as View ${n}.`);
   };
   const render = async (vs: SavedView[]) => {
-    if (!viewer.api || !vs.length) return;
+    if (viewer.api?.owner !== 'present' || !vs.length) return;
     const sz = STILL_SIZES.find((s) => s.id === size) ?? STILL_SIZES[0];
     setBusy(vs.length === 1 ? `Rendering ${vs[0].name}…` : `Rendering ${vs.length} views…`);
     try {
@@ -115,6 +117,9 @@ function ViewsPanel({ views, active, onPick }: { views: SavedView[]; active?: st
         </div>
         <div className="sub-head">Stills</div>
         <div className="pad col">
+          <div className="segmented sm wide-seg" aria-label="Look">
+            {(Object.keys(LOOK) as Look[]).map((l) => <button key={l} className={st.presentLook === l ? 'on' : ''} onClick={() => st.setLook(l)}>{LOOK[l].label}</button>)}
+          </div>
           <div className="segmented sm wide-seg">
             {STILL_SIZES.map((s) => <button key={s.id} className={size === s.id ? 'on' : ''} onClick={() => setSize(s.id)}>{s.label}</button>)}
           </div>

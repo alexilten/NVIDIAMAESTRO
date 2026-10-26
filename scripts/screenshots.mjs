@@ -70,6 +70,12 @@ await shot('20-exhibition-closed-booth-checks');
 for (const side of ['Front (−Y) open', 'Left (−X) open']) await page.locator('.check-row', { hasText: side }).locator('input').check();
 await page.locator('button', { hasText: '+ Power + data' }).scrollIntoViewIfNeeded();
 await shot('21-exhibition-service-points');
+// Round 07: start the checks from the German rule set
+await page.locator('summary', { hasText: 'Accessibility rules' }).click();
+await page.selectOption('select[aria-label="Rule set"]', 'din-18040-1');
+await page.locator('select[aria-label="Rule set"]').scrollIntoViewIfNeeded();
+await shot('30-exhibition-din-rule-set');
+await page.selectOption('select[aria-label="Rule set"]', 'ada-2010');
 const plan = await browser.newPage({ viewport: { width: 1587, height: 1123 } });
 await plan.goto(new URL('../samples/sample-booth.plan.svg', import.meta.url).href);
 await plan.screenshot({ path: `${out}/22-booth-plan-sheet.png` });
@@ -95,6 +101,13 @@ await page.locator('button', { hasText: 'Render all' }).click();
 await page.waitForSelector('.still', { timeout: 180000 });
 await page.locator('.audit').scrollIntoViewIfNeeded();
 await shot('28-present-stills-audit');
+// Round 07: the Hall look, with a still of the three-quarter view
+await page.locator('.view-row', { hasText: 'Three-quarter' }).locator('button').click();
+await page.locator('.wide-seg button', { hasText: 'Hall' }).click();
+await page.locator('button', { hasText: 'Render view' }).click();
+await page.waitForTimeout(4000);
+await shot('31-present-hall-look');
+await page.locator('.wide-seg button', { hasText: 'Studio' }).click();
 const [dl] = await Promise.all([page.waitForEvent('download'), page.locator('button', { hasText: 'Save .html' }).click()]);
 const clientFile = `${out}/.client-view.html`;
 await dl.saveAs(clientFile);

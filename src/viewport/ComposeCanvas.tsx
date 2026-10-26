@@ -11,6 +11,9 @@ import { Label } from './Label';
 import { MM, ShapeView, WORLD_ROTATION } from './ShapeView';
 import { Studio } from './Studio';
 
+// a stable array: a new literal on every render would put the camera back here each time the canvas re-renders
+const START_EYE: [number, number, number] = [6, 5, 9];
+
 /**
  * The Compose canvas: placed items at their composition transforms, selection, and a move/rotate gizmo.
  * `present` shows the same scene for presentation: no grid, gizmo, selection or analysis overlays.
@@ -21,6 +24,7 @@ export function ComposeCanvas({ mode, present = false }: { mode: 'translate' | '
   const selection = useStore((s) => s.selection);
   const selectItems = useStore((s) => s.selectItems);
   const xray = useStore((s) => s.xray);
+  const look = useStore((s) => s.presentLook);
 
   const extents = useMemo(() => comp.items.map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[], [comp, parts]);
   const span = comp.booth ? Math.max(comp.booth.width.value, comp.booth.depth.value) + 4000 : extents.length ? Math.max(...extents.map((e) => e.max[0]), 2000) - Math.min(...extents.map((e) => e.min[0]), -2000) : 6000;
@@ -28,8 +32,8 @@ export function ComposeCanvas({ mode, present = false }: { mode: 'translate' | '
   return (
     <div className="viewer">
       <Canvas shadows dpr={[1, 2]} gl={{ antialias: true, toneMapping: THREE.NeutralToneMapping, preserveDrawingBuffer: true }} onPointerMissed={(e) => { if (!present && e.type === 'click') selectItems([]); }}>
-        <PerspectiveCamera makeDefault fov={30} near={0.02} far={800} position={[6, 5, 9]} />
-        <Studio span={span * MM} shadows />
+        <PerspectiveCamera makeDefault fov={30} near={0.02} far={800} position={START_EYE} />
+        <Studio span={span * MM} shadows contactY={comp.booth ? 0.004 : 0.0005} look={present ? look : 'studio'} soft={present} />
         {!present && <Grid position={[0, 0.0002, 0]} args={[60, 60]} cellSize={0.1} cellThickness={0.5} cellColor="#d9d9de" sectionSize={1} sectionThickness={1} sectionColor="#c3c3ca" fadeDistance={40} fadeStrength={1.2} infiniteGrid />}
         <group rotation={WORLD_ROTATION} scale={MM}>
           {comp.booth && <BoothLayer present={present} />}
@@ -37,7 +41,7 @@ export function ComposeCanvas({ mode, present = false }: { mode: 'translate' | '
         </group>
         {!present && <Gizmo mode={mode} />}
         <FrameAll auto={!present} />
-        <Capture />
+        <Capture owner={present ? 'present' : 'compose'} />
       </Canvas>
       {!comp.items.length && !present && <div className="viewer-empty">{comp.kind === 'exhibition' ? 'Place modules from the left, or load the sample booth.' : 'Add products, kit parts or project parts from the library to start a module.'}</div>}
     </div>
