@@ -56,6 +56,8 @@ export interface IngestedPart {
     derivedFrom?: string;
     originNote?: string;
     revision?: string;
+    /** fingerprint of the block's geometry, nested blocks included (ingest/revision.ts) */
+    geometryHash?: string;
   };
   /** extents of the source geometry in the part frame, mm */
   bbox: Box3;
@@ -69,6 +71,8 @@ export interface IngestedPart {
   notes: string;
   /** earlier approved versions this one replaces */
   supersedes?: number;
+  /** set when the part came from a teammate's library bundle rather than this browser's own extraction */
+  sharedFrom?: { bundle: string; by?: string; importedAt: string };
 }
 
 export const isFixedGeometry = (_p: IngestedPart) => true;

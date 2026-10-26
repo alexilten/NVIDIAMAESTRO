@@ -13,7 +13,11 @@ export const FIXTURE = {
   dims: [609.6, 304.8, 944.88] as [number, number, number],
 };
 
-export function buildFixture(rh: Rh): Uint8Array {
+/**
+ * `rev` builds a later revision of the same model: the cap plate is thicker (so the plinth that nests it changes
+ * too), a stool block is added, and the header sign is renamed without being changed.
+ */
+export function buildFixture(rh: Rh, rev = false): Uint8Array {
   const doc = new rh.File3dm();
   doc.settings().modelUnitSystem = rh.UnitSystem.Feet;
   const layer = (name: string, color: { r: number; g: number; b: number }) => {
@@ -27,7 +31,7 @@ export function buildFixture(rh: Rh): Uint8Array {
   const attrs = (li: number, name = '') => { const a = new rh.ObjectAttributes(); a.layerIndex = li; a.name = name; return a; };
   const brepBox = (min: number[], max: number[]) => rh.Brep.createFromBox(new rh.Box(new rh.BoundingBox(min, max)));
 
-  doc.instanceDefinitions().add(FIXTURE.cap, 'Cap plate', '', '', [0, 0, 0], [brepBox([0, 0, 0], [2, 1, 0.1])], [attrs(cap, 'cap plate')]);
+  doc.instanceDefinitions().add(FIXTURE.cap, 'Cap plate', '', '', [0, 0, 0], [brepBox([0, 0, 0], [2, 1, rev ? 0.15 : 0.1])], [attrs(cap, 'cap plate')]);
   const capId = doc.instanceDefinitions().get(0).id;
   const up = rh.Transform.translationXYZ(0, 0, 3);
   doc.instanceDefinitions().add(
@@ -37,5 +41,14 @@ export function buildFixture(rh: Rh): Uint8Array {
   );
   const plinthId = doc.instanceDefinitions().get(1).id;
   doc.objects().addInstanceObject(new rh.InstanceReference(plinthId, rh.Transform.translationXYZ(10, 0, 0)), attrs(body));
+  // a block nobody changes, under its old name in the first model and a new name in the revision
+  doc.instanceDefinitions().add(rev ? 'NV_PART_Header Sign' : 'NV_PART_Sign', 'Header sign', '', '', [0, 0, 0], [brepBox([0, 0, 0], [4, 0.1, 1])], [attrs(body, 'sign')]);
+  const signId = doc.instanceDefinitions().get(2).id;
+  doc.objects().addInstanceObject(new rh.InstanceReference(signId, rh.Transform.translationXYZ(0, 5, 0)), attrs(body));
+  if (rev) {
+    doc.instanceDefinitions().add('NV_PART_Stool', 'A new stool', '', '', [0, 0, 0], [brepBox([0, 0, 0], [1, 1, 1.5])], [attrs(body, 'stool')]);
+    const stoolId = doc.instanceDefinitions().get(3).id;
+    doc.objects().addInstanceObject(new rh.InstanceReference(stoolId, rh.Transform.translationXYZ(5, 5, 0)), attrs(body));
+  }
   return doc.toByteArray();
 }

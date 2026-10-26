@@ -10,7 +10,9 @@
 
 ![Exhibition: the sample corner booth in plan, with the accessible route in green and narrow floor in orange](docs/screenshots/19-exhibition-plan-circulation.png)
 
-## Status after Round 04
+![Import: two revisions of a synthetic model compared block by block, with the library parts they affect](docs/screenshots/25-import-revision-diff.png)
+
+## Status after Round 05
 
 | Area | What works now |
 |---|---|
@@ -19,7 +21,7 @@
 | Kit of parts | A parametric demo counter (with an accessible section at 860 mm and a display on a post), a hardware light table and a gallery wall niche. All are labelled Estimated: they are design inputs until a project approves them. |
 | Compose | Place products, kit parts and approved project parts on a floor grid. Move and rotate with a gizmo (10 mm and 15° snaps) or by numbers; **Snap** butts faces and lines up edges and centres with nearby items within 40 mm. **Place on surface** (P) stands an item on the worktop, light table, niche base or shelf under it, and pressing again steps through the shelves; adding a product while a kit part is selected puts it straight onto that part. Duplicate, group, align, distribute, undo and redo. **Templates** insert ready-made modules as a group: DGX Spark demo counter, accessible counter, DGX Station podium, RTX PRO board niche, Spectrum-X switch table. A **power and data** schedule sums only stated figures for items marked live (systems by default, boards and trays static), counts what is unknown, and downloads as CSV. An **A3 sheet** draws plan and front elevation to a standard scale with overall dimensions, item tags and a list with verification statuses, as SVG or printed to PDF. Modules save in the browser and as `.maestro.json`. |
 | Exhibition | A booth plot (width, depth, open sides, hall aisle, height limit), each value with its status. Place saved modules or templates as groups: each lands in the first free spot a route width clear of the others, and is flagged when its saved module is edited later. **Circulation** checks the plan on a grid: every part below the headroom is an obstacle, and a wheelchair route of the set width, entering from an open side, shows as green floor, darker where a turning circle fits; open floor it cannot reach shows orange. Every module needs an accessible approach zone in front of it. Items outside the plot or over the height limit are errors. **Service points** (power, data or both, with an optional stated capacity) feed each live module from the nearest point; floor runs and stated loads are listed, and a point over its capacity is an error. The clearances default to the 2010 ADA reference values, marked Estimated, and are set per venue. Outputs: an **A3 booth plan** (plot, aisles, parts, module tags, approach zones, narrow floor, service points, module schedule and open checks), a **booth schedule CSV**, and the `.3dm` with the plot, service points, approach zones and narrow floor as curves on their own layers. A sample corner booth built from the templates loads on first open. |
-| Import | Open a project `.3dm` in the browser, list its blocks with nesting, use and provenance, and extract chosen blocks with their exact source geometry. Attach the fabrication deck PDF and get page suggestions for each part. Compare model dimensions with drawings; every discrepancy must be resolved (model governs, drawing governs, or noted) before approval. Approved parts join a private library in this browser, versioned. Review notes import and export as a sidecar file. |
+| Import | Open a project `.3dm` in the browser, list its blocks with nesting, use and provenance, and extract chosen blocks with their exact source geometry. **Batch extraction** selects every new kit candidate in one go (blocks placed in the model or not nested in another), marks blocks the library already holds or whose geometry it already has, extracts the rest one by one with progress, and reports any block it could not read without stopping. **Compare with a revision** opens a later version of the same model and diffs it block by block on an exact fingerprint of the geometry (nested blocks and their transforms included): changed, changed only through a nested block, renamed, added, removed, or only re-described, with the size change; library parts from a changed block get a one-click proposal of their next version (the approved version stays in use until it is reviewed), renamed ones can follow the rename, and the report downloads as CSV. **Library bundles** export approved parts with their geometry to one file a team passes through its own private storage; importing one adds new parts, recognises ones already held, never overwrites a different local version, and rejects damaged entries by checksum. Attach the fabrication deck PDF and get page suggestions for each part. Compare model dimensions with drawings; every discrepancy must be resolved (model governs, drawing governs, or noted) before approval. Approved parts join a private library in this browser, versioned. Review notes import and export as a sidecar file. |
 | Rhino export | One block per item, instances on the `NVIDIA_MAESTRO` layer tree (hardware, display furniture by type, booth plot, service points, clearances, labels, source layers), user strings on every instance (`maestro.ref`, `maestro.verification`, `maestro.lod`, `maestro.source`, overall `width/depth/height_mm`, rotation), groups for grouped items, text dots for labels and the composition embedded in the file. Imported parts are rebuilt from their source B-reps and extrusions, scaled to millimetres, nested blocks included. Every export is reopened and checked before download. |
 
 See [docs/RESEARCH.md](docs/RESEARCH.md) for the research, data standards, sources and roadmap, and [docs/INGEST.md](docs/INGEST.md) for the import workflow.
@@ -29,7 +31,8 @@ See [docs/RESEARCH.md](docs/RESEARCH.md) for the research, data standards, sourc
 ```bash
 npm install
 npm run dev          # http://localhost:5173
-npm test             # 48 tests: catalog, search, compose, arrange, booth, ingest, Rhino round trip
+npm test             # 54 tests: catalog, search, compose, arrange, booth, ingest, revisions, Rhino round trip
+npm run fixtures     # write the synthetic two-revision test model to samples/fixtures/ to try Import
 npm run build        # typecheck and production build in dist/
 npm run export:samples && npm run verify:3dm   # rebuild and independently check samples/*.3dm
 ```
@@ -41,7 +44,7 @@ npm run export:samples && npm run verify:3dm   # rebuild and independently check
 This repository is public. It holds code, the public catalog and generated samples only. Project models, fabrication decks, review notes and anything derived from them are never committed:
 
 - Import reads files in the browser and keeps extracted parts in the browser's IndexedDB. Nothing is uploaded, and the deployed site contains no project data.
-- `.gitignore` excludes `*.3dm` (except `samples/`), PDFs, DWG/STEP/FBX, `*.maestro-review.json` and `private/`.
+- `.gitignore` excludes `*.3dm` (except `samples/`), PDFs, DWG/STEP/FBX, review sidecars (`*.maestro-review.json`), library bundles (`*.maestro-library.json`) and `private/`.
 
 ## Layout
 

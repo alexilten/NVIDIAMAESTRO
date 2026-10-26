@@ -100,6 +100,10 @@ Round 02 catalogs the current NVIDIA exhibition line-up. Values were read from t
 - **HP ZGX Fury G1n** dimensions need HP's QuickSpecs read by hand.
 - The 19-inch MGX switches (the "-LD" models) have no stated rack-unit height and are left without one.
 
+## Revision fingerprints (Round 05)
+
+Each block's fingerprint hashes its own objects as openNURBS serialises them (`CommonObject.encode`, with the object's layer and name), sorted so object order does not matter, together with the fingerprints and transforms (to 1e-4) of the blocks nested in it. Identical geometry gives the same fingerprint in any file; any change to a control point, a trim, a layer or a nested placement changes it. A block whose own objects are unchanged but whose nested block changed is reported separately, so a sub-assembly edit is not mistaken for a change to every parent. A removed and an added block with the same fingerprint are reported as a rename. The hash is a 53-bit non-cryptographic hash: it tells blocks apart, it is not a security check.
+
 ## Exhibition checks (Round 04)
 
 The circulation check rasterises the booth on a plan grid (40 mm for a booth up to 10 m, coarser above). Every part whose bottom is below the headroom is an obstacle; floor-thin parts (15 mm or less) are walked over. Closed sides are walls; the hall aisle beyond each open side is free floor where visitors enter. An exact Euclidean distance transform (Felzenszwalb and Huttenlocher) gives each cell its clearance. A wheelchair is modelled as a disc of the route width: the cells it can be centred on are flooded from the aisle, and the floor those discs sweep is the accessible area, with square corners allowed for. A second flood with the turning-circle diameter marks where a full turn fits. Each module needs a reachable route cell inside the approach zone in front of the side its largest item faces.
@@ -132,5 +136,5 @@ The first project model is large (tens of thousands of objects, many blocks, aut
 | 02 | Done: the current exhibition line-up (see above). Still open from the original plan: HGX and more Jetson SKUs, partner robots, LOD 2 assets where licensing allows, clearances and power and data needs on every product |
 | 03 | Done: edge and centre snapping, place on surface, templates, power and data schedule, A3 plan and elevation sheet. Still open: cable routing, per-project power figures for kit parts (displays, lighting), side elevations |
 | 04 | Done: booth plot with open sides and limits, module placement as tracked groups, circulation and accessible-approach checks on a plan grid, service points with runs and loads, A3 booth plan, booth schedule and booth layers in the `.3dm`. Still open: checking the clearance values against the ADA document and adding venue rule sets, multi-level and island booths with columns, cable routes rather than straight runs, refreshing a placed module from its edited source |
-| 05 | Import at scale: batch extraction, revision diffs between two versions of a source model, shared private library for a team |
+| 05 | Done: batch extraction with a plan and per-block report, revision diffs on exact geometry fingerprints with library impact (propose next version, follow renames), private library bundles with checksums. Still open: a shared library served from private storage rather than passed as a file, diffs of layer and material changes, batch review (approve several parts that share a drawing) |
 | 06 | Presentation: renders, client view, links to project documents |

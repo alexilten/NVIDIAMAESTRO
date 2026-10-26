@@ -17,3 +17,5 @@ private/
 *.fbx
 *.maestro-review.json
 screenshots-private/
+samples/fixtures/
+*.maestro-library.json
