@@ -390,3 +390,6 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .refresh-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 12.5px; }
 .refresh-row > span { min-width: 0; }
 .svc-grid.four { grid-template-columns: repeat(4, 1fr); }
+.issue-row { display: flex; align-items: flex-start; gap: 6px; }
+.issue-row .issue { flex: 1; }
+.issue-row .turn-btn { flex: none; font-size: 12px; padding: 6px 2px; white-space: nowrap; }

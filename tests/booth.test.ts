@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { CELL, addColumn, addServicePoint, analyseBooth, approachZone, boothCsv, changedModules, freeSpot, frontSide, newExhibition, placeModule, planExtent } from '../src/core/booth';
-import { addItem } from '../src/core/compose';
-import { sampleExhibition } from '../src/core/exhibitionSample';
+import { BOOTH_TYPES, CELL, addColumn, addServicePoint, boothTypeOf, turnToFace, analyseBooth, approachZone, boothCsv, changedModules, freeSpot, frontSide, newExhibition, placeModule, planExtent } from '../src/core/booth';
+import { addItem, rotateItems } from '../src/core/compose';
+import { sampleExhibition, sampleIsland } from '../src/core/exhibitionSample';
 import { defaultParams } from '../src/core/geometry/kit';
 import { boxSize, shapeBounds } from '../src/core/geometry/shape';
 import { resolveRef } from '../src/core/library';
@@ -248,5 +248,53 @@ describe('booth columns', () => {
     c = { ...c, booth: addColumn(addColumn(c.booth!, -2000, 1000), 2000, 1000) };
     const notes = boothAnnotations(c, analyseBooth(c, shapeOf)!).filter((n) => n.layer.endsWith('::COLUMNS'));
     expect(notes.map((n) => n.name)).toEqual(['C1', 'C2']);
+  });
+});
+
+describe('stand types and island booths', () => {
+  it('names a stand by its open sides, and each preset reads back as itself', () => {
+    for (const t of BOOTH_TYPES) expect(boothTypeOf(t.open)).toBe(t.id);
+    expect(boothTypeOf({ front: true, back: true, left: false, right: false })).toBeNull();
+    expect(boothTypeOf({ front: false, back: false, left: true, right: true })).toBeNull();
+  });
+
+  it('turns a module the short way to face a side', () => {
+    expect(turnToFace('front', 'front')).toBe(0);
+    expect(turnToFace('front', 'right')).toBe(90);
+    expect(turnToFace('front', 'back')).toBe(180);
+    expect(turnToFace('front', 'left')).toBe(-90);
+    expect(turnToFace('left', 'front')).toBe(90);
+  });
+
+  it('builds a clear sample island: every module faces an aisle, two back to back in the middle', () => {
+    const c = sampleIsland();
+    expect(boothTypeOf(c.booth!.open)).toBe('island');
+    const a = analyseBooth(c, shapeOf)!;
+    expect(a.issues.filter((i) => i.level !== 'info')).toEqual([]);
+    expect(a.issues.some((i) => /back to the/.test(i.text))).toBe(false);
+    expect(a.access.every((z) => z.approach)).toBe(true);
+  });
+
+  it('flags a module with its back to a nearby aisle, and the suggested turn clears it', () => {
+    let c = booth();
+    c = { ...c, booth: { ...c.booth!, open: { front: true, back: true, left: true, right: true } } };
+    c = placeModule(c, tpl('tpl-spark-counter'), shapeOf, [0, 1300], 0).comp;
+    const hit = analyseBooth(c, shapeOf)!.issues.find((i) => /back to the back aisle/.test(i.text))!;
+    expect(hit).toBeDefined();
+    expect(hit.turn).toBe(180);
+    const turned = rotateItems(c, c.items.map((i) => i.id), hit.turn!);
+    const after = analyseBooth(turned, shapeOf)!;
+    expect(after.issues.some((i) => /back to the/.test(i.text))).toBe(false);
+    expect(after.access.every((z) => z.approach)).toBe(true);
+  });
+
+  it('offers the turn to the nearest aisle when a module faces a closed side', () => {
+    // against the closed back wall, facing it
+    const e = planExtent(tpl('tpl-spark-counter').items, shapeOf)!;
+    const half = (e.max[1] - e.min[1]) / 2;
+    const c = placeModule(booth(), tpl('tpl-spark-counter'), shapeOf, [0, 2000 - half], 180).comp;
+    const err = analyseBooth(c, shapeOf)!.issues.find((i) => i.level === 'error' && /no accessible approach/.test(i.text))!;
+    expect(err).toBeDefined();
+    expect(err.turn).toBe(180);
   });
 });

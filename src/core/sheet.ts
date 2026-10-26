@@ -1,6 +1,6 @@
 import { extentOfShape, worldBoxes, type ShapeOf, type WorldBox } from './arrange';
-import { CELL, type BoothAnalysis } from './booth';
-import type { Composition, Placement, Vec3, Verification } from './schema';
+import { BOOTH_TYPES, CELL, boothTypeOf, type BoothAnalysis } from './booth';
+import type { Booth, Composition, Placement, Vec3, Verification } from './schema';
 
 /**
  * A dimensioned A3 drawing sheet for a composition: plan above front elevation (third-angle), drawn to a
@@ -315,7 +315,7 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
   out.push('<g id="title">');
   line(lx, ty, PAPER.w - FRAME, ty, 'frame');
   text(lx + 4, ty + 8, info.title ?? c.name, 'title', 'start');
-  text(lx + 4, ty + 14, `${info.project ? `${info.project} · ` : ''}Booth ${fmm(W)} × ${fmm(D)} mm · height limit ${fmm(b.heightLimit.value)} mm · ${a.units.length} modules`, 'small', 'start');
+  text(lx + 4, ty + 14, `${info.project ? `${info.project} · ` : ''}${standName(b.open)}Booth ${fmm(W)} × ${fmm(D)} mm · height limit ${fmm(b.heightLimit.value)} mm · ${a.units.length} modules`, 'small', 'start');
   text(lx + 4, ty + 19.5, `Scale 1:${scale} at A3 · millimetres · ${info.date ?? new Date().toISOString().slice(0, 10)}`, 'small', 'start');
   text(lx + 4, ty + 25, `Plot, limits and clearances: ${STATUS_LABEL[a.status]}. Check with the venue before submission.`, 'tiny', 'start');
   text(lx + 4, ty + 29, info.appLabel ?? 'MAESTRO', 'tiny', 'start');
@@ -361,3 +361,6 @@ ${out.join('\n')}
 </svg>
 `;
 }
+
+/** "Island booth" and the like, or nothing for a stand with custom open sides */
+const standName = (open: Booth['open']) => { const t = BOOTH_TYPES.find((x) => x.id === boothTypeOf(open)); return t ? `${t.name} · ` : ''; };

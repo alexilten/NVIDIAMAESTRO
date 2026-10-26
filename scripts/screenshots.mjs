@@ -82,6 +82,18 @@ await page.locator('button', { hasText: '+ Column' }).click();
 await page.locator('.section', { hasText: 'Checks' }).first().scrollIntoViewIfNeeded();
 await shot('32-exhibition-column-clash');
 await page.locator('.svc-row', { has: page.locator('input[aria-label="Column name"]') }).locator('button[title="Remove"]').click();
+// Round 09: an island booth, then a module placed with its back to an aisle and turned to face it
+await page.locator('button', { hasText: 'Sample island booth' }).click();
+await page.locator('.section', { hasText: 'Plot' }).first().scrollIntoViewIfNeeded();
+await shot('35-exhibition-island-booth');
+await page.locator('.link-row', { hasText: 'DGX Spark demo counter' }).click();
+await page.keyboard.press('Escape');
+await page.waitForSelector('.turn-btn');
+await page.locator('.section', { hasText: 'Checks' }).first().scrollIntoViewIfNeeded();
+await shot('36-exhibition-back-to-aisle');
+await page.locator('.turn-btn').first().click();
+await page.keyboard.press('Escape');
+await page.locator('button', { hasText: 'Sample corner booth' }).click();
 const plan = await browser.newPage({ viewport: { width: 1587, height: 1123 } });
 await plan.goto(new URL('../samples/sample-booth.plan.svg', import.meta.url).href);
 await plan.screenshot({ path: `${out}/22-booth-plan-sheet.png` });
