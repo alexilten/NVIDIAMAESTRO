@@ -11,6 +11,9 @@ import { exportItemFor, resolveRef } from '../src/core/library';
 import type { Composition, ItemRef, Vec3 } from '../src/core/schema';
 import { MODEL_BY_ID } from '../src/core/catalog/products';
 import { exportComposition, readBack } from '../src/export/rhino';
+import { TEMPLATES, insertComposition } from '../src/core/templates';
+import { buildSheet } from '../src/core/sheet';
+import { schedule, scheduleCsv } from '../src/core/services';
 
 const rh = await rhino3dm();
 const pkg = (await import('../package.json', { with: { type: 'json' } })).default as { version: string };
@@ -59,7 +62,27 @@ function lineupR02(): Composition {
   return c;
 }
 
-for (const [file, comp] of [['spark-demo-station.3dm', sparkStation()], ['hardware-lineup.3dm', hardwareLineup()], ['lineup-r02.3dm', lineupR02()]] as const) {
+/** every built-in template, side by side: the Round 03 sample, with its sheet and services schedule */
+function demoModules(): Composition {
+  let c = newComposition('Demo module templates (sample)');
+  let x = 0;
+  for (const t of TEMPLATES) {
+    const s = t.build();
+    const ex = s.items.map((p) => { const b = shapeBounds(resolveRef(p.ref, [])!.shape!); return [p.position[0] + b.min[0], p.position[0] + b.max[0]]; });
+    const lo = Math.min(...ex.map((e) => e[0])), hi = Math.max(...ex.map((e) => e[1]));
+    c = insertComposition(c, s, [x - lo, 0, 0], t.name).comp;
+    x += hi - lo + 600;
+  }
+  return c;
+}
+
+const modules = demoModules();
+const sheet = buildSheet(modules, (p) => resolveRef(p.ref, [])?.shape ?? null, { statusOf: (p) => resolveRef(p.ref, [])!.entry.verification, appLabel: `MAESTRO ${pkg.version} · sample`, date: '2026-10-26' })!;
+writeFileSync('samples/demo-modules.sheet.svg', sheet.svg);
+writeFileSync('samples/demo-modules.services.csv', scheduleCsv(schedule(modules, (p) => resolveRef(p.ref, [])!.entry.name), modules.name));
+console.log(`samples/demo-modules.sheet.svg: 1:${sheet.scale}, ${sheet.items.length} items`);
+
+for (const [file, comp] of [['spark-demo-station.3dm', sparkStation()], ['hardware-lineup.3dm', hardwareLineup()], ['lineup-r02.3dm', lineupR02()], ['demo-modules.3dm', modules]] as const) {
   const r = exportComposition(rh, comp, (p) => exportItemFor(p, []), pkg.version);
   const back = readBack(rh, r.bytes);
   writeFileSync(`samples/${file}`, r.bytes);

@@ -1,0 +1,407 @@
+{
+  "schema": "maestro.composition",
+  "version": 1,
+  "id": "comp-mvpmd1yk-0p4sv",
+  "name": "Demo module templates (sample)",
+  "kind": "module",
+  "items": [
+    {
+      "id": "it-mvpmd1yo-7d648",
+      "ref": {
+        "kind": "kit",
+        "id": "kit-demo-counter",
+        "params": {
+          "width": 1800,
+          "depth": 700,
+          "height": 1000,
+          "top": 30,
+          "accessible": 0,
+          "screen": 55,
+          "screenCentre": 1650
+        }
+      },
+      "name": "Demo counter",
+      "position": [
+        900,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 1800,
+        "depth": 700,
+        "height": 2004.4474758833423,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yo-6yl6o"
+    },
+    {
+      "id": "it-mvpmd1yo-83lmh",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark",
+      "position": [
+        600,
+        0,
+        1000
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yo-6yl6o"
+    },
+    {
+      "id": "it-mvpmd1yo-9yeya",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark 2",
+      "position": [
+        1200,
+        0,
+        1000
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yo-6yl6o"
+    },
+    {
+      "id": "it-mvpmd1yp-gsjsl",
+      "ref": {
+        "kind": "kit",
+        "id": "kit-demo-counter",
+        "params": {
+          "width": 2400,
+          "depth": 700,
+          "height": 1000,
+          "top": 30,
+          "accessible": 900,
+          "screen": 55,
+          "screenCentre": 1650
+        }
+      },
+      "name": "Demo counter 2",
+      "position": [
+        3600,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 2400,
+        "depth": 700,
+        "height": 2004.4474758833423,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yp-fnih3"
+    },
+    {
+      "id": "it-mvpmd1yp-hey0p",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark (seated)",
+      "position": [
+        2850,
+        0,
+        860
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yp-fnih3"
+    },
+    {
+      "id": "it-mvpmd1yp-iz4mr",
+      "ref": {
+        "kind": "product",
+        "id": "nv-dgx-spark"
+      },
+      "name": "DGX Spark (standing)",
+      "position": [
+        4050,
+        0,
+        1000
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 150,
+        "depth": 150,
+        "height": 50.5,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yp-fnih3"
+    },
+    {
+      "id": "it-mvpmd1yq-pgj44",
+      "ref": {
+        "kind": "kit",
+        "id": "kit-light-table",
+        "params": {
+          "width": 1400,
+          "depth": 800,
+          "height": 400,
+          "border": 50
+        }
+      },
+      "name": "Podium",
+      "position": [
+        6100,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 1400,
+        "depth": 800,
+        "height": 400,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yq-o23q3"
+    },
+    {
+      "id": "it-mvpmd1yq-qpekb",
+      "ref": {
+        "kind": "product",
+        "id": "dell-pro-max-gb300"
+      },
+      "name": "Dell Pro Max with GB300",
+      "position": [
+        5770,
+        0,
+        399
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 231.6,
+        "depth": 610.5,
+        "height": 569,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yq-o23q3"
+    },
+    {
+      "id": "it-mvpmd1yq-r9cic",
+      "ref": {
+        "kind": "product",
+        "id": "gb-w775-v10"
+      },
+      "name": "GIGABYTE W775-V10-L01",
+      "position": [
+        6430,
+        0,
+        399
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 245,
+        "depth": 531,
+        "height": 500.4,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1yq-o23q3"
+    },
+    {
+      "id": "it-mvpmd1ys-zx954",
+      "ref": {
+        "kind": "kit",
+        "id": "kit-gallery-niche",
+        "params": {
+          "panelWidth": 1500,
+          "wallHeight": 2700,
+          "width": 1200,
+          "height": 1000,
+          "sill": 1100,
+          "depth": 300,
+          "shelves": 2
+        }
+      },
+      "name": "Gallery niche",
+      "position": [
+        8150,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 1500,
+        "depth": 300,
+        "height": 2700,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1ys-ybg1t"
+    },
+    {
+      "id": "it-mvpmd1ys-100htv",
+      "ref": {
+        "kind": "product",
+        "id": "nv-rtx-pro-6000-ws"
+      },
+      "name": "RTX PRO 6000 Workstation Edition",
+      "position": [
+        8150,
+        150,
+        1118
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 304.79999999999995,
+        "depth": 40.64,
+        "height": 137.16,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1ys-ybg1t"
+    },
+    {
+      "id": "it-mvpmd1ys-110ywq",
+      "ref": {
+        "kind": "product",
+        "id": "nv-rtx-pro-5000"
+      },
+      "name": "RTX PRO 5000",
+      "position": [
+        8150,
+        155,
+        1442.3
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 266.7,
+        "depth": 40.64,
+        "height": 111.76,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1ys-ybg1t"
+    },
+    {
+      "id": "it-mvpmd1ys-12364v",
+      "ref": {
+        "kind": "product",
+        "id": "nv-rtx-pro-6000-maxq"
+      },
+      "name": "RTX PRO 6000 Max-Q",
+      "position": [
+        8150,
+        155,
+        1775.7
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 266.7,
+        "depth": 40.6,
+        "height": 111.76,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1ys-ybg1t"
+    },
+    {
+      "id": "it-mvpmd1ys-19q511",
+      "ref": {
+        "kind": "kit",
+        "id": "kit-light-table",
+        "params": {
+          "width": 1200,
+          "depth": 1100,
+          "height": 900,
+          "border": 50
+        }
+      },
+      "name": "Light table",
+      "position": [
+        10100,
+        0,
+        0
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 1200,
+        "depth": 1100,
+        "height": 900,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1ys-189toe"
+    },
+    {
+      "id": "it-mvpmd1ys-1a4j4m",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6800-ld"
+      },
+      "name": "SN6800-LD",
+      "position": [
+        9840,
+        0,
+        899
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 900,
+        "height": 220,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1ys-189toe"
+    },
+    {
+      "id": "it-mvpmd1ys-1bnjjn",
+      "ref": {
+        "kind": "product",
+        "id": "nv-sn6810-ld"
+      },
+      "name": "SN6810-LD",
+      "position": [
+        10360,
+        0,
+        899
+      ],
+      "rotation": 0,
+      "snapshot": {
+        "width": 438,
+        "depth": 900,
+        "height": 87,
+        "version": 1
+      },
+      "groupId": "grp-mvpmd1ys-189toe"
+    }
+  ],
+  "groups": [
+    {
+      "id": "grp-mvpmd1yo-6yl6o",
+      "name": "DGX Spark demo counter"
+    },
+    {
+      "id": "grp-mvpmd1yp-fnih3",
+      "name": "Accessible demo counter"
+    },
+    {
+      "id": "grp-mvpmd1yq-o23q3",
+      "name": "DGX Station podium"
+    },
+    {
+      "id": "grp-mvpmd1ys-ybg1t",
+      "name": "RTX PRO board niche"
+    },
+    {
+      "id": "grp-mvpmd1ys-189toe",
+      "name": "Spectrum-X switch table"
+    }
+  ],
+  "updatedAt": "2026-10-26T18:57:57.556Z"
+}

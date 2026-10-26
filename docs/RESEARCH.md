@@ -122,7 +122,7 @@ The first project model is large (tens of thousands of objects, many blocks, aut
 | Round | Focus |
 |---|---|
 | 02 | Done: the current exhibition line-up (see above). Still open from the original plan: HGX and more Jetson SKUs, partner robots, LOD 2 assets where licensing allows, clearances and power and data needs on every product |
-| 03 | Compose: snapping to faces and edges, products placed on kit surfaces, cable and power schedule, module templates, PDF sheet with elevations |
+| 03 | Done: edge and centre snapping, place on surface, templates, power and data schedule, A3 plan and elevation sheet. Still open: cable routing, per-project power figures for kit parts (displays, lighting), side elevations |
 | 04 | Exhibition: floor plans, aisles and circulation checks, accessibility, services, module instances across a booth |
 | 05 | Import at scale: batch extraction, revision diffs between two versions of a source model, shared private library for a team |
 | 06 | Presentation: renders, client view, links to project documents |

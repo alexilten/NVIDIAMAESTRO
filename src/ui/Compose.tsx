@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { staleItems } from '../core/compose';
+import { isLive, powerOf, schedule } from '../core/services';
+import { TEMPLATES } from '../core/templates';
+import { downloadSchedule, downloadSheet, printSheet } from './exportActions';
 import { resolveRef } from '../core/library';
 import { boxSize, shapeBounds } from '../core/geometry/shape';
 import type { Placement, Vec3 } from '../core/schema';
@@ -21,6 +24,7 @@ export function Compose() {
       if (k === 'delete' || k === 'backspace') st.remove();
       if (k === 'w') setMode('translate');
       if (k === 'e') setMode('rotate');
+      if (k === 'p') st.placeOnSurface();
       if (k === 'escape') st.selectItems([]);
     };
     window.addEventListener('keydown', onKey);
@@ -49,6 +53,7 @@ export function Compose() {
         <button className="icon-btn" onClick={st.undo} disabled={!st.history.length} title="Undo (⌘Z)"><Icon name="undo" /></button>
         <button className="icon-btn" onClick={st.redo} disabled={!st.future.length} title="Redo (⇧⌘Z)"><Icon name="redo" /></button>
         <span className="tool-sep" />
+        <button className={`chip ${st.snap ? 'on' : ''}`} onClick={() => st.toggle('snap')} title="Snap edges and centres to nearby items within 40 mm">Snap</button>
         <button className={`chip ${st.xray ? 'on' : ''}`} onClick={() => st.toggle('xray')}>X-ray</button>
         <button className="chip" onClick={() => st.setCamera('perspective')}>Frame all</button>
       </div>
@@ -69,7 +74,7 @@ function ModuleTree() {
   }).map((s) => [s.id, s.reason])), [comp, parts]);
   const loose = comp.items.filter((i) => !i.groupId);
   const row = (p: Placement) => (
-    <button key={p.id} className={`tree-item ${selection.includes(p.id) ? 'on' : ''}`} onClick={(e) => selectItems([p.id], e.shiftKey || e.metaKey)}>
+    <button key={p.id} className={`tree-item ${selection.includes(p.id) ? 'on' : ''}`} onClick={(e) => selectItems([p.id], e.shiftKey || e.metaKey, true)} title="Selects this item alone; click the group name for the whole group">
       <span>{p.name}</span>
       {stale.has(p.id) && <span className="stale" title={stale.get(p.id)}>changed</span>}
     </button>
@@ -104,6 +109,7 @@ function SelectionPanel() {
     const p = sel[0];
     const r = resolveRef(p.ref, parts);
     const set = (k: number, v: number) => { const pos = [...p.position] as Vec3; pos[k] = v; setItem(p.id, { position: pos }); };
+    const host = st.supportFor(p.id);
     return (
       <div className="inspector">
         <div className="insp-head">
@@ -116,7 +122,14 @@ function SelectionPanel() {
           <Section title="Placement">
             {(['X', 'Y', 'Elevation'] as const).map((l, k) => <NumberRow key={l} label={l} value={p.position[k]} onChange={(v) => set(k, v)} />)}
             <NumberRow label="Rotation (°)" value={p.rotation} step={15} onChange={(v) => setItem(p.id, { rotation: ((v % 360) + 360) % 360 })} />
-            <p className="note">Moving or rotating changes only the placement; the item’s geometry and dimensions stay as recorded.</p>
+            <button className="ghost wide" onClick={st.placeOnSurface} disabled={!host} title="Stand on the surface below; press again for the next shelf (P)">
+              {host ? `Place on ${host.name}` : 'Place on surface'}
+            </button>
+            <p className="note">{host ? 'Press again to step through its surfaces. ' : 'Move the item over a counter, table, niche or another item to stand it there. '}Moving or rotating changes only the placement; the item’s geometry and dimensions stay as recorded.</p>
+          </Section>
+          <Section title="Power and data">
+            <label className="check-row"><input type="checkbox" checked={isLive(p)} onChange={(e) => setItem(p.id, { live: e.target.checked })} /> Live in the demo (powered)</label>
+            {(() => { const pw = powerOf(p.ref); return pw ? <KV k={`Power, ${pw.basis}`} status={pw.status}>{pw.watts.toLocaleString('en-GB')} W</KV> : <KV k="Power">No published figure</KV>; })()}
           </Section>
           <Section title="Reference">
             <KV k="Item">{p.ref.kind === 'ingested' ? `${p.ref.id.slice(0, 14)}… v${p.ref.version}` : p.ref.id}</KV>
@@ -178,6 +191,7 @@ function ModulePanel() {
   const st = useStore();
   const ex = comp.items.map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[];
   const fp = ex.length ? [Math.max(...ex.map((e) => e.max[0])) - Math.min(...ex.map((e) => e.min[0])), Math.max(...ex.map((e) => e.max[1])) - Math.min(...ex.map((e) => e.min[1]))] : [0, 0];
+  const sch = useMemo(() => schedule(comp, (p) => resolveRef(p.ref, parts)?.entry.name ?? p.name), [comp, parts]);
   const counts = new Map<string, number>();
   for (const p of comp.items) { const n = resolveRef(p.ref, parts)?.entry.name ?? p.name; counts.set(n, (counts.get(n) ?? 0) + 1); }
   return (
@@ -190,11 +204,26 @@ function ModulePanel() {
           {[...counts.entries()].map(([n, c]) => <KV key={n} k={n}>× {c}</KV>)}
           {!comp.items.length && <p className="note">Empty. Pick items from the library on the left.</p>}
         </Section>
+        <Section title="Power and data" summary={sch.liveCount ? `${(sch.knownWatts / 1000).toLocaleString('en-GB', { maximumFractionDigits: 2 })} kW stated` : undefined} open={comp.items.length > 0}>
+          {sch.rows.filter((r) => r.live).map((r) => (
+            <KV key={r.key} k={`${r.name}${r.live > 1 ? ` × ${r.live}` : ''}`} status={r.power?.status}>{r.power ? `${(r.power.watts * r.live).toLocaleString('en-GB')} W` : 'unknown'}</KV>
+          ))}
+          {!!sch.liveCount && <p className="note">Sums only stated figures; a supply rating is an upper bound, not a measured draw.{sch.unknownLive ? ` ${sch.unknownLive} live item${sch.unknownLive === 1 ? ' has' : 's have'} no figure: add them per project.` : ''} Static display items are left out; switch any item to live in its panel.</p>}
+          {!sch.liveCount && <p className="note">No live items. Systems are live by default; boards, trays and chips are shown static.</p>}
+        </Section>
+        <Section title="Templates" summary={`${TEMPLATES.length}`}>
+          {TEMPLATES.map((t) => <button key={t.id} className="link-row" title={t.description} onClick={() => st.insertTemplate(t)}>{t.name}<span className="muted small"> · {t.description}</span></button>)}
+        </Section>
         <Section title="Saved modules" summary={`${saved.length}`} open={saved.length > 0}>
           {saved.map((c) => <button key={c.id} className="link-row" onClick={() => st.openComp(c)}>{c.name}<span className="muted small"> · {c.items.length} items</span></button>)}
           {!saved.length && <p className="note">Save a module to reuse it. Modules are kept in this browser.</p>}
         </Section>
         <div className="pad col">
+          <div className="btn-grid">
+            <button className="ghost" disabled={!comp.items.length} onClick={() => st.notify(downloadSheet(comp, parts))}>Sheet .svg</button>
+            <button className="ghost" disabled={!comp.items.length} onClick={() => st.notify(printSheet(comp, parts))}>Print sheet</button>
+            <button className="ghost" disabled={!comp.items.length} onClick={() => downloadSchedule(comp, parts)}>Services .csv</button>
+          </div>
           <button className="ghost wide" onClick={st.saveComp}>Save module</button>
           <button className="ghost wide" onClick={st.newComp}>New module</button>
         </div>

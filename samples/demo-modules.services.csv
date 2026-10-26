@@ -1,0 +1,15 @@
+Item,Quantity,Live,Power each (W),Basis,Status,Source,Live total (W),Unknown,Data
+Demo counter,1,1,,,,,,display and outlets: set per project,
+NVIDIA DGX Spark,4,4,240,supply rating,verified,DGX Spark User Guide — Hardware Overview,960,,
+Demo counter,1,1,,,,,,display and outlets: set per project,
+Hardware light table,1,1,,,,,,lighting: set per project,
+Dell Pro Max with GB300,1,1,,,,,,no published power figure,
+GIGABYTE W775-V10-L01,1,1,1600,supply rating,verified,GIGABYTE W775-V10-L01 Workstation — specifications,1600,,
+Gallery wall niche,1,0,,,,,,,
+NVIDIA RTX PRO 6000 Blackwell Workstation Edition,1,0,600,total board power,verified,NVIDIA RTX PRO 6000 Blackwell Workstation Edition datasheet,0,,
+NVIDIA RTX PRO 5000 Blackwell,1,0,300,total board power,verified,NVIDIA RTX PRO 5000 Blackwell datasheet,0,,
+NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition,1,0,300,total board power,verified,NVIDIA RTX PRO 6000 Blackwell Max-Q Workstation Edition datasheet,0,,
+Hardware light table,1,1,,,,,,lighting: set per project,
+NVIDIA Spectrum-X SN6800-LD Ethernet Photonics switch,1,1,,,,,,no published power figure,2048 × 200 Gb/s MMC-16
+NVIDIA Spectrum-X SN6810-LD Ethernet Photonics switch,1,1,,,,,,no published power figure,128 × 800 Gb/s MMC-16
+Total for Demo module templates (sample) (stated values only),,12,,,,,2560,7 live item(s) without a figure,

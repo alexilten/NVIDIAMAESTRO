@@ -3,6 +3,8 @@ import { newComposition, addItem } from '../core/compose';
 import { boxSize, shapeBounds } from '../core/geometry/shape';
 import type { Composition, ItemRef } from '../core/schema';
 import { exportComposition, readBack } from '../export/rhino';
+import { buildSheet } from '../core/sheet';
+import { schedule, scheduleCsv } from '../core/services';
 import { download, loadRhino } from '../ingest/rhinoBrowser';
 import type { IngestedPart } from '../ingest/types';
 
@@ -31,4 +33,33 @@ export async function exportItemFile(ref: ItemRef, name: string, parts: Ingested
 
 export function saveCompositionJson(comp: Composition) {
   download(JSON.stringify(comp, null, 2), `${slug(comp.name)}.maestro.json`, 'application/json');
+}
+
+const sheetFor = (comp: Composition, parts: IngestedPart[]) => buildSheet(comp, (p) => resolveRef(p.ref, parts)?.shape ?? null, {
+  statusOf: (p) => resolveRef(p.ref, parts)?.entry.verification ?? 'placeholder',
+  appLabel: `MAESTRO ${__APP_VERSION__} · build ${__APP_BUILD__}`,
+});
+
+/** Download the A3 elevation sheet as SVG (to scale, in millimetres). */
+export function downloadSheet(comp: Composition, parts: IngestedPart[]): string {
+  const r = sheetFor(comp, parts);
+  if (!r) return 'Nothing to draw yet.';
+  download(r.svg, `${slug(comp.name)}.sheet.svg`, 'image/svg+xml');
+  return `Sheet saved at 1:${r.scale} on A3, ${r.items.length} items.`;
+}
+
+/** Open the sheet on its own page and print it (save as PDF from the print dialog; print at 100%). */
+export function printSheet(comp: Composition, parts: IngestedPart[]): string {
+  const r = sheetFor(comp, parts);
+  if (!r) return 'Nothing to draw yet.';
+  const w = window.open('', '_blank');
+  if (!w) return 'The browser blocked the print window. Use Sheet .svg instead.';
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>${comp.name.replace(/</g, '')}</title><style>@page{size:A3 landscape;margin:0}html,body{margin:0}svg{display:block;width:420mm;height:297mm}</style></head><body>${r.svg.replace(/^<\?xml[^>]*>/, '')}<script>setTimeout(()=>print(),300)<\/script></body></html>`);
+  w.document.close();
+  return `Sheet opened for printing at 1:${r.scale}. Print at 100% on A3 landscape.`;
+}
+
+export function downloadSchedule(comp: Composition, parts: IngestedPart[]) {
+  const s = schedule(comp, (p) => resolveRef(p.ref, parts)?.entry.name ?? p.name);
+  download(scheduleCsv(s, comp.name), `${slug(comp.name)}.services.csv`, 'text/csv');
 }
