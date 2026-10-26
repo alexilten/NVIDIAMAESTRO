@@ -33,6 +33,7 @@ const SEED_MODELS: ProductModel[] = [
       { label: 'Superchip', spec: s<string>('GB10 Grace Blackwell', 'verified', 'nv-dgx-spark-hw') },
       { label: 'SoC thermal design power', spec: s<number>(140, 'verified', 'nv-dgx-spark-hw'), unit: 'W' },
       { label: 'Power supply', spec: s<string>('240 W external, included', 'verified', 'nv-dgx-spark-hw') },
+      { label: 'Power supply rating', spec: s<number>(240, 'verified', 'nv-dgx-spark-hw', 'external supply'), unit: 'W' },
       { label: 'Operating temperature', spec: s<string>('5–30 °C', 'verified', 'nv-dgx-spark-hw') },
     ],
     physicalAssetId: 'pa-dgx-spark',

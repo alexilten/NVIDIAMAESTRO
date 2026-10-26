@@ -1,12 +1,12 @@
 {
   "schema": "maestro.composition",
   "version": 1,
-  "id": "comp-mvpm2iys-0dxqp",
+  "id": "comp-mvpmd1z0-1c20io",
   "name": "DGX Spark demo station (sample)",
   "kind": "module",
   "items": [
     {
-      "id": "it-mvpm2iyt-14je6",
+      "id": "it-mvpmd1z0-1d5bg2",
       "ref": {
         "kind": "kit",
         "id": "kit-demo-counter",
@@ -33,10 +33,10 @@
         "height": 2004.4474758833423,
         "version": 1
       },
-      "groupId": "grp-mvpm2iyu-3qd2f"
+      "groupId": "grp-mvpmd1z0-1fnqsv"
     },
     {
-      "id": "it-mvpm2iyu-2f61x",
+      "id": "it-mvpmd1z0-1e2dwa",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -54,10 +54,10 @@
         "height": 50.5,
         "version": 1
       },
-      "groupId": "grp-mvpm2iyu-3qd2f"
+      "groupId": "grp-mvpmd1z0-1fnqsv"
     },
     {
-      "id": "it-mvpm2iyv-50lnu",
+      "id": "it-mvpmd1z1-1hl07v",
       "ref": {
         "kind": "kit",
         "id": "kit-demo-counter",
@@ -84,10 +84,10 @@
         "height": 2004.4474758833423,
         "version": 1
       },
-      "groupId": "grp-mvpm2iyv-4c7vw"
+      "groupId": "grp-mvpmd1z1-1geo8a"
     },
     {
-      "id": "it-mvpm2iyv-6f4gj",
+      "id": "it-mvpmd1z1-1imh5h",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -105,10 +105,10 @@
         "height": 50.5,
         "version": 1
       },
-      "groupId": "grp-mvpm2iyv-4c7vw"
+      "groupId": "grp-mvpmd1z1-1geo8a"
     },
     {
-      "id": "it-mvpm2iyv-7hnvt",
+      "id": "it-mvpmd1z1-1jx82e",
       "ref": {
         "kind": "kit",
         "id": "kit-light-table",
@@ -134,7 +134,7 @@
       }
     },
     {
-      "id": "it-mvpm2iyv-8tol9",
+      "id": "it-mvpmd1z1-1kj34q",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -154,7 +154,7 @@
       }
     },
     {
-      "id": "it-mvpm2iyv-9umyy",
+      "id": "it-mvpmd1z1-1l4t3m",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -174,7 +174,7 @@
       }
     },
     {
-      "id": "it-mvpm2iyw-akmo9",
+      "id": "it-mvpmd1z1-1mscej",
       "ref": {
         "kind": "product",
         "id": "nv-dgx-spark"
@@ -196,13 +196,13 @@
   ],
   "groups": [
     {
-      "id": "grp-mvpm2iyu-3qd2f",
+      "id": "grp-mvpmd1z0-1fnqsv",
       "name": "Spark station"
     },
     {
-      "id": "grp-mvpm2iyv-4c7vw",
+      "id": "grp-mvpmd1z1-1geo8a",
       "name": "Spark station copy"
     }
   ],
-  "updatedAt": "2026-10-26T18:49:46.376Z"
+  "updatedAt": "2026-10-26T18:57:57.565Z"
 }

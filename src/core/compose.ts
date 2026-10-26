@@ -49,7 +49,7 @@ export function removeItems(c: Composition, ids: string[]): Composition {
   return touch(c, { items, groups: c.groups.filter((g) => used.has(g.id)) });
 }
 
-export function updateItem(c: Composition, id: string, patch: Partial<Pick<Placement, 'position' | 'rotation' | 'name' | 'ref' | 'snapshot'>>): Composition {
+export function updateItem(c: Composition, id: string, patch: Partial<Pick<Placement, 'position' | 'rotation' | 'name' | 'ref' | 'snapshot' | 'live'>>): Composition {
   return touch(c, { items: c.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) });
 }
 

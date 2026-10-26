@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="297mm" viewBox="0 0 420 297">
+<title>Demo module templates (sample)</title>
+<style>
+    .frame{stroke:#111;stroke-width:.35;fill:none}
+    .part{fill:#fff;stroke:#1a1a1a;stroke-width:.18;stroke-linejoin:round}
+    .floor{stroke:#1a1a1a;stroke-width:.5}
+    .dim{stroke:#555;stroke-width:.13}
+    .tick{stroke:#555;stroke-width:.25}
+    .tag{fill:#fff;stroke:#3b6400;stroke-width:.25}
+    text{font-family:Inter,Helvetica,Arial,sans-serif;fill:#111}
+    .dimtext{font-size:2.5px;fill:#333}
+    .tagtext{font-size:2.3px;font-weight:600;fill:#3b6400}
+    .view{font-size:3px;font-weight:700;letter-spacing:.3px}
+    .title{font-size:4.2px;font-weight:700}
+    .small{font-size:2.6px}
+    .tiny{font-size:2.1px;fill:#555}
+    .note{font-size:2.1px;fill:#555}</style>
+<rect x="0" y="0" width="420" height="297" fill="#fff"/>
+<rect x="10" y="10" width="400" height="277" class="frame"/>
+<g id="plan">
+<rect x="48.2" y="84.5" width="33.6" height="12.8" class="part"/>
+<rect x="114.2" y="84.5" width="27.6" height="12.8" class="part"/>
+<rect x="155" y="83.5" width="28" height="16" class="part"/>
+<rect x="156" y="84.5" width="26" height="14" class="part"/>
+<rect x="155" y="98.5" width="28" height="1" class="part"/>
+<rect x="155" y="83.5" width="28" height="1" class="part"/>
+<rect x="155" y="84.5" width="1" height="14" class="part"/>
+<rect x="182" y="84.5" width="1" height="14" class="part"/>
+<rect x="160.18" y="85.64" width="4.45" height="11.72" class="part"/>
+<rect x="173.25" y="86.4" width="4.7" height="10.2" class="part"/>
+<rect x="173.64" y="96.79" width="3.92" height="0.05" class="part"/>
+<rect x="95" y="84.5" width="18" height="2.4" class="part"/>
+<rect x="173.89" y="86.19" width="3.43" height="0.05" class="part"/>
+<rect x="95" y="84.5" width="18" height="14" class="part"/>
+<rect x="102.77" y="92.37" width="0.36" height="0.36" class="part"/>
+<rect x="104.87" y="92.37" width="0.36" height="0.36" class="part"/>
+<rect x="102.77" y="90.27" width="0.36" height="0.36" class="part"/>
+<rect x="104.87" y="90.27" width="0.36" height="0.36" class="part"/>
+<rect x="160.55" y="97.59" width="3.71" height="0.05" class="part"/>
+<rect x="102.8" y="90" width="2.4" height="0.05" class="part"/>
+<rect x="237" y="80.5" width="24" height="22" class="part"/>
+<rect x="160.78" y="85.4" width="3.24" height="0.05" class="part"/>
+<rect x="238" y="81.5" width="22" height="20" class="part"/>
+<rect x="173.15" y="86.19" width="4.9" height="10.6" class="part"/>
+<rect x="237" y="101.5" width="24" height="1" class="part"/>
+<rect x="237" y="80.5" width="24" height="1" class="part"/>
+<rect x="237" y="81.5" width="1" height="20" class="part"/>
+<rect x="260" y="81.5" width="1" height="20" class="part"/>
+<rect x="102.62" y="92.98" width="2.76" height="0.05" class="part"/>
+<rect x="102.5" y="90" width="3" height="2.98" class="part"/>
+<rect x="59" y="84.5" width="12" height="0.05" class="part"/>
+<rect x="122" y="84.5" width="12" height="0.05" class="part"/>
+<rect x="160.08" y="85.4" width="4.63" height="12.19" class="part"/>
+<rect x="47" y="84.5" width="36" height="14" class="part"/>
+<rect x="113" y="84.5" width="30" height="14" class="part"/>
+<rect x="250.35" y="100.48" width="7.71" height="0.05" class="part"/>
+<rect x="249.82" y="82.5" width="8.76" height="17.4" class="part"/>
+<rect x="249.82" y="99.9" width="8.76" height="0.6" class="part"/>
+<rect x="47" y="84.5" width="36" height="14" class="part"/>
+<rect x="113" y="84.5" width="30" height="14" class="part"/>
+<rect x="57.77" y="92.37" width="0.36" height="0.36" class="part"/>
+<rect x="59.87" y="92.37" width="0.36" height="0.36" class="part"/>
+<rect x="57.77" y="90.27" width="0.36" height="0.36" class="part"/>
+<rect x="59.87" y="90.27" width="0.36" height="0.36" class="part"/>
+<rect x="69.77" y="92.37" width="0.36" height="0.36" class="part"/>
+<rect x="71.87" y="92.37" width="0.36" height="0.36" class="part"/>
+<rect x="69.77" y="90.27" width="0.36" height="0.36" class="part"/>
+<rect x="71.87" y="90.27" width="0.36" height="0.36" class="part"/>
+<rect x="126.77" y="92.37" width="0.36" height="0.36" class="part"/>
+<rect x="128.87" y="92.37" width="0.36" height="0.36" class="part"/>
+<rect x="126.77" y="90.27" width="0.36" height="0.36" class="part"/>
+<rect x="128.87" y="90.27" width="0.36" height="0.36" class="part"/>
+<rect x="57.8" y="90" width="2.4" height="0.05" class="part"/>
+<rect x="69.8" y="90" width="2.4" height="0.05" class="part"/>
+<rect x="126.8" y="90" width="2.4" height="0.05" class="part"/>
+<rect x="57.62" y="92.98" width="2.76" height="0.05" class="part"/>
+<rect x="69.62" y="92.98" width="2.76" height="0.05" class="part"/>
+<rect x="126.62" y="92.98" width="2.76" height="0.05" class="part"/>
+<rect x="57.5" y="90" width="3" height="2.98" class="part"/>
+<rect x="69.5" y="90" width="3" height="2.98" class="part"/>
+<rect x="126.5" y="90" width="3" height="2.98" class="part"/>
+<rect x="239.95" y="100.48" width="7.71" height="0.05" class="part"/>
+<rect x="198" y="91.14" width="24" height="0.36" class="part"/>
+<rect x="198" y="85.86" width="24" height="5.28" class="part"/>
+<rect x="239.42" y="82.5" width="8.76" height="17.4" class="part"/>
+<rect x="239.42" y="99.9" width="8.76" height="0.6" class="part"/>
+<rect x="208.63" y="88.48" width="2.13" height="0.05" class="part"/>
+<rect x="208.35" y="88.89" width="1.48" height="0.05" class="part"/>
+<rect x="210.79" y="88.89" width="1.48" height="0.05" class="part"/>
+<rect x="207.27" y="88.09" width="5.78" height="0.81" class="part"/>
+<rect x="206.95" y="88.09" width="0.16" height="0.81" class="part"/>
+<rect x="198.36" y="85.86" width="23.28" height="5.08" class="part"/>
+<rect x="208.8" y="88.38" width="1.87" height="0.05" class="part"/>
+<rect x="210.91" y="88.79" width="1.17" height="0.05" class="part"/>
+<rect x="207.65" y="87.99" width="5.01" height="0.81" class="part"/>
+<rect x="207.33" y="87.99" width="0.16" height="0.81" class="part"/>
+<rect x="64.2" y="84.9" width="1.6" height="0.8" class="part"/>
+<rect x="127.2" y="84.9" width="1.6" height="0.8" class="part"/>
+<rect x="198.36" y="85.86" width="23.28" height="5.08" class="part"/>
+<rect x="208.8" y="88.38" width="1.87" height="0.05" class="part"/>
+<rect x="210.91" y="88.79" width="1.17" height="0.05" class="part"/>
+<rect x="207.65" y="87.99" width="5.01" height="0.81" class="part"/>
+<rect x="207.33" y="87.99" width="0.16" height="0.81" class="part"/>
+<rect x="52.58" y="85.7" width="24.83" height="0.6" class="part"/>
+<rect x="115.58" y="85.7" width="24.83" height="0.6" class="part"/>
+<rect x="198" y="85.5" width="24" height="0.36" class="part"/>
+<rect x="198" y="85.86" width="0.36" height="5.28" class="part"/>
+<rect x="221.64" y="85.86" width="0.36" height="5.28" class="part"/>
+<rect x="198" y="85.86" width="24" height="5.28" class="part"/>
+<rect x="195" y="91.14" width="3" height="0.36" class="part"/>
+<rect x="222" y="91.14" width="3" height="0.36" class="part"/>
+<rect x="198" y="91.14" width="24" height="0.36" class="part"/>
+</g>
+<g id="elevation">
+<rect x="237" y="160.5" width="24" height="0.12" class="part"/>
+<rect x="155" y="170.5" width="28" height="0.12" class="part"/>
+<rect x="59" y="159.9" width="12" height="16.2" class="part"/>
+<rect x="122" y="159.9" width="12" height="16.2" class="part"/>
+<rect x="160.78" y="160.61" width="3.24" height="3.41" class="part"/>
+<rect x="64.2" y="145.5" width="1.6" height="13" class="part"/>
+<rect x="127.2" y="145.5" width="1.6" height="13" class="part"/>
+<rect x="198" y="136.5" width="24" height="20" class="part"/>
+<rect x="173.89" y="161.77" width="3.43" height="3" class="part"/>
+<rect x="52.58" y="138.41" width="24.83" height="14.18" class="part"/>
+<rect x="115.58" y="138.41" width="24.83" height="14.18" class="part"/>
+<rect x="95" y="161.9" width="18" height="15" class="part"/>
+<rect x="208.8" y="149.37" width="1.87" height="0.28" class="part"/>
+<rect x="208.8" y="142.71" width="1.87" height="0.28" class="part"/>
+<rect x="208.63" y="155.86" width="2.13" height="0.28" class="part"/>
+<rect x="207.65" y="140.75" width="5.01" height="1.96" class="part"/>
+<rect x="207.33" y="140.75" width="0.16" height="2.24" class="part"/>
+<rect x="210.91" y="141.14" width="1.17" height="1.17" class="part"/>
+<rect x="207.65" y="147.42" width="5.01" height="1.96" class="part"/>
+<rect x="207.33" y="147.42" width="0.16" height="2.24" class="part"/>
+<rect x="210.91" y="147.81" width="1.17" height="1.17" class="part"/>
+<rect x="207.27" y="153.4" width="5.78" height="2.46" class="part"/>
+<rect x="206.95" y="153.4" width="0.16" height="2.74" class="part"/>
+<rect x="208.35" y="153.89" width="1.48" height="1.48" class="part"/>
+<rect x="210.79" y="153.89" width="1.48" height="1.48" class="part"/>
+<rect x="57.8" y="157.85" width="2.4" height="0.33" class="part"/>
+<rect x="69.8" y="157.85" width="2.4" height="0.33" class="part"/>
+<rect x="102.8" y="160.66" width="2.4" height="0.33" class="part"/>
+<rect x="126.8" y="157.85" width="2.4" height="0.33" class="part"/>
+<rect x="57.77" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="59.87" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="69.77" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="71.87" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="102.77" y="161.24" width="0.36" height="0.06" class="part"/>
+<rect x="104.87" y="161.24" width="0.36" height="0.06" class="part"/>
+<rect x="126.77" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="128.87" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="198.36" y="149.65" width="23.28" height="0.36" class="part"/>
+<rect x="198.36" y="142.99" width="23.28" height="0.36" class="part"/>
+<rect x="198" y="136.5" width="0.36" height="20" class="part"/>
+<rect x="221.64" y="136.5" width="0.36" height="20" class="part"/>
+<rect x="198" y="156.14" width="24" height="0.36" class="part"/>
+<rect x="198" y="136.5" width="24" height="0.36" class="part"/>
+<rect x="195" y="124.5" width="3" height="54" class="part"/>
+<rect x="222" y="124.5" width="3" height="54" class="part"/>
+<rect x="198" y="156.5" width="24" height="22" class="part"/>
+<rect x="198" y="124.5" width="24" height="12" class="part"/>
+<rect x="57.77" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="59.87" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="69.77" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="71.87" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="102.77" y="161.24" width="0.36" height="0.06" class="part"/>
+<rect x="104.87" y="161.24" width="0.36" height="0.06" class="part"/>
+<rect x="126.77" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="128.87" y="158.44" width="0.36" height="0.06" class="part"/>
+<rect x="57.5" y="157.49" width="3" height="0.95" class="part"/>
+<rect x="69.5" y="157.49" width="3" height="0.95" class="part"/>
+<rect x="102.5" y="160.29" width="3" height="0.95" class="part"/>
+<rect x="126.5" y="157.49" width="3" height="0.95" class="part"/>
+<rect x="57.62" y="157.56" width="2.76" height="0.8" class="part"/>
+<rect x="69.62" y="157.56" width="2.76" height="0.8" class="part"/>
+<rect x="102.62" y="160.36" width="2.76" height="0.8" class="part"/>
+<rect x="126.62" y="157.56" width="2.76" height="0.8" class="part"/>
+<rect x="173.25" y="170.28" width="4.7" height="0.24" class="part"/>
+<rect x="173.15" y="160.51" width="4.9" height="9.77" class="part"/>
+<rect x="173.64" y="162.07" width="3.92" height="7.21" class="part"/>
+<rect x="48.2" y="176.9" width="33.6" height="1.6" class="part"/>
+<rect x="114.2" y="176.9" width="27.6" height="1.6" class="part"/>
+<rect x="160.18" y="170.28" width="4.45" height="0.24" class="part"/>
+<rect x="160.08" y="159.14" width="4.63" height="11.14" class="part"/>
+<rect x="160.55" y="160.95" width="3.71" height="8.19" class="part"/>
+<rect x="47" y="159.1" width="36" height="17.8" class="part"/>
+<rect x="47" y="158.5" width="36" height="0.6" class="part"/>
+<rect x="113" y="159.1" width="30" height="17.8" class="part"/>
+<rect x="113" y="158.5" width="30" height="0.6" class="part"/>
+<rect x="95" y="161.3" width="18" height="0.6" class="part"/>
+<rect x="155" y="170.5" width="1" height="0.12" class="part"/>
+<rect x="182" y="170.5" width="1" height="0.12" class="part"/>
+<rect x="156" y="170.52" width="26" height="0.1" class="part"/>
+<rect x="155" y="170.62" width="28" height="7.88" class="part"/>
+<rect x="155" y="170.5" width="28" height="0.12" class="part"/>
+<rect x="239.42" y="156.12" width="8.76" height="4.4" class="part"/>
+<rect x="249.82" y="158.78" width="8.76" height="1.74" class="part"/>
+<rect x="239.42" y="156.12" width="8.76" height="4.4" class="part"/>
+<rect x="239.95" y="156.78" width="7.71" height="3.08" class="part"/>
+<rect x="249.82" y="158.78" width="8.76" height="1.74" class="part"/>
+<rect x="250.35" y="159.04" width="7.71" height="1.22" class="part"/>
+<rect x="237" y="160.5" width="1" height="0.12" class="part"/>
+<rect x="260" y="160.5" width="1" height="0.12" class="part"/>
+<rect x="238" y="160.52" width="22" height="0.1" class="part"/>
+<rect x="237" y="160.62" width="24" height="17.88" class="part"/>
+<rect x="237" y="160.5" width="24" height="0.12" class="part"/>
+<line x1="41" y1="178.5" x2="267" y2="178.5" class="floor"/>
+</g>
+<g id="dimensions">
+<line x1="47" y1="185.5" x2="261" y2="185.5" class="dim"/>
+<line x1="47" y1="184" x2="47" y2="187" class="tick"/>
+<line x1="261" y1="184" x2="261" y2="187" class="tick"/>
+<text x="154" y="189.1" class="dimtext" text-anchor="middle">10700</text>
+<line x1="39" y1="124.5" x2="39" y2="178.5" class="dim"/>
+<line x1="37.5" y1="124.5" x2="40.5" y2="124.5" class="tick"/>
+<line x1="37.5" y1="178.5" x2="40.5" y2="178.5" class="tick"/>
+<text x="37.4" y="151.5" class="dimtext" text-anchor="middle" transform="rotate(-90 37.4 151.5)">2700</text>
+<line x1="39" y1="80.5" x2="39" y2="102.5" class="dim"/>
+<line x1="37.5" y1="80.5" x2="40.5" y2="80.5" class="tick"/>
+<line x1="37.5" y1="102.5" x2="40.5" y2="102.5" class="tick"/>
+<text x="37.4" y="91.5" class="dimtext" text-anchor="middle" transform="rotate(-90 37.4 91.5)">1100</text>
+<line x1="47" y1="75.5" x2="261" y2="75.5" class="dim"/>
+<line x1="47" y1="74" x2="47" y2="77" class="tick"/>
+<line x1="261" y1="74" x2="261" y2="77" class="tick"/>
+<text x="154" y="74.1" class="dimtext" text-anchor="middle">10700</text>
+</g>
+<g id="tags">
+<circle cx="65" cy="91.5" r="2.1" class="tag"/>
+<text x="65" y="92.4" class="tagtext" text-anchor="middle">1</text>
+<circle cx="65" cy="135.21" r="2.1" class="tag"/>
+<text x="65" y="136.11" class="tagtext" text-anchor="middle">1</text>
+<circle cx="59" cy="154.29" r="2.1" class="tag"/>
+<text x="59" y="155.19" class="tagtext" text-anchor="middle">2</text>
+<circle cx="71" cy="154.29" r="2.1" class="tag"/>
+<text x="71" y="155.19" class="tagtext" text-anchor="middle">3</text>
+<circle cx="119" cy="91.5" r="2.1" class="tag"/>
+<text x="119" y="92.4" class="tagtext" text-anchor="middle">4</text>
+<circle cx="119" cy="135.21" r="2.1" class="tag"/>
+<text x="119" y="136.11" class="tagtext" text-anchor="middle">4</text>
+<circle cx="104" cy="157.09" r="2.1" class="tag"/>
+<text x="104" y="157.99" class="tagtext" text-anchor="middle">5</text>
+<circle cx="128" cy="154.29" r="2.1" class="tag"/>
+<text x="128" y="155.19" class="tagtext" text-anchor="middle">6</text>
+<circle cx="169" cy="91.5" r="2.1" class="tag"/>
+<text x="169" y="92.4" class="tagtext" text-anchor="middle">7</text>
+<circle cx="169" cy="167.3" r="2.1" class="tag"/>
+<text x="169" y="168.2" class="tagtext" text-anchor="middle">7</text>
+<circle cx="162.4" cy="155.94" r="2.1" class="tag"/>
+<text x="162.4" y="156.84" class="tagtext" text-anchor="middle">8</text>
+<circle cx="175.6" cy="157.31" r="2.1" class="tag"/>
+<text x="175.6" y="158.21" class="tagtext" text-anchor="middle">9</text>
+<circle cx="210" cy="88.5" r="2.1" class="tag"/>
+<text x="210" y="89.4" class="tagtext" text-anchor="middle">10</text>
+<circle cx="210" cy="121.3" r="2.1" class="tag"/>
+<text x="210" y="122.2" class="tagtext" text-anchor="middle">10</text>
+<circle cx="210" cy="150.2" r="2.1" class="tag"/>
+<text x="210" y="151.1" class="tagtext" text-anchor="middle">11</text>
+<circle cx="210" cy="144.22" r="2.1" class="tag"/>
+<text x="210" y="145.12" class="tagtext" text-anchor="middle">12</text>
+<circle cx="210" cy="137.55" r="2.1" class="tag"/>
+<text x="210" y="138.45" class="tagtext" text-anchor="middle">13</text>
+<circle cx="249" cy="91.5" r="2.1" class="tag"/>
+<text x="249" y="92.4" class="tagtext" text-anchor="middle">14</text>
+<circle cx="249" cy="157.3" r="2.1" class="tag"/>
+<text x="249" y="158.2" class="tagtext" text-anchor="middle">14</text>
+<circle cx="243.8" cy="152.92" r="2.1" class="tag"/>
+<text x="243.8" y="153.82" class="tagtext" text-anchor="middle">15</text>
+<circle cx="254.2" cy="155.58" r="2.1" class="tag"/>
+<text x="254.2" y="156.48" class="tagtext" text-anchor="middle">16</text>
+</g>
+<text x="24" y="71.5" class="view" text-anchor="start">PLAN</text>
+<text x="24" y="120.5" class="view" text-anchor="start">FRONT ELEVATION</text>
+<g id="list">
+<line x1="298" y1="10" x2="298" y2="287" class="frame"/>
+<text x="302" y="17" class="view" text-anchor="start">ITEMS</text>
+<circle cx="304" cy="23" r="2.1" class="tag"/>
+<text x="304" y="23.9" class="tagtext" text-anchor="middle">1</text>
+<text x="308" y="24" class="small" text-anchor="start">Demo counter</text>
+<text x="308" y="27.6" class="tiny" text-anchor="start">1800 × 700 × 2004 mm · Estimated</text>
+<circle cx="304" cy="32" r="2.1" class="tag"/>
+<text x="304" y="32.9" class="tagtext" text-anchor="middle">2</text>
+<text x="308" y="33" class="small" text-anchor="start">DGX Spark</text>
+<text x="308" y="36.6" class="tiny" text-anchor="start">150 × 150 × 51 mm · base +1000 · Verified</text>
+<circle cx="304" cy="41" r="2.1" class="tag"/>
+<text x="304" y="41.9" class="tagtext" text-anchor="middle">3</text>
+<text x="308" y="42" class="small" text-anchor="start">DGX Spark 2</text>
+<text x="308" y="45.6" class="tiny" text-anchor="start">150 × 150 × 51 mm · base +1000 · Verified</text>
+<circle cx="304" cy="50" r="2.1" class="tag"/>
+<text x="304" y="50.9" class="tagtext" text-anchor="middle">4</text>
+<text x="308" y="51" class="small" text-anchor="start">Demo counter 2</text>
+<text x="308" y="54.6" class="tiny" text-anchor="start">2400 × 700 × 2004 mm · Estimated</text>
+<circle cx="304" cy="59" r="2.1" class="tag"/>
+<text x="304" y="59.9" class="tagtext" text-anchor="middle">5</text>
+<text x="308" y="60" class="small" text-anchor="start">DGX Spark (seated)</text>
+<text x="308" y="63.6" class="tiny" text-anchor="start">150 × 150 × 51 mm · base +860 · Verified</text>
+<circle cx="304" cy="68" r="2.1" class="tag"/>
+<text x="304" y="68.9" class="tagtext" text-anchor="middle">6</text>
+<text x="308" y="69" class="small" text-anchor="start">DGX Spark (standing)</text>
+<text x="308" y="72.6" class="tiny" text-anchor="start">150 × 150 × 51 mm · base +1000 · Verified</text>
+<circle cx="304" cy="77" r="2.1" class="tag"/>
+<text x="304" y="77.9" class="tagtext" text-anchor="middle">7</text>
+<text x="308" y="78" class="small" text-anchor="start">Podium</text>
+<text x="308" y="81.6" class="tiny" text-anchor="start">1400 × 800 × 400 mm · Estimated</text>
+<circle cx="304" cy="86" r="2.1" class="tag"/>
+<text x="304" y="86.9" class="tagtext" text-anchor="middle">8</text>
+<text x="308" y="87" class="small" text-anchor="start">Dell Pro Max with GB300</text>
+<text x="308" y="90.6" class="tiny" text-anchor="start">232 × 611 × 569 mm · base +399 · Verified</text>
+<circle cx="304" cy="95" r="2.1" class="tag"/>
+<text x="304" y="95.9" class="tagtext" text-anchor="middle">9</text>
+<text x="308" y="96" class="small" text-anchor="start">GIGABYTE W775-V10-L01</text>
+<text x="308" y="99.6" class="tiny" text-anchor="start">245 × 531 × 500 mm · base +399 · Verified</text>
+<circle cx="304" cy="104" r="2.1" class="tag"/>
+<text x="304" y="104.9" class="tagtext" text-anchor="middle">10</text>
+<text x="308" y="105" class="small" text-anchor="start">Gallery niche</text>
+<text x="308" y="108.6" class="tiny" text-anchor="start">1500 × 300 × 2700 mm · Estimated</text>
+<circle cx="304" cy="113" r="2.1" class="tag"/>
+<text x="304" y="113.9" class="tagtext" text-anchor="middle">11</text>
+<text x="308" y="114" class="small" text-anchor="start">RTX PRO 6000 Workstation Edition</text>
+<text x="308" y="117.6" class="tiny" text-anchor="start">305 × 41 × 137 mm · base +1118 · Estimated</text>
+<circle cx="304" cy="122" r="2.1" class="tag"/>
+<text x="304" y="122.9" class="tagtext" text-anchor="middle">12</text>
+<text x="308" y="123" class="small" text-anchor="start">RTX PRO 5000</text>
+<text x="308" y="126.6" class="tiny" text-anchor="start">267 × 41 × 112 mm · base +1442 · Estimated</text>
+<circle cx="304" cy="131" r="2.1" class="tag"/>
+<text x="304" y="131.9" class="tagtext" text-anchor="middle">13</text>
+<text x="308" y="132" class="small" text-anchor="start">RTX PRO 6000 Max-Q</text>
+<text x="308" y="135.6" class="tiny" text-anchor="start">267 × 41 × 112 mm · base +1776 · Estimated</text>
+<circle cx="304" cy="140" r="2.1" class="tag"/>
+<text x="304" y="140.9" class="tagtext" text-anchor="middle">14</text>
+<text x="308" y="141" class="small" text-anchor="start">Light table</text>
+<text x="308" y="144.6" class="tiny" text-anchor="start">1200 × 1100 × 900 mm · Estimated</text>
+<circle cx="304" cy="149" r="2.1" class="tag"/>
+<text x="304" y="149.9" class="tagtext" text-anchor="middle">15</text>
+<text x="308" y="150" class="small" text-anchor="start">SN6800-LD</text>
+<text x="308" y="153.6" class="tiny" text-anchor="start">438 × 900 × 220 mm · base +899 · Verified</text>
+<circle cx="304" cy="158" r="2.1" class="tag"/>
+<text x="304" y="158.9" class="tagtext" text-anchor="middle">16</text>
+<text x="308" y="159" class="small" text-anchor="start">SN6810-LD</text>
+<text x="308" y="162.6" class="tiny" text-anchor="start">438 × 900 × 87 mm · base +899 · Verified</text>
+</g>
+<g id="title">
+<line x1="298" y1="253" x2="410" y2="253" class="frame"/>
+<text x="302" y="261" class="title" text-anchor="start">Demo module templates (sample)</text>
+<text x="302" y="267" class="small" text-anchor="start">Demo module · overall 10700 × 1100 × 2700 mm</text>
+<text x="302" y="272.5" class="small" text-anchor="start">Scale 1:50 at A3 · millimetres · 2026-10-26</text>
+<text x="302" y="278" class="tiny" text-anchor="start">Design intent. Check every Estimated or Placeholder value before fabrication.</text>
+<text x="302" y="282" class="tiny" text-anchor="start">MAESTRO 0.1.0 · sample</text>
+</g>
+</svg>

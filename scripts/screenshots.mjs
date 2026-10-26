@@ -37,6 +37,26 @@ for (const n of ['Demo counter', 'DGX Spark', 'Hardware light table', 'DGX B200'
 await page.locator('.chip', { hasText: 'Frame all' }).click();
 await page.locator('.tree-item').nth(1).click();
 await shot('07-compose-module');
+// Round 03: templates, place on surface, power schedule, sheet
+const deselect = () => page.mouse.click(800, 140);
+await deselect();
+await page.locator('button', { hasText: 'New module' }).click();
+for (const t of ['DGX Spark demo counter', 'RTX PRO board niche', 'Spectrum-X switch table']) { await page.locator('.link-row', { hasText: t }).click(); await page.waitForTimeout(300); await deselect(); }
+await deselect();
+await page.locator('.chip', { hasText: 'Frame all' }).click();
+await shot('14-compose-templates');
+await page.locator('.tree-item', { hasText: 'RTX PRO 5000' }).click();
+await page.locator('button', { hasText: 'Place on Gallery niche' }).click();
+await shot('15-compose-place-on-shelf');
+await deselect();
+await page.locator('.section', { hasText: 'Power and data' }).first().scrollIntoViewIfNeeded();
+await shot('16-compose-power-schedule');
+// the A3 sheet the module exports, rendered from the sample file written by export:samples
+const sheet = await browser.newPage({ viewport: { width: 1587, height: 1123 } });
+await sheet.goto(new URL('../samples/demo-modules.sheet.svg', import.meta.url).href);
+await sheet.screenshot({ path: `${out}/17-elevation-sheet.png` });
+await sheet.close();
+console.log('saved 17-elevation-sheet');
 await page.locator('.segmented button', { hasText: 'Import' }).click();
 await shot('08-import-intro');
 await page.locator('.logo').click(); await shot('09-about');

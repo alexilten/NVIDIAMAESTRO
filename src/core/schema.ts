@@ -210,6 +210,8 @@ export interface Placement {
   /** degrees about +Z */
   rotation: number;
   groupId?: string;
+  /** powered and running in the demo (true) or shown as a static object (false); unset = the item's default */
+  live?: boolean;
   /** the item's envelope when it was placed, so a later catalog change is detected rather than silently applied */
   snapshot: { width: number; depth: number; height: number; version: number };
 }

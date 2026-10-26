@@ -52,6 +52,7 @@ export const LINEUP_MODELS: ProductModel[] = [
     description: 'GIGABYTE’s DGX Station system, a liquid-cooled deskside pedestal.', purpose: 'One physical implementation of DGX Station.', industries: ['AI development', 'Enterprise AI'],
     specs: [
       { label: 'Power supply', spec: s<string>('1 × 1600 W ATX 80 PLUS Platinum; C19 cord; 20 A circuit', 'verified', 'gb-w775') },
+      { label: 'Power supply rating', spec: s<number>(1600, 'verified', 'gb-w775'), unit: 'W' },
       { label: 'Cooling', spec: s<string>('Closed-loop liquid cooling; 3 × 120 mm system fans', 'verified', 'gb-w775') },
     ],
     physicalAssetId: 'pa-gb-w775-v10', related: ['nv-dgx-station-gb300'], tags: ['dgx station', 'gb300', 'gigabyte', 'pedestal', 'liquid cooled'], sources: ['gb-w775'],
@@ -72,6 +73,7 @@ export const LINEUP_MODELS: ProductModel[] = [
     description: 'MSI’s DGX Station system, a deskside tower.', purpose: 'One physical implementation of DGX Station.', industries: ['AI development', 'Enterprise AI'],
     specs: [
       { label: 'Power supply', spec: s<string>('1600 W 80 PLUS Platinum ATX', 'verified', 'msi-ws300') },
+      { label: 'Power supply rating', spec: s<number>(1600, 'verified', 'msi-ws300'), unit: 'W' },
       { label: 'Networking', spec: s<string>('2 × 400 GbE QSFP (ConnectX-8), 1 × 10 GbE RJ45', 'verified', 'msi-ws300') },
     ],
     physicalAssetId: 'pa-msi-ws300', related: ['nv-dgx-station-gb300'], tags: ['dgx station', 'gb300', 'msi', 'tower', 'xpertstation'], sources: ['msi-ws300'],
@@ -82,6 +84,7 @@ export const LINEUP_MODELS: ProductModel[] = [
     specs: [
       { label: 'Form factor', spec: s<string>('Tower or 5U', 'verified', 'smc-ars-511gd') },
       { label: 'Power supply', spec: s<string>('1 × 1600 W Titanium', 'verified', 'smc-ars-511gd') },
+      { label: 'Power supply rating', spec: s<number>(1600, 'verified', 'smc-ars-511gd'), unit: 'W' },
       { label: 'Cooling', spec: s<string>('Closed-loop direct-to-chip liquid cooling; 2 × 140 mm fans', 'verified', 'smc-ars-511gd') },
     ],
     physicalAssetId: 'pa-smc-ars-511gd', related: ['nv-dgx-station-gb300'], tags: ['dgx station', 'gb300', 'supermicro', 'tower', '5u', 'liquid cooled'], sources: ['smc-ars-511gd'],

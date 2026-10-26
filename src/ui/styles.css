@@ -293,3 +293,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
 @media (max-width: 1180px) { :root { --left-w: 272px; --right-w: 280px; } .tb-note { display: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+
+/* Round 03: compose services */
+.check-row { display: flex; align-items: center; gap: 8px; font-size: 12.5px; padding: 4px 0 8px; cursor: pointer; }
+.check-row input { accent-color: var(--accent); }
+.ghost.wide + .note { margin-top: 6px; }
+.section-body .ghost.wide { margin-top: 8px; }

@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { placeOn, snapDelta, supportSurfaces } from '../core/arrange';
+import { insertComposition, type Template } from '../core/templates';
 import { addItem, alignItems, distributeX, duplicateItems, expandToGroups, groupItems, moveItems, newComposition, nextSlot, removeItems, rotateItems, ungroup, updateItem } from '../core/compose';
 import { resolveRef, type LibraryEntry } from '../core/library';
 import { boxSize, shapeBounds } from '../core/geometry/shape';
@@ -34,7 +36,7 @@ interface State {
   dims: boolean;
   autoRotate: boolean;
   scaleFigure: boolean;
-  toggle: (k: 'ortho' | 'xray' | 'dims' | 'autoRotate' | 'scaleFigure') => void;
+  toggle: (k: 'ortho' | 'xray' | 'dims' | 'autoRotate' | 'scaleFigure' | 'snap') => void;
   favorites: string[];
   toggleFavorite: (key: string) => void;
 
@@ -55,7 +57,8 @@ interface State {
   setComp: (c: Composition, record?: boolean) => void;
   undo: () => void;
   redo: () => void;
-  selectItems: (ids: string[], additive?: boolean) => void;
+  /** `exact` selects the given items alone, without the rest of their groups */
+  selectItems: (ids: string[], additive?: boolean, exact?: boolean) => void;
   addToCanvas: (ref: ItemRef, name: string) => void;
   duplicate: () => void;
   remove: () => void;
@@ -65,7 +68,12 @@ interface State {
   rotate: (deg: number) => void;
   align: (axis: 0 | 1 | 2) => void;
   distribute: () => void;
-  setItem: (id: string, patch: Partial<Pick<Placement, 'position' | 'rotation' | 'name' | 'ref' | 'snapshot'>>) => void;
+  snap: boolean;
+  lastSnap: string | null;
+  placeOnSurface: () => void;
+  supportFor: (id: string) => Placement | null;
+  insertTemplate: (t: Template) => void;
+  setItem: (id: string, patch: Partial<Pick<Placement, 'position' | 'rotation' | 'name' | 'ref' | 'snapshot' | 'live'>>) => void;
   saveComp: () => Promise<void>;
   openComp: (c: Composition) => void;
   newComp: () => void;
@@ -143,9 +151,9 @@ export const useStore = create<State>((set, get) => {
     setComp: (c, record = true) => { if (record) commit(c); else { writeLocal(COMP_KEY, c); set({ comp: c }); } },
     undo: () => { const { history, comp, future } = get(); if (!history.length) return; const prev = history[history.length - 1]; writeLocal(COMP_KEY, prev); set({ comp: prev, history: history.slice(0, -1), future: [comp, ...future] }); },
     redo: () => { const { history, comp, future } = get(); if (!future.length) return; writeLocal(COMP_KEY, future[0]); set({ comp: future[0], history: [...history, comp], future: future.slice(1) }); },
-    selectItems: (ids, additive) => {
+    selectItems: (ids, additive, exact) => {
       const { comp, selection } = get();
-      const exp = expandToGroups(comp, ids);
+      const exp = exact ? ids : expandToGroups(comp, ids);
       if (!additive) { set({ selection: exp }); return; }
       const already = ids.every((i) => selection.includes(i));
       set({ selection: already ? selection.filter((x) => !exp.includes(x)) : [...new Set([...selection, ...exp])] });
@@ -155,12 +163,20 @@ export const useStore = create<State>((set, get) => {
       const r = resolveRef(ref, parts);
       if (!r?.shape) { get().notify('This item has no physical geometry to place.'); return; }
       const dims = boxSize(shapeBounds(r.shape));
-      const at = nextSlot(comp, (p) => extentOf(p, parts), dims[0]);
       const version = ref.kind === 'ingested' ? ref.version : 1;
-      const { comp: c, id } = addItem(comp, ref, name, dims, at, version);
+      // with one kit part selected, the new item goes onto it; otherwise to the right of everything
+      const { selection } = get();
+      const host = selection.length === 1 && ref.kind !== 'kit' ? comp.items.find((i) => i.id === selection[0] && i.ref.kind === 'kit') : undefined;
+      const at = host ? host.position : nextSlot(comp, (p) => extentOf(p, parts), dims[0]);
+      let { comp: c, id } = addItem(comp, ref, name, dims, at, version);
+      let where = c.name;
+      if (host) {
+        const on = placeOn(c, id, host.id, (p) => resolveRef(p.ref, parts)?.shape ?? null);
+        if (on) { c = on.comp; where = `${host.name}${on.overhang ? ' (it overhangs the surface)' : ''}`; }
+      }
       commit(c);
       set({ selection: [id], workspace: 'compose' });
-      get().notify(`${name} added to ${c.name}.`);
+      get().notify(`${name} added to ${where}.`);
     },
     duplicate: () => {
       const { comp, selection, parts } = get();
@@ -187,11 +203,62 @@ export const useStore = create<State>((set, get) => {
       for (const g of gids) c = ungroup(c, g);
       commit(c);
     },
-    move: (delta) => { const { comp, selection } = get(); if (selection.length) commit(moveItems(comp, selection, delta)); },
+    move: (delta) => {
+      const { comp, selection, parts, snap } = get();
+      if (!selection.length) return;
+      let d = delta, note: string | null = null;
+      if (snap) {
+        const mine = comp.items.filter((i) => selection.includes(i.id)).map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[];
+        const others = comp.items.filter((i) => !selection.includes(i.id)).map((p) => extentOf(p, parts)).filter(Boolean) as { min: Vec3; max: Vec3 }[];
+        if (mine.length) {
+          const ext = { min: [0, 1, 2].map((k) => Math.min(...mine.map((e) => e.min[k]))) as Vec3, max: [0, 1, 2].map((k) => Math.max(...mine.map((e) => e.max[k]))) as Vec3 };
+          const s = snapDelta(ext, others, delta);
+          d = s.delta; note = s.note;
+        }
+      }
+      commit(moveItems(comp, selection, d));
+      set({ lastSnap: note });
+      if (note) get().notify(`Snapped: ${note}.`);
+    },
     rotate: (deg) => { const { comp, selection } = get(); if (selection.length) commit(rotateItems(comp, selection, deg)); },
     align: (axis) => { const { comp, selection } = get(); if (selection.length > 1) commit(alignItems(comp, selection, axis)); },
     distribute: () => { const { comp, selection } = get(); if (selection.length > 2) commit(distributeX(comp, selection)); },
     setItem: (id, patch) => commit(updateItem(get().comp, id, patch)),
+    snap: true,
+    lastSnap: null,
+    supportFor: (id) => {
+      const { comp, parts } = get();
+      const me = comp.items.find((i) => i.id === id);
+      if (!me) return null;
+      const [x, y] = me.position;
+      // the largest other item under the item's plan centre that offers a surface
+      const under = comp.items.filter((o) => o.id !== id).map((o) => ({ o, e: extentOf(o, parts), s: resolveRef(o.ref, parts)?.shape }))
+        .filter((c) => c.e && c.s && supportSurfaces(c.s).length && x >= c.e.min[0] && x <= c.e.max[0] && y >= c.e.min[1] && y <= c.e.max[1])
+        .sort((a, b) => (b.e!.max[0] - b.e!.min[0]) * (b.e!.max[1] - b.e!.min[1]) - (a.e!.max[0] - a.e!.min[0]) * (a.e!.max[1] - a.e!.min[1]));
+      return under[0]?.o ?? null;
+    },
+    placeOnSurface: () => {
+      const { comp, selection, parts } = get();
+      if (selection.length !== 1) return;
+      const host = get().supportFor(selection[0]);
+      if (!host) { get().notify('Move the item over a counter, table, niche or other item first.'); return; }
+      const r = placeOn(comp, selection[0], host.id, (p) => resolveRef(p.ref, parts)?.shape ?? null);
+      if (!r) return;
+      commit(r.comp);
+      get().notify(`On ${host.name}, ${r.surface.toLowerCase().replace(/_/g, ' ')}${r.overhang ? '; it overhangs the surface' : ''}.`);
+    },
+    insertTemplate: (tpl) => {
+      const { comp, parts } = get();
+      const src = tpl.build();
+      const srcEx = src.items.map((p) => extentOf(p, [])).filter(Boolean) as { min: Vec3; max: Vec3 }[];
+      const minX = Math.min(...srcEx.map((e) => e.min[0]));
+      const w = Math.max(...srcEx.map((e) => e.max[0])) - minX;
+      const slot = nextSlot(comp, (p) => extentOf(p, parts), w);
+      const r = insertComposition(comp, src, [Math.round(slot[0] - w / 2 - minX), 0, 0], tpl.name);
+      commit(r.comp);
+      set({ selection: r.ids, workspace: 'compose' });
+      get().notify(`${tpl.name} inserted as a group of ${r.ids.length}.`);
+    },
     saveComp: async () => {
       const c = get().comp;
       try {
