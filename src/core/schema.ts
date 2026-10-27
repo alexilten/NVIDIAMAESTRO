@@ -125,6 +125,16 @@ export interface ProductModel {
   tags: string[];
   sources: string[];
   lastReviewed: string;
+  /** an official product photo for the inspector, cut out on a transparent background; without one the product is drawn from its model */
+  image?: ProductImage;
+}
+
+export interface ProductImage {
+  /** a file in public/products/ or a full URL */
+  src: string;
+  /** the page the photo was taken from */
+  sourceId: string;
+  credit: string;
 }
 
 export interface Interface {
