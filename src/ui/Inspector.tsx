@@ -8,6 +8,7 @@ import { checkState } from '../ingest/pipeline';
 import { useStore } from './store';
 import { Icon, KV, LodBadge, Section, VBadge, dims3, mm } from './common';
 import { exportItemFile } from './exportActions';
+import { ProductHero } from './ProductHero';
 
 export function Inspector({ refItem }: { refItem: ItemRef | null }) {
   const parts = useStore((s) => s.parts);
@@ -34,6 +35,7 @@ function Header({ r, refItem }: { r: NonNullable<ReturnType<typeof resolveRef>>;
   const physical = !!r.shape;
   return (
     <div className="insp-head">
+      <ProductHero refItem={refItem} entry={e} shape={r.shape} />
       <div className="insp-kicker">{e.subtitle}</div>
       <h2 className="insp-title">{e.name}</h2>
       <div className="insp-badges">
