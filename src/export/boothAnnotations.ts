@@ -26,7 +26,7 @@ export function boothAnnotations(c: Composition, a: BoothAnalysis): Annotation[]
     out.push({ kind: 'circle', layer: '60_TECHNICAL_INFRASTRUCTURE::SERVICE_POINTS', name: sp.name, center: [sp.x, sp.y, 0], radius: 150, user: { kind: sp.kind, capacity_w: sp.capacityW ?? 'not stated', status: sp.status, stated_load_w: l.watts } });
     out.push({ kind: 'dot', layer: '60_TECHNICAL_INFRASTRUCTURE::SERVICE_POINTS', name: `${sp.name}.LABEL`, text: `${sp.name} · ${sp.kind} · ${(l.watts / 1000).toFixed(2)} kW stated`, at: [sp.x, sp.y, 300] });
   }
-  for (const z of a.access) {
+  for (const z of a.access.filter((x) => !x.overhead)) {
     const u = a.units.find((x) => x.id === z.unit);
     out.push({ kind: 'polyline', layer: '91_CLEARANCES::APPROACH_ZONES', name: `${u?.name ?? z.unit} APPROACH`, points: rect(z.zone.min[0], z.zone.min[1], z.zone.max[0], z.zone.max[1]), closed: true, user: { accessible_approach: z.approach ? 'yes' : 'no', turning_circle: z.turning ? 'yes' : 'no' } });
   }

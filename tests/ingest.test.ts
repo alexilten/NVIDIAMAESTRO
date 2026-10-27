@@ -108,4 +108,18 @@ describe('Rhino export of an ingested part', () => {
     expect(Number(inst.user['maestro.height_mm'])).toBeCloseTo(FIXTURE.dims[2], 0);
     expect(inst.user['maestro.source']).toBe(`${FIXTURE.fileName}#${FIXTURE.plinth}`);
   });
+
+  it('exports the display mesh of a part published without its source geometry', () => {
+    const light: IngestedPart = { ...part, geometry: { ...part.geometry, defs: {} } };
+    const ref = { kind: 'ingested' as const, id: part.id, version: part.version };
+    const c = addItem(newComposition('Light'), ref, part.name, part.dims, [0, 0, 0]).comp;
+    const item = exportItemFor(c.items[0], [light])!;
+    expect(item.part).toBeUndefined();
+    expect(item.description).toMatch(/Simplified display mesh/);
+    const r = exportComposition(rh, c, (p) => exportItemFor(p, [light]), 'test');
+    expect(r.skipped).toEqual([]);
+    const back = readBack(rh, r.bytes);
+    expect(back.instances).toHaveLength(1);
+    expect(back.blocks.some((b) => b.name.startsWith('SRC_'))).toBe(false);
+  });
 });

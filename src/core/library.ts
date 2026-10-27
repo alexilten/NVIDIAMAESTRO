@@ -145,10 +145,12 @@ export function exportItemFor(p: Placement, parts: IngestedPart[]): ExportItem |
     };
   }
   const part = r.part!;
+  // a part published without its source geometry (too heavy for the site) exports its simplified display mesh
+  const exact = !!part.geometry.defs[part.geometry.root];
   return {
     key: `ingested:${part.id}@${part.version}`, blockName: `${blockSlug(part.source.block)} v${part.version}`, layer: KIT_LAYER[part.category],
-    description: `${part.name} — ${part.project}. Source geometry from ${part.source.fileName} (sha256 ${part.source.sha256.slice(0, 12)}…), block “${part.source.block}”${part.source.derivedFrom ? `, derived from “${part.source.derivedFrom}”` : ''}; scaled ${part.source.units} → mm. ${part.status === 'approved' ? `Approved ${part.approvedAt?.slice(0, 10)}.` : 'Not yet approved.'}`,
-    verification: part.status === 'approved' ? 'project' : 'estimated', lod: 2, source: `${part.source.fileName}#${part.source.block}`, dims: part.dims,
-    part: { geometry: part.geometry, materials: part.materials, sourceHash: part.source.sha256 },
+    description: `${part.name} — ${part.project}. ${exact ? 'Source geometry' : 'Simplified display mesh'} from ${part.source.fileName} (sha256 ${part.source.sha256.slice(0, 12)}…), block “${part.source.block}”${part.source.derivedFrom ? `, derived from “${part.source.derivedFrom}”` : ''}; scaled ${part.source.units} → mm.${exact ? '' : ' Use the source file for exact geometry.'} ${part.status === 'approved' ? `Approved ${part.approvedAt?.slice(0, 10)}.` : 'Not yet approved.'}`,
+    verification: part.status === 'approved' ? 'project' : 'estimated', lod: exact ? 2 : 1, source: `${part.source.fileName}#${part.source.block}`, dims: part.dims,
+    ...(exact ? { part: { geometry: part.geometry, materials: part.materials, sourceHash: part.source.sha256 } } : { shape: r.shape! }),
   };
 }

@@ -352,7 +352,7 @@ export const useStore = create<State>((set, get) => {
         const res = await fetch(`${base}shows/shows.json`);
         if (!res.ok) return;
         const f = parseShowPresets(await res.text());
-        const built = f.presets.map((p) => ({ ...p, builtIn: true, partsUrl: `${base}shows/parts.json` }));
+        const built = f.presets.map((p) => ({ ...p, builtIn: true, partsUrl: `${base}shows/${p.partsUrl ?? 'parts.json'}` }));
         const ids = new Set(built.map((p) => p.id));
         set({ showPresets: [...built, ...get().showPresets.filter((p) => !p.builtIn && !ids.has(p.id))] });
       } catch { /* offline or no shows shipped: the dropdown offers the sample and files */ }

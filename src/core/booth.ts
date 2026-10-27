@@ -282,7 +282,11 @@ export interface Issue {
   turn?: number;
 }
 
-export interface UnitAccess { unit: string; approach: boolean; turning: boolean; zone: { min: [number, number]; max: [number, number] } }
+export interface UnitAccess {
+  unit: string; approach: boolean; turning: boolean; zone: { min: [number, number]; max: [number, number] };
+  /** hung above the headroom: no approach is needed, and none is drawn */
+  overhead?: boolean;
+}
 
 export interface UnitService {
   unit: string;
@@ -399,6 +403,8 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
   };
   const access: UnitAccess[] = units.map((u) => {
     const zone = approachZone(u.extent, u.front, b.rules.approach.value);
+    // overhead items (signs, rigging) clear the headroom and need no approach of their own
+    if (u.extent.min[2] >= b.rules.headroom.value) return { unit: u.id, approach: true, turning: true, zone, overhead: true };
     const cells = cellsIn(zone);
     const approach = cells.some((i) => routeC[i]);
     const turn = cells.some((i) => turnC[i]);
