@@ -93,8 +93,10 @@ interface State {
   loadSampleBooth: () => void;
   /** show presets loaded from a private `*.maestro-shows.json` file; kept in this browser only */
   showPresets: ShowPreset[];
+  /** fetch the presets that ship with the site */
+  loadBuiltInShows: () => Promise<void>;
   loadShowPresets: (text: string) => Promise<void>;
-  startShowPreset: (p: ShowPreset) => void;
+  startShowPreset: (p: ShowPreset) => Promise<void>;
   clearShowPresets: () => void;
   /** replace a placed module with the current version of its saved source */
   refreshPlaced: (groupId: string) => void;
@@ -344,6 +346,17 @@ export const useStore = create<State>((set, get) => {
     },
     loadSampleBooth: () => { commit(sampleExhibition()); set({ selection: [] }); get().notify('Sample booth loaded. It is synthetic: its plot, limits and service points are placeholders.'); },
     showPresets: readLocal<ShowPreset[]>(SHOWS_KEY, []),
+    loadBuiltInShows: async () => {
+      const base = import.meta.env.BASE_URL;
+      try {
+        const res = await fetch(`${base}shows/shows.json`);
+        if (!res.ok) return;
+        const f = parseShowPresets(await res.text());
+        const built = f.presets.map((p) => ({ ...p, builtIn: true, partsUrl: `${base}shows/parts.json` }));
+        const ids = new Set(built.map((p) => p.id));
+        set({ showPresets: [...built, ...get().showPresets.filter((p) => !p.builtIn && !ids.has(p.id))] });
+      } catch { /* offline or no shows shipped: the dropdown offers the sample and files */ }
+    },
     loadShowPresets: async (text) => {
       let f;
       try { f = parseShowPresets(text); } catch (e) { get().notify((e as Error).message); return; }
@@ -355,19 +368,29 @@ export const useStore = create<State>((set, get) => {
       }
       const ids = new Set(f.presets.map((p) => p.id));
       const all = [...get().showPresets.filter((p) => !ids.has(p.id)), ...f.presets];
-      writeLocal(SHOWS_KEY, all);
+      writeLocal(SHOWS_KEY, all.filter((p) => !p.builtIn));
       set({ showPresets: all });
       const parts = added ? `, ${added} project part${added === 1 ? '' : 's'} added to the library` : '';
       const clash = conflicts ? `. ${conflicts} part${conflicts === 1 ? '' : 's'} differ from the copy already here; the local copy is kept` : '';
       get().notify(`${f.presets.length} show preset${f.presets.length === 1 ? '' : 's'} loaded from ${f.name}${parts}${clash}.`);
     },
-    startShowPreset: (p) => {
-      const missing = missingParts(p, get().parts);
+    startShowPreset: async (p) => {
+      let missing = missingParts(p, get().parts);
+      if (missing.length && p.partsUrl) {
+        get().notify(`Loading the parts for ${p.name}…`);
+        try {
+          const res = await fetch(p.partsUrl);
+          if (!res.ok) throw new Error(String(res.status));
+          const r = readBundle(await res.text(), get().parts, p.show);
+          for (const x of r.add) { try { await get().savePart(x); } catch { set({ parts: [...get().parts, x] }); } }
+        } catch { /* reported below as missing parts */ }
+        missing = missingParts(p, get().parts);
+      }
       commit(startFromPreset(p));
       set({ selection: [], workspace: 'exhibition' });
-      get().notify(missing.length ? `${p.name} opened. ${missing.length} project part${missing.length === 1 ? ' is' : 's are'} not in this browser's library; load the presets file again to add ${missing.length === 1 ? 'it' : 'them'}.` : `${p.name} opened as a new exhibition. The preset itself is unchanged.`);
+      get().notify(missing.length ? `${p.name} opened. ${missing.length} project part${missing.length === 1 ? ' is' : 's are'} not in this browser's library, so ${missing.length === 1 ? 'it is' : 'they are'} not drawn.` : `${p.name} opened as a new exhibition. The preset itself is unchanged.`);
     },
-    clearShowPresets: () => { writeLocal(SHOWS_KEY, []); set({ showPresets: [] }); get().notify('Show presets removed from this browser. Project parts stay in the library.'); },
+    clearShowPresets: () => { const keep = get().showPresets.filter((p) => p.builtIn); writeLocal(SHOWS_KEY, []); set({ showPresets: keep }); get().notify('Loaded show presets removed from this browser. Project parts stay in the library.'); },
     circulation: true,
 
     presentKind: (k) => { const next = docFor(k); if (next) set({ comp: next, history: [], future: [], selection: [] }); },

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { plotOutline } from '../core/booth';
 import { sampleExhibition } from '../core/exhibitionSample';
 import { showsOf, type ShowPreset } from '../core/showPresets';
-import type { Composition } from '../core/schema';
+import type { Composition, Placement } from '../core/schema';
 import type { IngestedPart } from '../ingest/types';
 import { Icon } from './common';
 import { extentOf, useStore } from './store';
@@ -12,8 +12,7 @@ const MINE = 'Mine';
 
 /**
  * Show presets: the booths the team has built, by show, to start an exhibition from. A category row and a
- * thumbnail grid, as in Stagework. Presets come from a private file loaded into this browser; the public build
- * ships the synthetic sample only.
+ * thumbnail grid, as in Stagework. The published shows ship with the site; more load from a presets file.
  */
 export function ShowPicker() {
   const comp = useStore((s) => s.comp);
@@ -97,12 +96,15 @@ export function ShowPicker() {
               ))}
             </div>
           )}
+          {cat !== SAMPLES && cat !== MINE && list.some((p) => p.builtIn) && (
+            <p className="preset-blurb">As built, from the show's Rhino model. Parts not yet checked against the fabrication drawings are marked Estimated.</p>
+          )}
           {!presets.length && cat !== MINE && (
-            <p className="preset-blurb">The booths from past shows are project material, so they are not part of this site. Load the team's <span className="mono">.maestro-shows.json</span> file from private storage to add them here. It stays in this browser.</p>
+            <p className="preset-blurb">No show presets yet. Load a <span className="mono">.maestro-shows.json</span> file to add booths here. It stays in this browser.</p>
           )}
           <div className="preset-foot">
             <button className="ghost" onClick={() => fileRef.current?.click()}>Load show presets…</button>
-            {presets.length > 0 && <button className="ghost" onClick={clear}>Remove from this browser</button>}
+            {presets.some((p) => !p.builtIn) && <button className="ghost" onClick={clear}>Remove loaded presets</button>}
           </div>
           <input ref={fileRef} type="file" accept=".json" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); e.target.value = ''; }} />
         </div>
@@ -121,16 +123,23 @@ export function PlanThumb({ comp, parts }: { comp: Composition; parts: IngestedP
   const x0 = Math.min(...xs) - pad, x1 = Math.max(...xs) + pad, y0 = Math.min(...ys) - pad, y1 = Math.max(...ys) + pad;
   // plan view: +Y (back) up, so flip y
   const pts = o.map(([x, y]) => `${x},${-y}`).join(' ');
-  const boxes = comp.items.map((p) => ({ id: p.id, e: extentOf(p, parts) })).filter((x) => x.e);
+  // a part this browser has not fetched yet is drawn from the size recorded when it was placed
+  const boxes = comp.items.map((p) => ({ id: p.id, e: extentOf(p, parts) ?? snapshotExtent(p) }));
   return (
     <span className="preset-thumb">
       <svg viewBox={`${x0} ${-y1} ${x1 - x0} ${y1 - y0}`} preserveAspectRatio="xMidYMid meet" aria-hidden>
         <polygon points={pts} className="pt-plot" />
-        {boxes.map(({ id, e }) => <rect key={id} x={e!.min[0]} y={-e!.max[1]} width={e!.max[0] - e!.min[0]} height={e!.max[1] - e!.min[1]} className="pt-item" />)}
+        {boxes.map(({ id, e }) => <rect key={id} x={e.min[0]} y={-e.max[1]} width={e.max[0] - e.min[0]} height={e.max[1] - e.min[1]} className="pt-item" />)}
         {(b.columns ?? []).map((k) => <rect key={k.id} x={k.x - k.w / 2} y={-k.y - k.d / 2} width={k.w} height={k.d} className="pt-col" />)}
       </svg>
     </span>
   );
+}
+
+function snapshotExtent(p: Placement) {
+  const a = (p.rotation * Math.PI) / 180, w = p.snapshot.width / 2, d = p.snapshot.depth / 2;
+  const hx = Math.abs(w * Math.cos(a)) + Math.abs(d * Math.sin(a)), hy = Math.abs(w * Math.sin(a)) + Math.abs(d * Math.cos(a));
+  return { min: [p.position[0] - hx, p.position[1] - hy, 0], max: [p.position[0] + hx, p.position[1] + hy, 0] };
 }
 
 export type { ShowPreset };

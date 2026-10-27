@@ -1,0 +1,455 @@
+{
+ "schema": "maestro.show-presets",
+ "version": 1,
+ "name": "Show presets",
+ "exportedAt": "2026-10-27T14:05:08.257Z",
+ "presets": [
+  {
+   "id": "gtc-berlin-2026",
+   "show": "GTC Berlin",
+   "edition": "2026",
+   "name": "GTC Berlin 2026",
+   "summary": "Stepped 46.7 × 19 m plot on the main aisle; hardware wall, 5 quad and 2 tri kiosks",
+   "sources": [
+    "NVIDIA_Booth_Kit_Master.3dm, block NV_ASSEMBLY_GTC Berlin Booth 2026 (exact)",
+    "20260923_NVIDIA_BERLIN_R4_MY.3dm, FINAL BOOTH BOUNDARY and columns",
+    "Berlin Fabrication Deck p.19 (plan as of 13 Oct): names and aisle"
+   ],
+   "comp": {
+    "schema": "maestro.composition",
+    "version": 1,
+    "id": "comp-gtcber-2026",
+    "name": "GTC Berlin 2026",
+    "kind": "exhibition",
+    "items": [
+     {
+      "id": "it-robots",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-robot-alcove-l-shape",
+       "version": 1
+      },
+      "name": "Robots",
+      "position": [
+       -19850,
+       -564,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 6781.800000000041,
+       "depth": 6074.4437781791985,
+       "height": 3117.2872556725088,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-quad-kiosk-1",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-mvpsb2nkf89b3",
+       "version": 1
+      },
+      "name": "Quad Kiosk 1",
+      "position": [
+       -18462,
+       -7614,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 2833.8040699592584,
+       "depth": 2833.803935986517,
+       "height": 2319.974954126945,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-hardware-wall",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-hardware-wall-complete-as-built",
+       "version": 1
+      },
+      "name": "Hardware Wall",
+      "position": [
+       -16669,
+       -333,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 40026.65330141276,
+       "depth": 9816.462007155009,
+       "height": 4267.200000007372,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-robot-pedestal-yam-",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-yam-robot-pedestal",
+       "version": 1
+      },
+      "name": "Robot Pedestal (YAM)",
+      "position": [
+       -16533,
+       -7604,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 1436.841007173975,
+       "depth": 1436.84098840499,
+       "height": 946.8179178003058,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-rtx-spark-demo",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-rtx-spark-demo-desk",
+       "version": 1
+      },
+      "name": "RTX Spark Demo",
+      "position": [
+       -14079,
+       -3648,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 2112.6936292200116,
+       "depth": 1803.3999999999537,
+       "height": 1485.02655838691,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-rtx-spark-hero",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-rtx-spark-hero-display",
+       "version": 1
+      },
+      "name": "RTX Spark Hero",
+      "position": [
+       -8904,
+       -3757,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3151.3132530424054,
+       "depth": 2770.1241243383333,
+       "height": 3048.000000000005,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-nvqlink-rack-column",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-column-shroud-nvqlink-rack-surgery-pedes",
+       "version": 1
+      },
+      "name": "NVQLink Rack + Column",
+      "position": [
+       -5361,
+       -8089,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3317.7999999999993,
+       "depth": 2890.896548294501,
+       "height": 3190.4673994587624,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-quad-kiosk-2",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-mvpsb2nkf89b3",
+       "version": 1
+      },
+      "name": "Quad Kiosk 2",
+      "position": [
+       1833,
+       -7815,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 2833.8040699592584,
+       "depth": 2833.803935986517,
+       "height": 2319.974954126945,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-tri-kiosk-1",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-tri-demo-station-3-sided",
+       "version": 1
+      },
+      "name": "Tri Kiosk 1",
+      "position": [
+       4805,
+       -2645,
+       0
+      ],
+      "rotation": 165,
+      "snapshot": {
+       "width": 2784.5467346141622,
+       "depth": 2772.7477189867277,
+       "height": 2320.1977329597808,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-quad-kiosk-3",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-mvpsb2nkf89b3",
+       "version": 1
+      },
+      "name": "Quad Kiosk 3",
+      "position": [
+       8185,
+       -7918,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 2833.8040699592584,
+       "depth": 2833.803935986517,
+       "height": 2319.974954126945,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-overhead-banner",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-overhead-hanging-banner",
+       "version": 1
+      },
+      "name": "Overhead Banner",
+      "position": [
+       11465,
+       -2013,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 10161.86396534606,
+       "depth": 8809.039563379689,
+       "height": 1220.0000000000005,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-tri-kiosk-2",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-tri-demo-station-3-sided",
+       "version": 1
+      },
+      "name": "Tri Kiosk 2",
+      "position": [
+       11875,
+       -2645,
+       0
+      ],
+      "rotation": 165,
+      "snapshot": {
+       "width": 2784.5467346141622,
+       "depth": 2772.7477189867277,
+       "height": 2320.1977329597808,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-quad-kiosk-4",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-mvpsb2nkf89b3",
+       "version": 1
+      },
+      "name": "Quad Kiosk 4",
+      "position": [
+       14514,
+       -7937,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 2833.8040699592584,
+       "depth": 2833.803935986517,
+       "height": 2319.974954126945,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-quad-kiosk-5",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-mvpsb2nkf89b3",
+       "version": 1
+      },
+      "name": "Quad Kiosk 5",
+      "position": [
+       19268,
+       -2801,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 2833.8040699592584,
+       "depth": 2833.803935986517,
+       "height": 2319.974954126945,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-info-desk",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcber-info-desk",
+       "version": 1
+      },
+      "name": "Info Desk",
+      "position": [
+       20660,
+       -7507,
+       0
+      ],
+      "rotation": 46,
+      "snapshot": {
+       "width": 1836.4756697482737,
+       "depth": 942.334445106884,
+       "height": 1117.6000000000242,
+       "version": 1
+      }
+     }
+    ],
+    "groups": [],
+    "updatedAt": "2026-10-27T14:05:08.200Z",
+    "booth": {
+     "width": {
+      "value": 46723,
+      "status": "project",
+      "note": "From the Berlin R4 model (23 Sep 2026), FINAL BOOTH BOUNDARY. The fab deck gives a 46,725 mm front edge, 47,000 required."
+     },
+     "depth": {
+      "value": 19032,
+      "status": "project",
+      "note": "From the Berlin R4 model (23 Sep 2026), FINAL BOOTH BOUNDARY. The fab deck gives 19,000 mm."
+     },
+     "open": {
+      "front": true,
+      "left": false,
+      "back": false,
+      "right": false
+     },
+     "aisle": {
+      "value": 3000,
+      "status": "project",
+      "note": "Main Aisle (3 metres), Fabrication Deck p.19."
+     },
+     "heightLimit": {
+      "value": 4877,
+      "status": "project",
+      "note": "From the Berlin R4 model (23 Sep 2026), layer CEILING HEIGHT 16FT. Check against the hall's technical guidelines."
+     },
+     "rules": {
+      "route": {
+       "value": 915,
+       "status": "estimated",
+       "note": "Accessible route clear width, 36 in (ADA 2010, 403.5.1). Replace with the venue rule."
+      },
+      "turning": {
+       "value": 1525,
+       "status": "estimated",
+       "note": "Turning circle diameter, 60 in (ADA 2010, 304.3.1). Many European venues ask for 1500."
+      },
+      "approach": {
+       "value": 1220,
+       "status": "estimated",
+       "note": "Clear floor space depth in front of a demo, 48 in (ADA 2010, 305.3)."
+      },
+      "headroom": {
+       "value": 2030,
+       "status": "estimated",
+       "note": "Parts lower than 80 in are obstacles (ADA 2010, 307.4)."
+      }
+     },
+     "services": [],
+     "outline": [
+      [
+       -1870,
+       2608
+      ],
+      [
+       -23361,
+       2608
+      ],
+      [
+       -23361,
+       -9516
+      ],
+      [
+       23362,
+       -9516
+      ],
+      [
+       23362,
+       9516
+      ],
+      [
+       -1870,
+       9516
+      ]
+     ],
+     "columns": [
+      {
+       "id": "col-gtcber-c1",
+       "name": "C1",
+       "x": -5498,
+       "y": -8885,
+       "w": 1055,
+       "d": 1055,
+       "status": "project",
+       "enclosedBy": "it-nvqlink-rack-column"
+      },
+      {
+       "id": "col-gtcber-c2",
+       "name": "C2",
+       "x": 14441,
+       "y": -7867,
+       "w": 1300,
+       "d": 339,
+       "status": "project",
+       "enclosedBy": "it-quad-kiosk-4"
+      },
+      {
+       "id": "col-gtcber-c3",
+       "name": "C3",
+       "x": 14392,
+       "y": 5853,
+       "w": 908,
+       "d": 339,
+       "status": "project",
+       "enclosedBy": "it-hardware-wall"
+      }
+     ]
+    }
+   }
+  }
+ ]
+}

@@ -5,9 +5,9 @@ import type { IngestedPart } from '../ingest/types';
 
 /**
  * Show presets: booths as they were actually designed and built for a show, to start an exhibition from.
- * They are project material, so none ships with the app: a team keeps them in a `*.maestro-shows.json` file in
- * its private storage and loads it into the browser. The file carries the booth compositions and, as a library
- * bundle, the project parts they stand on, so a preset opens complete on a machine that has never seen the model.
+ * The shows the team has cleared for publication ship with the site in `public/shows/`: the presets in one small
+ * file and the project parts they stand on in a library bundle, fetched only when a preset is opened. A team can
+ * also load its own `*.maestro-shows.json` file, which carries its presets and parts together.
  */
 
 export interface ShowPreset {
@@ -21,6 +21,10 @@ export interface ShowPreset {
   /** where the layout comes from: model files, assembly blocks, drawing pages */
   sources: string[];
   comp: Composition;
+  /** shipped with the site rather than loaded from a file */
+  builtIn?: boolean;
+  /** where the library bundle with this preset's parts can be fetched */
+  partsUrl?: string;
 }
 
 export interface ShowPresetFile {

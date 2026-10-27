@@ -19,4 +19,5 @@ private/
 screenshots-private/
 samples/fixtures/
 *.maestro-library.json
+# show presets a team loads itself; the published ones live in public/shows/
 *.maestro-shows.json

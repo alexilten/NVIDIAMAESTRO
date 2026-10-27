@@ -1,4 +1,4 @@
-// Public screenshots of the built app (no project data). Usage: node scripts/screenshots.mjs [url] [outDir]
+// Public screenshots of the built app (synthetic data, and the shows published with it). Usage: node scripts/screenshots.mjs [url] [outDir]
 import { createRequire } from 'node:module';
 // Playwright is not a project dependency: use the one installed on the machine
 const { chromium } = createRequire(import.meta.url)('playwright');
@@ -76,19 +76,26 @@ await page.selectOption('select[aria-label="Rule set"]', 'din-18040-1');
 await page.locator('select[aria-label="Rule set"]').scrollIntoViewIfNeeded();
 await shot('30-exhibition-din-rule-set');
 await page.selectOption('select[aria-label="Rule set"]', 'ada-2010');
-// Round 11: show presets from a (synthetic) presets file, one on a stepped plot
+// Round 11: show presets. GTC Berlin 2026 ships with the site; a synthetic presets file adds a booth on a stepped plot
+await page.locator('.preset-btn').click();
+await page.waitForSelector('.preset-card >> text=GTC Berlin 2026');
+await shot('35-exhibition-show-presets');
+await page.locator('.preset-card', { hasText: 'GTC Berlin 2026' }).click();
+await page.waitForFunction(() => document.querySelector('.toast')?.textContent?.includes('opened'), null, { timeout: 120000 });
+await page.waitForTimeout(3000);
+await shot('37-exhibition-gtc-berlin');
 const fx11 = process.argv[4];
 if (fx11) {
   await page.locator('.preset-btn').click();
   await page.locator('.preset-menu input[type=file]').setInputFiles(`${fx11}/synthetic.maestro-shows.json`);
+  await page.locator('.preset-menu .segmented button', { hasText: 'Synthetic Show' }).click();
   await page.waitForSelector('.preset-card >> text=Booth B');
-  await shot('35-exhibition-show-presets');
   await page.locator('.preset-card', { hasText: 'Booth B' }).click();
   await page.locator('button', { hasText: 'Use a plain rectangle' }).scrollIntoViewIfNeeded();
   await shot('36-exhibition-stepped-plot');
-  // back to the sample booth for the rest
-  await page.locator('button', { hasText: 'Load sample booth' }).click();
 }
+// back to the sample booth for the rest
+await page.locator('button', { hasText: 'Load sample booth' }).click();
 // Round 08: a hall column at the plot centre runs into a module
 await page.locator('summary', { hasText: 'Columns' }).click();
 await page.locator('button', { hasText: '+ Column' }).click();
