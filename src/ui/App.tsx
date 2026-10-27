@@ -2,6 +2,7 @@ import { Component, useEffect, useState, type ReactNode } from 'react';
 import { Compose } from './Compose';
 import { Discover } from './Discover';
 import { Ingest } from './Ingest';
+import { Niches } from './Niches';
 import { Present } from './Present';
 import { ShowPicker } from './ShowPicker';
 import { Icon } from './common';
@@ -22,6 +23,7 @@ export function App() {
       <Guard key={workspace} area={workspace}>
         {workspace === 'discover' && <Discover />}
         {(workspace === 'compose' || workspace === 'exhibition') && <Compose />}
+        {workspace === 'niches' && <Niches />}
         {workspace === 'present' && <Present />}
         {workspace === 'ingest' && <Ingest />}
       </Guard>
@@ -35,6 +37,7 @@ const TABS: { id: Workspace; label: string; title?: string }[] = [
   { id: 'discover', label: 'Discover' },
   { id: 'compose', label: 'Compose', title: 'Compose demo modules' },
   { id: 'exhibition', label: 'Exhibition', title: 'Lay modules out on a booth and check circulation and services' },
+  { id: 'niches', label: 'Niches', title: 'Build hardware niches from a show’s placement rules: sizes, label positions, dimensions' },
   { id: 'present', label: 'Present', title: 'Views, stills, document links and the client view' },
   { id: 'ingest', label: 'Import' },
 ];
@@ -71,7 +74,8 @@ function Toolbar({ onAbout }: { onAbout: () => void }) {
           </>
         )}
         {workspace === 'present' && <span className="tb-note">Concept visualisation · not for construction</span>}
-        {workspace !== 'compose' && workspace !== 'exhibition' && workspace !== 'present' && <span className="tb-note">{parts.filter((p) => p.status === 'approved').length} project parts in this browser</span>}
+        {workspace === 'niches' && <span className="tb-note">Placement rules: GTC Berlin 2026</span>}
+        {workspace !== 'compose' && workspace !== 'exhibition' && workspace !== 'present' && workspace !== 'niches' && <span className="tb-note">{parts.filter((p) => p.status === 'approved').length} project parts in this browser</span>}
       </div>
     </header>
   );

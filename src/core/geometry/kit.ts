@@ -60,6 +60,58 @@ export const KIT: ParametricKitPart[] = [
     note: 'Design inputs.',
     tags: ['niche', 'gallery', 'wall', 'shelf', 'vitrine'],
   },
+  // made by the Niches workspace from a rule set; not offered in the library on their own
+  {
+    id: 'kit-rule-niche',
+    name: 'Hardware niche (built from rules)',
+    category: 'niche',
+    description: 'A niche opening in a wall panel with shelves at stated heights, generated in the Niches workspace from its hardware and a show’s placement rules. The origin is the front face centre at floor level; the niche extends into the wall (+Y).',
+    params: [
+      { key: 'width', label: 'Opening width', min: 100, max: 6000, step: 0.1, default: 1200, unit: 'mm' },
+      { key: 'height', label: 'Opening height', min: 100, max: 3000, step: 0.1, default: 1000, unit: 'mm' },
+      { key: 'sill', label: 'Sill height', min: 0, max: 2500, step: 0.1, default: 1100, unit: 'mm' },
+      { key: 'depth', label: 'Clear depth', min: 30, max: 1200, step: 0.1, default: 220, unit: 'mm' },
+      { key: 'void', label: 'Service void', min: 0, max: 400, step: 0.1, default: 75, unit: 'mm' },
+      { key: 'wallWidth', label: 'Wall panel width', min: 200, max: 8000, step: 1, default: 1600, unit: 'mm' },
+      { key: 'wallHeight', label: 'Wall height', min: 500, max: 5000, step: 1, default: 2700, unit: 'mm' },
+      { key: 'shelfT', label: 'Shelf thickness', min: 5, max: 100, step: 0.1, default: 36, unit: 'mm' },
+      { key: 'shelfDepth', label: 'Shelf depth', min: 30, max: 1200, step: 0.1, default: 200, unit: 'mm' },
+      ...[1, 2, 3, 4, 5, 6].map((i) => ({ key: `shelf${i}`, label: `Shelf ${i} underside above sill`, min: 0, max: 3000, step: 0.1, default: 0, unit: 'mm' as const })),
+    ],
+    status: 'estimated',
+    note: 'Generated from a niche rule set; its status in an export is the weakest of the rules and hardware it was built from.',
+    tags: ['niche', 'shelf', 'hardware wall'],
+    hidden: true,
+  },
+  {
+    id: 'kit-die-cut-label',
+    name: 'Die-cut label',
+    category: 'signage',
+    description: 'One line of die-cut vinyl type on a niche back panel, drawn as its estimated extent. The origin is the bottom centre of the label.',
+    params: [
+      { key: 'width', label: 'Width', min: 1, max: 2000, step: 0.1, default: 100, unit: 'mm' },
+      { key: 'height', label: 'Cap height', min: 1, max: 200, step: 0.1, default: 10, unit: 'mm' },
+    ],
+    status: 'estimated',
+    note: 'The extent is estimated from the text length and letter height.',
+    tags: ['label', 'graphics', 'vinyl'],
+    hidden: true,
+  },
+  {
+    id: 'kit-mounted-envelope',
+    name: 'Wall-mounted hardware envelope',
+    category: 'other',
+    description: 'The envelope of a unit hung on a niche back panel on its back, as seen from the front. The origin is the bottom centre of its back face.',
+    params: [
+      { key: 'width', label: 'Width', min: 1, max: 3000, step: 0.1, default: 445, unit: 'mm' },
+      { key: 'height', label: 'Height', min: 1, max: 3000, step: 0.1, default: 900, unit: 'mm' },
+      { key: 'depth', label: 'Stand-off', min: 1, max: 1000, step: 0.1, default: 45, unit: 'mm' },
+    ],
+    status: 'estimated',
+    note: 'A unit turned upright on the wall cannot be shown as its catalog model, which only turns about Z; this is its envelope at the catalog size.',
+    tags: ['tray', 'wall-hung'],
+    hidden: true,
+  },
 ];
 
 export const KIT_BY_ID = new Map(KIT.map((k) => [k.id, k]));
@@ -149,6 +201,33 @@ export function kitShape(id: string, raw: Record<string, number>): Shape | null 
       const z = sill + ((top - sill) * i) / (n + 1);
       parts.push(box(`SHELF_${i}`, 'white', [-w / 2 + t, t + 10, z - 9], [w / 2 - t, nd - t, z + 9]));
     }
+  } else if (id === 'kit-rule-niche') {
+    const { width: w, height: h, sill, depth: nd, void: vd, wallWidth, wallHeight, shelfT: T, shelfDepth: sd } = p;
+    const t = 18;
+    const pw = Math.max(wallWidth, w + 2 * t), wh = Math.max(wallHeight, sill + h + t);
+    const top = sill + h;
+    parts.push(box('WALL_LEFT', 'laminateBlack', [-pw / 2, 0, 0], [-w / 2, t, wh]));
+    parts.push(box('WALL_RIGHT', 'laminateBlack', [w / 2, 0, 0], [pw / 2, t, wh]));
+    parts.push(box('WALL_BELOW', 'laminateBlack', [-w / 2, 0, 0], [w / 2, t, sill]));
+    parts.push(box('WALL_ABOVE', 'laminateBlack', [-w / 2, 0, top], [w / 2, t, wh]));
+    // the niche case: lining inside the opening, the matte white back panel at the clear depth, and the void behind it
+    parts.push(box('NICHE_BACK', 'white', [-w / 2 - t, nd, sill - t], [w / 2 + t, nd + t, top + t]));
+    parts.push(box('NICHE_LEFT', 'white', [-w / 2 - t, t, sill - t], [-w / 2, nd, top + t]));
+    parts.push(box('NICHE_RIGHT', 'white', [w / 2, t, sill - t], [w / 2 + t, nd, top + t]));
+    parts.push(box('NICHE_BASE', 'white', [-w / 2, t, sill - t], [w / 2, nd, sill]));
+    parts.push(box('NICHE_HEAD', 'white', [-w / 2, t, top], [w / 2, nd, top + t]));
+    if (vd > 0) parts.push(box('VOID_REAR', 'laminateBlack', [-w / 2 - t, nd + t + vd, sill - t], [w / 2 + t, nd + 2 * t + vd, top + t]));
+    for (let i = 1; i <= 6; i++) {
+      const u = p[`shelf${i}`];
+      if (!(u > 0)) continue;
+      parts.push(box(`SHELF_${i}`, 'opal', [-w / 2, Math.max(t, nd - sd), sill + u], [w / 2, nd, sill + u + T]));
+    }
+  } else if (id === 'kit-die-cut-label') {
+    const { width: w, height: h } = p;
+    parts.push(box('VINYL', 'black', [-w / 2, -0.25, 0], [w / 2, 0.25, h]));
+  } else if (id === 'kit-mounted-envelope') {
+    const { width: w, height: h, depth: d } = p;
+    parts.push(box('ENVELOPE', 'graphite', [-w / 2, -d, 0], [w / 2, 0, h]));
   } else return null;
   return { parts, materials: MATERIALS };
 }
