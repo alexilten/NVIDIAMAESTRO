@@ -133,3 +133,55 @@ describe('niche outputs', () => {
     expect(card.origin[2]).toBeCloseTo(l.shelves[2].top, 1);
   });
 });
+
+describe('pedestals and racks', () => {
+  it('lays a pedestal out in plan: one front line, labels 50 mm in front and 90 mm from the edge (fab deck p.121)', () => {
+    const l = layoutNiche(example('06A'), BERLIN_2026, resolve)!;
+    expect(l.base).toBe(900);
+    expect([l.width, l.height]).toEqual([1810, 1250]);
+    // every unit's front on one line, so every label shares a top line
+    expect(new Set(l.units.map((u) => u.z0)).size).toBe(1);
+    const front = l.units[0].z0;
+    for (const lb of l.labels) {
+      expect(lb.z0).toBe(90);
+      expect(front - (lb.z0 + lb.cap)).toBe(50);
+      expect(lb.x0).toBe(l.units.find((u) => u.col === lb.col)!.x0);
+    }
+    expect(l.labels.map((x) => x.code)).toEqual(['06A.01', '06A.02', '06A.03']);
+    expect(l.checks.filter((c) => c.level === 'error')).toEqual([]);
+    // too shallow a table is reported
+    const shallow = layoutNiche({ ...example('06A'), lockHeight: 800 }, BERLIN_2026, resolve)!;
+    expect(shallow.checks.some((c) => c.level === 'error' && /overhangs the back edge/.test(c.text))).toBe(true);
+  });
+
+  it('builds the pedestal with its hardware on the top and flat labels, and draws its plan', () => {
+    const l = layoutNiche(example('06A'), BERLIN_2026, resolve)!;
+    const c = nicheComposition(l);
+    expect(c.items).toHaveLength(1 + 3 + 3);
+    for (const p of c.items) expect(resolveRef(p.ref, [])?.shape).toBeTruthy();
+    const units = c.items.slice(1, 4);
+    for (const u of units) expect(u.position[2]).toBe(900);
+    const label = c.items[4];
+    expect(label.ref.kind === 'kit' && label.ref.params?.flat).toBe(1);
+    const svg = nicheElevation(l).svg;
+    expect(svg).toContain('PLAN OF PEDESTAL TOP');
+    expect(svg).not.toContain('CL 1675');
+    expect(labelCsv(l).split('\n')[1]).toMatch(/,black die-cut vinyl,.*,pedestal front edge$/);
+  });
+
+  it('puts a white label centred on each rack door', () => {
+    const l = layoutNiche(example('05C'), BERLIN_2026, resolve)!;
+    expect([l.width, l.height, l.depth]).toEqual([600, 2296, 1404]);
+    const [lb] = l.labels;
+    expect(lb.x0 + lb.w / 2).toBeCloseTo(0, 5);
+    expect(l.height - (lb.z0 + lb.cap)).toBe(BERLIN_2026.values.rackLabelDrop.value);
+    expect(lb.status).toBe('estimated');
+    const c = nicheComposition(l);
+    expect(c.items).toHaveLength(2);
+    const v = c.items[1];
+    expect(v.ref.kind === 'kit' && v.ref.params?.white).toBe(1);
+    expect(labelCsv(l).split('\n')[1]).toMatch(/,white die-cut vinyl,.*,floor$/);
+    const r = exportComposition(rh, c, (p) => exportItemFor(p, []), 'test', nicheAnnotations(l));
+    expect(r.skipped).toEqual([]);
+  });
+});

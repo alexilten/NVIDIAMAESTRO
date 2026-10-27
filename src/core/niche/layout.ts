@@ -6,11 +6,14 @@ import { RULE_DEF, inches, type NicheRuleSet, type RuleKey } from './rules';
  * each die-cut label goes. Everything here is a pure function of the spec, the rules and the hardware dimensions, so
  * the elevation, the 3D model, the label schedule and the Rhino export all read one layout.
  *
- * Frame: x across the niche from its centre line (right +), z height above the finished floor; mm.
+ * Frame: x across the niche from its centre line (right +), z height above the finished floor; mm. A pedestal is laid
+ * out in plan instead: x across, z back from the pedestal's front edge, with the top at `base` above the floor.
  */
 
-export type NicheType = 'shelf' | 'wall';
-export const NICHE_TYPE_LABEL: Record<NicheType, string> = { shelf: 'Shelf niche', wall: 'Wall-hung niche' };
+export type NicheType = 'shelf' | 'wall' | 'pedestal' | 'rack';
+export const NICHE_TYPE_LABEL: Record<NicheType, string> = { shelf: 'Shelf niche', wall: 'Wall-hung niche', pedestal: 'Pedestal', rack: 'Server rack' };
+/** pedestals and racks hold one row of hardware */
+export const SINGLE_ROW = (t: NicheType) => t === 'pedestal' || t === 'rack';
 
 export interface NicheItem {
   id: string;
@@ -81,6 +84,8 @@ export interface NicheLayout {
   top: number;
   depth: number;
   centre: number;
+  /** pedestals: the top's height above the floor (the layout itself is a plan of the top) */
+  base?: number;
   /** shelf niches: shelves bottom up; the niche base is not a shelf */
   shelves: Shelf[];
   units: PlacedUnit[];
@@ -110,6 +115,8 @@ export function faceOf(type: NicheType, u: UnitInfo, item: NicheItem): { w: numb
   const [w, d, h] = u.dims;
   if (type === 'wall' && item.upright) return { w, h: d, protrude: h };
   if (type === 'wall') return { w, h, protrude: d };
+  // in plan, a unit's face is its footprint and it stands its height off the top
+  if (type === 'pedestal') return { w, h: d, protrude: h };
   return { w, h, protrude: d };
 }
 
@@ -118,9 +125,12 @@ export function layoutNiche(spec: NicheSpec, rules: NicheRuleSet, resolve: UnitR
   const used = new Set<RuleKey>();
   const use = (k: RuleKey) => { used.add(k); return V(k); };
   const checks: Check[] = [];
+  const flat = SINGLE_ROW(spec.type);
+  const rows = flat ? [spec.rows.flat()] : spec.rows;
+  if (flat && spec.rows.filter((r) => r.length).length > 1) checks.push({ level: 'info', text: `A ${NICHE_TYPE_LABEL[spec.type].toLowerCase()} holds one row, so the rows are joined left to right.` });
 
   // resolve every slot; units without dimensions are reported and left out, never drawn to a guessed size
-  const grid = spec.rows.map((row, ri) => row.map((item, ci) => {
+  const grid = rows.map((row, ri) => row.map((item, ci) => {
     if (!item) return null;
     const info = resolve(item);
     const face = faceOf(spec.type, info, item);
@@ -131,26 +141,29 @@ export function layoutNiche(spec: NicheSpec, rules: NicheRuleSet, resolve: UnitR
   if (!cells.length) return null;
 
   // columns are shared by every row, so labels line up down the niche (each column is as wide as its widest unit)
-  const ncols = Math.max(...spec.rows.map((r) => r.length));
+  const ncols = Math.max(...rows.map((r) => r.length));
   const colW = Array.from({ length: ncols }, (_, c) => Math.max(0, ...cells.filter((x) => x.col === c).map((x) => x.face.w)));
   const live = colW.map((w, c) => ({ w, c })).filter((x) => x.w > 0);
-  const edge0 = use('edge'), gap0 = use('gap');
+  // racks stand side by side; pedestals have their own spacing
+  const edgeKey: RuleKey | undefined = spec.type === 'pedestal' ? 'pedEdge' : spec.type === 'rack' ? undefined : 'edge';
+  const gapKey: RuleKey | undefined = spec.type === 'pedestal' ? 'pedGap' : spec.type === 'rack' ? undefined : 'gap';
+  const edge0 = edgeKey ? use(edgeKey) : 0, gap0 = gapKey ? use(gapKey) : 0;
   const span = live.reduce((s, x) => s + x.w, 0) + gap0 * (live.length - 1);
   const natural = span + 2 * edge0;
   let width = natural, edge = edge0, gap = gap0;
-  if (spec.lockWidth && spec.lockWidth > 0) {
+  if (spec.lockWidth && spec.lockWidth > 0 && spec.type !== 'rack') {
     width = spec.lockWidth;
     const slack = width - natural;
     if (slack >= 0) {
       edge = edge0 + slack / 2;
-      if (slack > 1) checks.push({ level: 'info', rule: 'edge', text: `The fixed ${both(width)} opening is wider than the rules need (${both(natural)}), so the hardware is centred with ${both(edge)} at each edge.` });
+      if (slack > 1) checks.push({ level: 'info', rule: edgeKey, text: `The fixed ${both(width)} opening is wider than the rules need (${both(natural)}), so the hardware is centred with ${both(edge)} at each edge.` });
     } else {
       // squeeze the gaps first, then the edges; say which rule broke and what the rules would need
       const g = live.length > 1 ? gap0 + slack / (live.length - 1) : gap0;
       if (live.length > 1 && g >= 0) gap = g;
       else { gap = live.length > 1 ? 0 : gap0; edge = (width - (live.reduce((s, x) => s + x.w, 0) + gap * (live.length - 1))) / 2; }
-      if (gap < gap0) checks.push({ level: 'error', rule: 'gap', text: `At ${both(width)} wide the gaps between units drop to ${both(gap)}, under the ${both(gap0)} rule. The rules need ${both(natural)}.` });
-      if (edge < edge0 - 0.5) checks.push({ level: 'error', rule: 'edge', text: `At ${both(width)} wide the hardware comes within ${both(Math.max(edge, 0))} of the visible edge, under the ${both(edge0)} rule. The rules need ${both(natural)}.` });
+      if (gap < gap0) checks.push({ level: 'error', rule: gapKey, text: `At ${both(width)} wide the gaps between units drop to ${both(gap)}, under the ${both(gap0)} rule. The rules need ${both(natural)}.` });
+      if (edge < edge0 - 0.5) checks.push({ level: 'error', rule: edgeKey, text: `At ${both(width)} wide the hardware comes within ${both(Math.max(edge, 0))} of the ${spec.type === 'pedestal' ? 'pedestal' : 'visible'} edge, under the ${both(edge0)} rule. The rules need ${both(natural)}.` });
     }
   }
   const colX = new Map<number, number>();
@@ -159,12 +172,13 @@ export function layoutNiche(spec: NicheSpec, rules: NicheRuleSet, resolve: UnitR
 
   const capKey: RuleKey = spec.letter === 'small' ? 'capSmall' : 'capStandard';
   const cap = use(capKey);
-  const centre = use('centreAff');
+  let centre = flat ? 0 : use('centreAff');
+  let base: number | undefined;
   const units: PlacedUnit[] = [];
   const shelves: Shelf[] = [];
   const heightChain: NicheLayout['heightChain'] = [];
   let height: number, depth: number, labelOffset: number | undefined;
-  const nrows = spec.rows.length;
+  const nrows = rows.length;
   const labelZ = new Map<number, number>(); // row → label baseline z0
 
   if (spec.type === 'shelf') {
@@ -211,7 +225,7 @@ export function layoutNiche(spec: NicheSpec, rules: NicheRuleSet, resolve: UnitR
       else if (c.face.protrude > sd + 0.5) checks.push({ level: 'warn', rule: 'shelfDepth', text: `${c.info.name} is ${both(c.face.protrude)} deep and overhangs the ${both(sd)} shelf by ${both(c.face.protrude - sd)}.` });
     }
     shelves.forEach((sh) => labelZ.set(nrows - 1 - sh.index, sh.top + labelOffset! - cap / 2));
-  } else {
+  } else if (spec.type === 'wall') {
     const below = use('labelBelow'), rowGap = use('rowGap');
     depth = use('depth');
     const face = Array.from({ length: nrows }, (_, r) => Math.max(0, ...cells.filter((c) => c.row === r).map((c) => c.face.h)));
@@ -248,25 +262,68 @@ export function layoutNiche(spec: NicheSpec, rules: NicheRuleSet, resolve: UnitR
     });
     chain.push({ a: sill, b: z, label: 'edge' });
     heightChain.push(...chain.reverse());
+  } else if (spec.type === 'pedestal') {
+    // units stand on one front line, so every label shares its top line; spare depth goes behind the hardware
+    const toLabel = use('pedToLabel'), toEdge = use('pedLabelToEdge'), back = use('pedBack');
+    base = use('pedHeight');
+    const front = toEdge + cap + toLabel;
+    const deepest = Math.max(...cells.map((c) => c.face.h));
+    const need = front + deepest + back;
+    height = need;
+    if (spec.lockHeight && spec.lockHeight > 0) {
+      const left = spec.lockHeight - front - deepest;
+      // hardware off the back of the table is wrong whatever the margin rule says
+      if (left < back - 0.5) checks.push({ level: 'error', rule: left < 0 ? undefined : 'pedBack', text: left < 0
+        ? `At ${both(spec.lockHeight)} deep the deepest unit overhangs the back edge by ${both(-left)}. The rules need ${both(need)}.`
+        : `At ${both(spec.lockHeight)} deep the deepest unit comes within ${both(left)} of the back edge, under the ${both(back)} rule. The rules need ${both(need)}.` });
+      height = spec.lockHeight;
+    }
+    depth = height;
+    for (const c of cells) {
+      const x0 = colX.get(c.col)!;
+      units.push({ item: c.item, name: c.info.name, row: 0, col: c.col, status: c.info.status, dims: c.info.dims!, x0, x1: x0 + c.face.w, z0: front, z1: front + c.face.h, protrude: c.face.protrude });
+    }
+    labelZ.set(0, toEdge);
+    heightChain.push({ a: 0, b: toEdge, label: 'label to edge' }, { a: toEdge, b: toEdge + cap, label: 'type' }, { a: toEdge + cap, b: front, label: 'hardware to label' }, { a: front, b: front + deepest, label: 'hardware' });
+    if (height - front - deepest > 0.5) heightChain.push({ a: front + deepest, b: height, label: 'to back edge' });
+    centre = base;
+  } else {
+    // racks stand on the floor; each label is centred on its rack's door, a set drop below the top
+    const drop = use('rackLabelDrop');
+    height = Math.max(...cells.map((c) => c.face.h));
+    depth = Math.max(...cells.map((c) => c.face.protrude));
+    for (const c of cells) {
+      const x0 = colX.get(c.col)!;
+      units.push({ item: c.item, name: c.info.name, row: 0, col: c.col, status: c.info.status, dims: c.info.dims!, x0, x1: x0 + c.face.w, z0: 0, z1: c.face.h, protrude: c.face.protrude });
+    }
+    heightChain.push({ a: 0, b: height - drop - cap, label: 'floor to label' }, { a: height - drop - cap, b: height - drop, label: 'type' }, { a: height - drop, b: height, label: 'to rack top' });
+    centre = height / 2;
   }
 
-  const sill = centre - height / 2;
+  const sill = flat ? 0 : centre - height / 2;
   const top = sill + height;
-  if (sill < 0) checks.push({ level: 'error', rule: 'centreAff', text: `The opening is ${both(height)} high, too tall to centre at ${both(centre)}: its sill would be below the floor.` });
+  if (!flat && sill < 0) checks.push({ level: 'error', rule: 'centreAff', text: `The opening is ${both(height)} high, too tall to centre at ${both(centre)}: its sill would be below the floor.` });
 
   // labels: one per unit, numbered top row first, left to right, starting at the left edge of its hardware
   const labels: PlacedLabel[] = [];
   const order = [...units].sort((a, b) => a.row - b.row || a.x0 - b.x0);
+  const placeKey: RuleKey = ({ shelf: 'headroom', wall: 'labelBelow', pedestal: 'pedToLabel', rack: 'rackLabelDrop' } as const)[spec.type];
   order.forEach((u, i) => {
     const text = (u.item.label ?? u.name).trim();
     const code = `${spec.code || 'N'}.${String(i + 1).padStart(2, '0')}`;
-    labels.push({ code, text, row: u.row, col: u.col, x0: u.x0, z0: labelZ.get(u.row)!, w: labelWidth(text, cap), cap, status: weakest(rules.values[capKey].status, rules.values[spec.type === 'shelf' ? 'headroom' : 'labelBelow'].status) });
+    const w = labelWidth(text, cap);
+    const rack = spec.type === 'rack';
+    const x0 = rack ? (u.x0 + u.x1) / 2 - w / 2 : u.x0;
+    const z0 = rack ? u.z1 - V('rackLabelDrop') - cap : labelZ.get(u.row)!;
+    labels.push({ code, text, row: u.row, col: u.col, x0, z0, w, cap, status: weakest(rules.values[capKey].status, rules.values[placeKey].status) });
   });
+  const edgeName = spec.type === 'pedestal' ? 'the pedestal edge' : spec.type === 'rack' ? 'the rack’s edge' : 'the niche edge';
   // a label wider than its column runs toward the next label in the row
   for (const l of labels) {
     const next = labels.filter((m) => m.row === l.row && m.x0 > l.x0).sort((a, b) => a.x0 - b.x0)[0];
-    const limit = next ? next.x0 - 0.25 * gap : width / 2 - edge * 0.5;
-    if (l.x0 + l.w > limit) checks.push({ level: 'warn', rule: capKey, text: `Label ${l.code} “${l.text}” is about ${both(l.w)} long at ${both(l.cap)} type and runs into ${next ? `label ${next.code}` : 'the niche edge'}. Try the smaller letter size or a shorter name.` });
+    const u = units.find((v) => v.row === l.row && v.col === l.col);
+    const limit = spec.type === 'rack' ? (u?.x1 ?? width / 2) - 20 : next ? next.x0 - 0.25 * gap : width / 2 - edge * 0.5;
+    if (l.x0 + l.w > limit) checks.push({ level: 'warn', rule: capKey, text: `Label ${l.code} “${l.text}” is about ${both(l.w)} long at ${both(l.cap)} type and runs into ${next && spec.type !== 'rack' ? `label ${next.code}` : edgeName}. Try the smaller letter size or a shorter name.` });
     if (spec.type === 'shelf') {
       const sh = shelves[nrows - 1 - l.row];
       if (l.z0 + l.cap > sh.top + sh.clear) checks.push({ level: 'error', rule: 'headroom', text: `Label ${l.code} does not fit under the shelf above.` });
@@ -275,7 +332,7 @@ export function layoutNiche(spec: NicheSpec, rules: NicheRuleSet, resolve: UnitR
     }
   }
 
-  const rowChains = spec.rows.map((_, r) => {
+  const rowChains = rows.map((_, r) => {
     const segs: Seg[] = [{ a: -width / 2, b: -width / 2 + edge, kind: 'edge' }];
     live.forEach((x, i) => {
       const x0 = colX.get(x.c)!;
@@ -293,12 +350,22 @@ export function layoutNiche(spec: NicheSpec, rules: NicheRuleSet, resolve: UnitR
 
   const usedList = [...used];
   const status = [...usedList.map((k) => rules.values[k].status), ...units.map((u) => u.status)].reduce((a, b) => (VERIFICATION_RANK.indexOf(b) < VERIFICATION_RANK.indexOf(a) ? b : a), 'verified' as Verification);
+  // breaking a rule whose value is itself a guess is something to check, not a broken rule
+  for (const c of checks) {
+    const st = c.rule && rules.values[c.rule].status;
+    if (c.level === 'error' && (st === 'estimated' || st === 'placeholder')) { c.level = 'warn'; c.text += ' That rule is estimated, so check it before changing the layout.'; }
+  }
   for (const k of usedList) {
     const v = rules.values[k];
     if (v.status === 'estimated' || v.status === 'placeholder') checks.push({ level: 'info', rule: k, text: `${RULE_DEF.get(k)!.label} (${both(v.value)}) is ${v.status}: ${v.note ?? 'not from a project document'}` });
   }
-  return { spec, rules, width: r1(width), height: r1(height), sill: r1(sill), top: r1(top), depth, centre, shelves, units, labels, rowChains, heightChain, labelOffset, checks, status, used: usedList };
+  return { spec, rules, width: r1(width), height: r1(height), sill: r1(sill), top: r1(top), depth: r1(depth), centre, base, shelves, units, labels, rowChains, heightChain, labelOffset, checks, status, used: usedList };
 }
+
+/** the vinyl a layout's labels are cut from */
+export const labelColour = (l: NicheLayout) => (l.spec.type === 'rack' ? l.rules.labels.rackColour : l.rules.labels.colour);
+/** what a label's second coordinate is measured from */
+export const labelDatum = (l: NicheLayout) => (l.spec.type === 'pedestal' ? 'pedestal front edge' : l.spec.type === 'rack' ? 'floor' : 'sill');
 
 export const checkCounts = (l: NicheLayout | null) => ({
   errors: l?.checks.filter((c) => c.level === 'error').length ?? 0,

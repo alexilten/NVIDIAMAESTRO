@@ -1,6 +1,6 @@
 import { VERIFICATION } from '../schema';
 import { SCALES } from '../sheet';
-import { NICHE_TYPE_LABEL, type NicheLayout } from './layout';
+import { labelColour, NICHE_TYPE_LABEL, type NicheLayout } from './layout';
 import { inches, RULE_DEF } from './rules';
 
 /**
@@ -23,6 +23,8 @@ export interface ElevationResult { svg: string; scale: number; focus: { x: numbe
 
 export function nicheElevation(l: NicheLayout, info: ElevationInfo = {}): ElevationResult {
   const W = l.width / 2;
+  // a pedestal is drawn as a plan of its top, front edge at the bottom of the sheet; a rack as its front
+  const plan = l.spec.type === 'pedestal', rack = l.spec.type === 'rack', niche = !plan && !rack;
   const margin = { l: 300, r: 330, t: 190, b: 45 };
   const x0w = -W - margin.l, x1w = W + margin.r, z1w = l.top + margin.t;
   const spanX = x1w - x0w, spanZ = z1w + margin.b;
@@ -42,25 +44,29 @@ export function nicheElevation(l: NicheLayout, info: ElevationInfo = {}): Elevat
 
   // wall, opening, shelves
   out.push('<g id="niche">');
-  rect(X(-W - 220), Z(Math.min(l.top + 220, z1w)), (l.width + 440) * k, (Math.min(l.top + 220, z1w)) * k, 'wall');
-  rect(X(-W), Z(l.top), l.width * k, l.height * k, 'opening');
+  if (niche) rect(X(-W - 220), Z(Math.min(l.top + 220, z1w)), (l.width + 440) * k, (Math.min(l.top + 220, z1w)) * k, 'wall');
+  if (!rack) rect(X(-W), Z(l.top), l.width * k, l.height * k, plan ? 'pedtop' : 'opening');
   for (const sh of l.shelves) rect(X(-W), Z(sh.top), l.width * k, (sh.top - sh.under) * k, 'shelf');
-  line(X(x0w + 40), Z(0), X(x1w - 40), Z(0), 'floor');
-  text(X(x0w + 40), Z(0) + 3.6, 'FFL', 'small', 'start');
+  if (plan) text(X(0), Z(0) + 3.4, 'FRONT EDGE · labels read from here', 'small');
+  else {
+    line(X(x0w + 40), Z(0), X(x1w - 40), Z(0), 'floor');
+    text(X(x0w + 40), Z(0) + 3.6, 'FFL', 'small', 'start');
+  }
   out.push('</g>');
 
   // install guides: the left edge of each unit's type, and each row's label line
   out.push('<g id="guides">');
   const cols = [...new Set(l.labels.map((lb) => Math.round(lb.x0 * 10) / 10))];
-  for (const x of cols) line(X(x), Z(l.top) - 2, X(x), Z(l.sill) + 2, 'guide');
-  for (const z of [...new Set(l.labels.map((lb) => Math.round(lb.z0 * 10) / 10))]) line(X(-W) - 2, Z(z), X(W) + 2, Z(z), 'guide');
+  if (!rack) for (const x of cols) line(X(x), Z(l.top) - 2, X(x), Z(l.sill) + 2, 'guide');
+  // the shared label line: the type's top on a pedestal, its baseline elsewhere
+  for (const z of [...new Set(l.labels.map((lb) => Math.round((plan ? lb.z0 + lb.cap : lb.z0) * 10) / 10))]) line(X(-W) - 2, Z(z), X(W) + 2, Z(z), 'guide');
   out.push('</g>');
 
   // hardware and labels
   out.push('<g id="hardware">');
-  for (const u of l.units) rect(X(u.x0), Z(u.z1), (u.x1 - u.x0) * k, (u.z1 - u.z0) * k, `unit ${u.status}`, `${u.name} · ${Math.round(u.x1 - u.x0)} × ${Math.round(u.z1 - u.z0)} mm · ${VERIFICATION[u.status].label}`);
+  for (const u of l.units) rect(X(u.x0), Z(u.z1), (u.x1 - u.x0) * k, (u.z1 - u.z0) * k, `unit ${u.status}${rack ? ' rack' : ''}`, `${u.name} · ${Math.round(u.x1 - u.x0)} × ${Math.round(u.z1 - u.z0)} mm${plan ? ` plan, ${Math.round(u.protrude)} high` : ''} · ${VERIFICATION[u.status].label}`);
   out.push('</g><g id="labels">');
-  for (const lb of l.labels) text(X(lb.x0), Z(lb.z0), lb.text, 'vinyl', 'start', 0, Math.max(lb.cap * k / 0.72, 0.6));
+  for (const lb of l.labels) text(X(lb.x0), Z(lb.z0), lb.text, rack ? 'vinyl white' : 'vinyl', 'start', 0, Math.max(lb.cap * k / 0.72, 0.6));
   out.push('</g>');
 
   // dimensions: chain values in mm with inches under them
@@ -81,16 +87,18 @@ export function nicheElevation(l: NicheLayout, info: ElevationInfo = {}): Elevat
   };
   dimH(-W, W, Z(l.top) - 9, l.width, false);
   for (const ch of l.rowChains) {
-    const below = l.spec.type === 'shelf' ? Z(l.shelves[l.spec.rows.length - 1 - ch.row]?.under ?? ch.z) + 2.2 : Z(ch.z) + 2.2 + (l.labels[0]?.cap ?? 0) * k + 6;
-    for (const sg of ch.segs) if (sg.kind !== 'space' || sg.b - sg.a > 1) dimH(sg.a, sg.b, below, sg.b - sg.a);
+    const below = l.spec.type === 'shelf' ? Z(l.shelves[l.spec.rows.length - 1 - ch.row]?.under ?? ch.z) + 2.2 : !niche ? Z(0) + 6.5 : Z(ch.z) + 2.2 + (l.labels[0]?.cap ?? 0) * k + 6;
+    for (const sg of ch.segs) if (sg.b - sg.a > (sg.kind === 'space' ? 1 : 0.5)) dimH(sg.a, sg.b, below, sg.b - sg.a);
   }
   const xr = X(W) + 7;
   for (const h of l.heightChain) dimV(xr, h.a, h.b, h.b - h.a);
   dimV(X(-W) - 8, l.sill, l.top, l.height, true);
-  dimV(X(-W) - 18, 0, l.sill, l.sill, true);
-  text(X(-W) - 18, Z(0) + 3.4, 'AFF', 'tiny');
-  line(X(-W) - 24, Z(l.centre), X(W) + 24, Z(l.centre), 'centre');
-  text(X(W) + 25, Z(l.centre) + 1, `CL ${Math.round(l.centre)} AFF · ${inches(l.centre)}`, 'small', 'start');
+  if (niche) {
+    dimV(X(-W) - 18, 0, l.sill, l.sill, true);
+    text(X(-W) - 18, Z(0) + 3.4, 'AFF', 'tiny');
+    line(X(-W) - 24, Z(l.centre), X(W) + 24, Z(l.centre), 'centre');
+    text(X(W) + 25, Z(l.centre) + 1, `CL ${Math.round(l.centre)} AFF · ${inches(l.centre)}`, 'small', 'start');
+  }
   if (l.spec.type === 'shelf' && l.labelOffset != null && l.shelves.length) {
     const sh = l.shelves[0];
     const xm = X(W) + 22;
@@ -99,7 +107,7 @@ export function nicheElevation(l: NicheLayout, info: ElevationInfo = {}): Elevat
   }
   out.push('</g>');
 
-  text(ax0, ay0 - 2, `FRONT ELEVATION · ${l.spec.code} ${l.spec.name}`.toUpperCase(), 'view', 'start');
+  text(ax0, ay0 - 2, `${plan ? 'PLAN OF PEDESTAL TOP' : 'FRONT ELEVATION'} · ${l.spec.code} ${l.spec.name}`.toUpperCase(), 'view', 'start');
 
   // side column: title, opening, rules, label schedule
   const sx = PAPER.w - FRAME - SIDE_W;
@@ -109,8 +117,8 @@ export function nicheElevation(l: NicheLayout, info: ElevationInfo = {}): Elevat
   const wrap = (s: string, max: number) => { const words = s.split(' '); const lines: string[] = []; let cur = ''; for (const w of words) { if ((cur + ' ' + w).trim().length > max) { lines.push(cur); cur = w; } else cur = (cur + ' ' + w).trim(); } if (cur) lines.push(cur); return lines; };
   put(`${l.spec.code} ${l.spec.name}`, 'title', 6);
   put(`${NICHE_TYPE_LABEL[l.spec.type]} · ${l.rules.name} rules`, 'small', 5);
-  put(`Opening ${Math.round(l.width)} × ${Math.round(l.height)} mm (${inches(l.width)} × ${inches(l.height)})`, 'small', 4.4);
-  put(`Sill ${Math.round(l.sill)} AFF · depth ${Math.round(l.depth)} · ${VERIFICATION[l.status].label}`, 'small', 7);
+  put(`${plan ? 'Top' : rack ? 'Racks' : 'Opening'} ${Math.round(l.width)} × ${Math.round(l.height)} mm (${inches(l.width)} × ${inches(l.height)})`, 'small', 4.4);
+  put(plan ? `Top ${Math.round(l.base ?? 0)} AFF · ${VERIFICATION[l.status].label}` : rack ? `${Math.round(l.depth)} deep · ${VERIFICATION[l.status].label}` : `Sill ${Math.round(l.sill)} AFF · depth ${Math.round(l.depth)} · ${VERIFICATION[l.status].label}`, 'small', 7);
   put('RULES USED', 'view', 4.6);
   for (const key of l.used) {
     const v = l.rules.values[key];
@@ -119,7 +127,7 @@ export function nicheElevation(l: NicheLayout, info: ElevationInfo = {}): Elevat
     put(`   ${VERIFICATION[v.status].label}${src ? ` · ${src.title.replace('GTC Berlin 2026 ', '')} ${v.ref ?? ''}` : ''}`, 'tiny faint', 3.7);
   }
   y += 2.5;
-  put(`LABELS · ${l.rules.labels.colour}`.toUpperCase(), 'view', 4.6);
+  put(`LABELS · ${labelColour(l)}`.toUpperCase(), 'view', 4.6);
   for (const lb of l.labels) {
     if (y > PAPER.h - FRAME - 34) { put(`+ ${l.labels.length - l.labels.indexOf(lb)} more in the label schedule`, 'tiny', 3.4); break; }
     for (const [i, s] of wrap(`${lb.code}  ${lb.text}`, 58).entries()) put(i ? `        ${s}` : s, 'tiny', 3.1);
@@ -154,6 +162,9 @@ text{font-family:Inter,Helvetica,Arial,sans-serif;fill:#1d1d1f}
 .unit.estimated{fill:#8a8b8f}
 .unit.placeholder{fill:none;stroke-dasharray:1 .8}
 .vinyl{fill:#111;font-weight:600}
+.vinyl.white{fill:#fff}
+.pedtop{fill:#f4f4ef;stroke:#2a2b2e;stroke-width:.5}
+.unit.rack{fill:#232427;stroke:#111}
 .guide{stroke:#e0249a;stroke-width:.2;stroke-dasharray:1.2 .9;opacity:.75}
 .centre{stroke:#0a84ff;stroke-width:.2;stroke-dasharray:3 1 .6 1}
 .dim{stroke:#0a84ff;stroke-width:.18}

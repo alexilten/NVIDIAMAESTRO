@@ -22,12 +22,14 @@ export interface RuleValue {
 }
 
 /** what the rule does, for the interface and for the reasons given with every check */
-export interface RuleDef { key: RuleKey; label: string; group: 'Niche' | 'Shelf' | 'Label'; meaning: string }
+export interface RuleDef { key: RuleKey; label: string; group: 'Niche' | 'Shelf' | 'Label' | 'Pedestal' | 'Rack'; meaning: string }
 
 export type RuleKey =
   | 'centreAff' | 'edge' | 'gap' | 'depth' | 'void'
   | 'shelfThickness' | 'shelfDepth' | 'bottomSpace' | 'shelfClearMin' | 'topClearMin' | 'headroom'
-  | 'labelBelow' | 'rowGap' | 'capStandard' | 'capSmall';
+  | 'labelBelow' | 'rowGap' | 'capStandard' | 'capSmall'
+  | 'pedHeight' | 'pedEdge' | 'pedBack' | 'pedGap' | 'pedToLabel' | 'pedLabelToEdge'
+  | 'rackLabelDrop';
 
 export const RULE_DEFS: RuleDef[] = [
   { key: 'centreAff', label: 'Niche centre above floor', group: 'Niche', meaning: 'Every niche opening is centred on this height, so the hardware wall reads as one line.' },
@@ -45,6 +47,13 @@ export const RULE_DEFS: RuleDef[] = [
   { key: 'rowGap', label: 'Label to next row', group: 'Label', meaning: 'Wall-hung hardware: clear space from a row’s labels to the hardware below.' },
   { key: 'capStandard', label: 'Standard letter height', group: 'Label', meaning: 'Cap height of standard-size die-cut type.' },
   { key: 'capSmall', label: 'Smaller letter height', group: 'Label', meaning: 'Cap height of the smaller die-cut type, for small hardware.' },
+  { key: 'pedHeight', label: 'Pedestal top above floor', group: 'Pedestal', meaning: 'Height of the pedestal or light table top the hardware stands on.' },
+  { key: 'pedEdge', label: 'Pedestal side edge to hardware', group: 'Pedestal', meaning: 'Clear space from the pedestal’s left and right edges to the nearest hardware.' },
+  { key: 'pedBack', label: 'Hardware to pedestal back edge', group: 'Pedestal', meaning: 'Clear space behind the deepest unit, at least.' },
+  { key: 'pedGap', label: 'Gap between units on a pedestal', group: 'Pedestal', meaning: 'Clear space between neighbouring pieces of hardware on a pedestal.' },
+  { key: 'pedToLabel', label: 'Hardware to label', group: 'Pedestal', meaning: 'From the front of the hardware to the top of its label. Units stand on one front line, so every label shares a top line.' },
+  { key: 'pedLabelToEdge', label: 'Label to pedestal front edge', group: 'Pedestal', meaning: 'From the bottom of the label to the pedestal’s front edge.' },
+  { key: 'rackLabelDrop', label: 'Rack top to label', group: 'Rack', meaning: 'From the top of the rack to the top of its label, on the front door.' },
 ];
 export const RULE_DEF = new Map(RULE_DEFS.map((r) => [r.key, r]));
 
@@ -59,6 +68,8 @@ export interface LabelPolicy {
   /** order of codes: top row first, left to right */
   order: 'rows-top-down';
   colour: string;
+  /** server racks take a different vinyl, to read on the dark rack door */
+  rackColour: string;
 }
 
 export interface NicheRuleSet {
@@ -106,10 +117,16 @@ export const BERLIN_2026: NicheRuleSet = {
     rowGap: est(4 * IN, 'Not stated. Taken as the 4" gap between units.'),
     capStandard: est(10, 'Not stated in the decks; scaled from the p.119 example. Confirm against the graphics files.'),
     capSmall: est(6, 'Not stated in the decks; scaled from the p.119 example. Confirm against the graphics files.'),
+    pedHeight: p(900, 'pp.56, 70', 'Berlin’s light tables are 900 high with an opal acrylic top.'),
+    pedEdge: est(200, 'Not dimensioned; scaled from the p.121 San Jose pedestal example. Berlin’s light tables are a fixed size (pp.56, 70), so fix the width to the table.'),
+    pedBack: est(90, 'Not dimensioned; scaled from the p.121 San Jose pedestal example.'),
+    pedGap: est(120, 'Not dimensioned; scaled from the p.121 San Jose pedestal example.'),
+    pedToLabel: p(50, 'p.121', '50 mm from the hardware to the label; labels top-aligned and left-aligned per unit.'),
+    pedLabelToEdge: p(90, 'p.121', '90 mm from the label to the pedestal edge.'),
+    rackLabelDrop: est(150, 'Not dimensioned in the decks; the renders on pp.129–140 show the label centred on the door just under the rack’s top panel. Confirm against the graphics files.'),
   },
-  labels: { alignLeft: true, shelfMode: 'centre-above-tallest', rowAlign: 'shared', order: 'rows-top-down', colour: 'black die-cut vinyl' },
+  labels: { alignLeft: true, shelfMode: 'centre-above-tallest', rowAlign: 'shared', order: 'rows-top-down', colour: 'black die-cut vinyl', rackColour: 'white die-cut vinyl' },
   notes: [
-    { text: 'Pedestals: 50 mm from hardware to label and 90 mm label to edge, labels top-aligned and left-aligned per unit.', sourceId: FAB, ref: 'p.121' },
     { text: 'Lit niches: LED strip recessed 130 mm behind the cabinet lip, around the perimeter only; back and sides not backlit; matte white back panel.', sourceId: FAB, ref: 'pp.169–170' },
     { text: 'Trays thru-bolt to a custom bracket on the niche back with a 1.5" spacer block behind it.', sourceId: FAB, ref: 'pp.72, 75, 78, 83' },
     { text: 'Labels are black die-cut vinyl on niches and pedestals, white on server racks.', sourceId: ONSITE, ref: 'pp.69–87' },
