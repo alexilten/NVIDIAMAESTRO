@@ -8,7 +8,7 @@ import { boxSize, shapeBounds } from '../core/geometry/shape';
 import type { Placement, Vec3 } from '../core/schema';
 import { ComposeCanvas } from '../viewport/ComposeCanvas';
 import { Catalog } from './Catalog';
-import { BoothPanel, DeckMove, ModulesToPlace, useModuleFlags } from './Exhibition';
+import { BoothPanel, ModulesToPlace, useModuleFlags } from './Exhibition';
 import { ProjectDocs } from './Present';
 import { Icon, KV, Section, VBadge, dims3, mm } from './common';
 import { extentOf, useStore } from './store';
@@ -134,7 +134,6 @@ function SelectionPanel() {
             </button>
             <p className="note">{host ? 'Press again to step through its surfaces. ' : 'Move the item over a counter, table, niche or another item to stand it there. '}Moving or rotating changes only the placement; the item’s geometry and dimensions stay as recorded.</p>
           </Section>
-          <DeckMove />
           <Section title="Power and data">
             <label className="check-row"><input type="checkbox" checked={isLive(p)} onChange={(e) => setItem(p.id, { live: e.target.checked })} /> Live in the demo (powered)</label>
             {(() => { const pw = powerOf(p.ref); return pw ? <KV k={`Power, ${pw.basis}`} status={pw.status}>{pw.watts.toLocaleString('en-GB')} W</KV> : <KV k="Power">No published figure</KV>; })()}
@@ -170,7 +169,6 @@ function SelectionPanel() {
           </div>
           <p className="note">Align uses the first selected item as the reference.</p>
         </Section>
-        <DeckMove />
       </div>
     </div>
   );

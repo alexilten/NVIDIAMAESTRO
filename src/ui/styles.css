@@ -393,8 +393,3 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .issue-row { display: flex; align-items: flex-start; gap: 6px; }
 .issue-row .issue { flex: 1; }
 .issue-row .turn-btn { flex: none; font-size: 12px; padding: 6px 2px; white-space: nowrap; }
-.deck-access { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-top: 6px; }
-.deck-access > span { width: 34px; color: var(--ink-2); }
-.deck-access select { flex: 1; }
-.deck-access label { display: flex; align-items: center; gap: 4px; color: var(--ink-2); }
-.deck-access label input { width: 72px; }

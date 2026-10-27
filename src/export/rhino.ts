@@ -26,7 +26,7 @@ export const LAYER_TREE: { name: string; color: [number, number, number]; childr
   { name: '20_DEMO_MODULES', color: [60, 60, 70], children: [] },
   { name: '30_DISPLAY_FURNITURE', color: [90, 90, 96], children: ['COUNTERS', 'KIOSKS', 'PEDESTALS', 'NICHES', 'DESKS'] },
   { name: '40_MEDIA', color: [20, 20, 24], children: ['DISPLAYS'] },
-  { name: '50_EXHIBITION_ARCHITECTURE', color: [120, 120, 128], children: ['BOOTH_PLOT', 'COLUMNS', 'DECKS', 'WALLS', 'SIGNAGE', 'ROBOT_CELLS', 'OTHER'] },
+  { name: '50_EXHIBITION_ARCHITECTURE', color: [120, 120, 128], children: ['BOOTH_PLOT', 'COLUMNS', 'WALLS', 'SIGNAGE', 'ROBOT_CELLS', 'OTHER'] },
   { name: '60_TECHNICAL_INFRASTRUCTURE', color: [230, 170, 30], children: ['SERVICE_POINTS'] },
   { name: '90_DIMENSIONS', color: [10, 132, 255], children: ['LABELS'] },
   { name: '91_CLEARANCES', color: [230, 40, 40], children: ['APPROACH_ZONES', 'NARROW_FLOOR'] },

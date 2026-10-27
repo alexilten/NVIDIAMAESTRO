@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { BOOTH_TYPES, DECK_DEFAULTS, RULE_PRESETS, SIDES, addDeck, boothTypeOf, stairRun, SIDE_LABEL, addColumn, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
+import { BOOTH_TYPES, RULE_PRESETS, SIDES, boothTypeOf, SIDE_LABEL, addColumn, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
 import { moduleTag } from '../core/sheet';
 import { TEMPLATES } from '../core/templates';
-import { VERIFICATION, VERIFICATION_RANK, type BoothColumn, type BoothDeck, type BoothSide, type DeckAccess, type BoothValue, type ServicePoint, type Verification } from '../core/schema';
+import { VERIFICATION, VERIFICATION_RANK, type BoothColumn, type BoothValue, type ServicePoint, type Verification } from '../core/schema';
 import { KV, Section, VBadge, mm } from './common';
 import { downloadBoothSchedule, downloadBoothSheet, printBoothSheet } from './exportActions';
 import { ProjectDocs } from './Present';
@@ -21,23 +21,6 @@ export function ModulesToPlace() {
       {TEMPLATES.map((t) => <button key={t.id} className="link-row" title={t.description} onClick={() => st.placeModuleOnBooth(t.build(), true)}>{t.name}<span className="muted small"> · template</span></button>)}
       <p className="note">A module lands in the first free spot from the back left, a route width clear of the others. Modules you save in Compose appear here.</p>
     </div>
-  );
-}
-
-/** Selection panel, exhibition with decks: stand the selected modules on a deck or back on the floor. */
-export function DeckMove() {
-  const comp = useStore((s) => s.comp);
-  const toDeck = useStore((s) => s.toDeck);
-  const decks = comp.booth?.decks ?? [];
-  if (comp.kind !== 'exhibition' || !decks.length) return null;
-  return (
-    <Section title="Level">
-      <div className="btn-grid">
-        {decks.map((k) => <button key={k.id} className="ghost" onClick={() => toDeck(k.id)}>Onto {k.name} · +{Math.round(k.level)}</button>)}
-        <button className="ghost" onClick={() => toDeck(null)}>Booth floor</button>
-      </div>
-      <p className="note">Moves the whole module, centred on the deck with its base at the deck level. Move it into place from there.</p>
-    </Section>
   );
 }
 
@@ -91,8 +74,6 @@ export function BoothPanel() {
   const exhibitions = saved.filter((c) => c.kind === 'exhibition');
   const changed = changedModules(comp, saved);
   const cols = b.columns ?? [];
-  const decks = b.decks ?? [];
-  const setDeck = (id: string, patch: Partial<BoothDeck>) => st.setBooth({ decks: decks.map((k) => (k.id === id ? { ...k, ...patch, status: k.status === 'placeholder' && !('status' in patch) && !('name' in patch) ? 'project' : patch.status ?? k.status } : k)) });
   const setCol = (id: string, patch: Partial<BoothColumn>) => st.setBooth({ columns: cols.map((c) => (c.id === id ? { ...c, ...patch } : c)) });
   return (
     <div className="inspector">
@@ -168,11 +149,6 @@ export function BoothPanel() {
           </div>
           <p className="note">Each module is fed from the nearest point of the right kind; runs are plan distances along the floor from the module’s centre, without rise or slack. Loads sum stated figures only.</p>
         </Section>
-        <Section title="Decks" summary={`${decks.length}`} open={decks.length > 0}>
-          {decks.map((k) => <DeckRow key={k.id} k={k} set={(patch) => setDeck(k.id, patch)} remove={() => st.setBooth({ decks: decks.filter((x) => x.id !== k.id) })} />)}
-          <button className="ghost wide" onClick={() => st.setBooth(addDeck(b))}>+ Upper deck</button>
-          <p className="note">An upper floor on corner posts, with a stair and optionally a lift standing on the booth floor beside one edge. Stair length follows from the level at {DECK_DEFAULTS.rise.value} mm risers and {DECK_DEFAULTS.going.value} mm goings. Slab, posts, guard rail, stair and lift sizes are Estimated; hover a row for its basis.</p>
-        </Section>
         <Section title="Columns" summary={`${cols.length}`} open={cols.length > 0}>
           {cols.map((k) => (
             <div key={k.id} className="svc-row">
@@ -236,49 +212,8 @@ export function BoothPanel() {
             <button className="ghost" onClick={() => st.loadSampleBooth('corner')}>Sample corner booth</button>
             <button className="ghost" onClick={() => st.loadSampleBooth('island')}>Sample island booth</button>
           </div>
-          <button className="ghost wide" onClick={() => st.loadSampleBooth('two-storey')}>Sample two-storey booth</button>
         </div>
       </div>
-    </div>
-  );
-}
-
-const SIDE_SHORT: Record<BoothSide, string> = { front: 'Front', right: 'Right', back: 'Back', left: 'Left' };
-
-function DeckRow({ k, set, remove }: { k: BoothDeck; set: (p: Partial<BoothDeck>) => void; remove: () => void }) {
-  const num = (f: 'x' | 'y' | 'w' | 'd' | 'level', label: string) => (
-    <label key={f}>{label}<input type="number" step={50} defaultValue={Math.round(k[f])} key={`${f}${k[f]}`}
-      onBlur={(e) => { const v = +e.target.value; if (!Number.isFinite(v) || (f !== 'x' && f !== 'y' && v <= 0) || v === k[f]) return; set({ [f]: v }); }} aria-label={`${k.name} ${label}`} /></label>
-  );
-  const access = (kind: 'stair' | 'lift') => {
-    const a = k[kind];
-    const setA = (p: Partial<DeckAccess> | null) => set({ [kind]: p === null ? undefined : { side: 'front', offset: 0, ...(kind === 'stair' ? { width: DECK_DEFAULTS.stairWidth.value } : {}), ...a, ...p } } as Partial<BoothDeck>);
-    return (
-      <div className="deck-access">
-        <span>{kind === 'stair' ? 'Stair' : 'Lift'}</span>
-        <select value={a?.side ?? ''} onChange={(e) => setA(e.target.value ? { side: e.target.value as BoothSide } : null)} aria-label={`${k.name} ${kind} side`}>
-          <option value="">None</option>
-          {SIDES.map((s) => <option key={s} value={s}>{SIDE_SHORT[s]} edge</option>)}
-        </select>
-        {a && <label>Along<input type="number" step={100} defaultValue={Math.round(a.offset)} key={`o${a.offset}`} onBlur={(e) => { const v = +e.target.value; if (Number.isFinite(v) && v !== a.offset) setA({ offset: v }); }} aria-label={`${k.name} ${kind} offset`} /></label>}
-      </div>
-    );
-  };
-  const run = stairRun(k);
-  return (
-    <div className="svc-row">
-      <div className="svc-head">
-        <input className="name-input" value={k.name} onChange={(e) => set({ name: e.target.value })} aria-label="Deck name" />
-        <select className={`vselect ${k.status}`} value={k.status} onChange={(e) => set({ status: e.target.value as Verification })} aria-label={`${k.name} status`}>
-          {statuses.map((x) => <option key={x} value={x}>{VERIFICATION[x].label}</option>)}
-        </select>
-        <button className="icon-btn" title="Remove" onClick={remove}>×</button>
-      </div>
-      <div className="svc-grid four">{num('x', 'X')}{num('y', 'Y')}{num('w', 'Width')}{num('d', 'Depth')}</div>
-      <div className="svc-grid four">{num('level', 'Level')}</div>
-      {access('stair')}
-      {access('lift')}
-      {k.stair && <p className="note">{run.risers} risers, a {(run.length / 1000).toFixed(2)} m straight run.</p>}
     </div>
   );
 }

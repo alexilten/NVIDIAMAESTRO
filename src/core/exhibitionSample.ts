@@ -53,34 +53,3 @@ export function sampleIsland(): Composition {
   put('tpl-accessible-counter', [2700, -3300], 0);
   return c;
 }
-
-/**
- * A generic 12 × 10 m peninsula stand with an upper deck at the back: a 6 × 4 m deck at 2700 mm with a stair
- * down its front edge and a lift on its right, two modules upstairs and the rest on the floor. Every plot,
- * limit and deck figure is a placeholder or Estimated.
- */
-export function sampleTwoStorey(): Composition {
-  let c = newExhibition('Sample two-storey booth');
-  const booth = defaultBooth();
-  booth.width = { ...booth.width, value: 12000 };
-  booth.depth = { ...booth.depth, value: 10000 };
-  booth.open = { front: true, right: true, back: false, left: true };
-  booth.services = [{ id: 'sp-1', name: 'S1', kind: 'power-data', x: 0, y: 0, status: 'placeholder' }];
-  booth.decks = [{
-    id: 'deck-1', name: 'D1', x: 0, y: 3000, w: 6000, d: 4000, level: 2700, status: 'placeholder',
-    stair: { side: 'front', offset: -2400, width: 1200 }, lift: { side: 'right', offset: 0 },
-  }];
-  c = { ...c, booth };
-  const put = (id: string, at: [number, number], rot = 0, z = 0) => {
-    const r = placeModule(c, tpl(id).build(), shapeOf, at, rot, true);
-    c = z ? { ...r.comp, items: r.comp.items.map((i) => (r.ids.includes(i.id) ? { ...i, position: [i.position[0], i.position[1], i.position[2] + z] } : i)) } : r.comp;
-  };
-  put('tpl-station-podium', [-1000, 4200], 0, 2700);
-  put('tpl-switch-table', [1500, 4300], 0, 2700);
-  put('tpl-board-niche', [-4500, 4850]);
-  put('tpl-board-niche', [-4500, 1300]);
-  put('tpl-switch-table', [1500, 2500]);
-  put('tpl-spark-counter', [-4000, -2600]);
-  put('tpl-accessible-counter', [3000, -3200]);
-  return c;
-}
