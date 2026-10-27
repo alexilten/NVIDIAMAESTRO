@@ -1,7 +1,7 @@
 import { extentOfShape, worldBoxes, type ShapeOf, type WorldBox } from './arrange';
 import { newComposition, uid, type Extent } from './compose';
 import { schedule } from './services';
-import type { AccessRules, Booth, BoothColumn, BoothSide, BoothValue, Composition, Placement, ServicePoint, Vec3, Verification } from './schema';
+import type { AccessRules, Booth, BoothColumn, BoothDeck, BoothSide, DeckAccess, BoothValue, Composition, Placement, ServicePoint, Vec3, Verification } from './schema';
 
 /**
  * The exhibition booth: its plot, the circulation and accessibility check, and the service points that feed the
@@ -118,6 +118,75 @@ export function addColumn(b: Booth, x = 0, y = 0, w = 600, d = 600): Booth {
 
 /** a column's plan extent, as an obstacle full height */
 export const columnExtent = (k: BoothColumn): Extent => ({ min: [k.x - k.w / 2, k.y - k.d / 2, 0], max: [k.x + k.w / 2, k.y + k.d / 2, 100000] });
+
+// ── upper decks ────────────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Typical figures for a two-storey stand, all Estimated: the venue's technical guidelines and the stand
+ * builder's structural engineer set the real ones, and many venues need a separate approval for a deck.
+ */
+export const DECK_DEFAULTS = {
+  slab: v(300, 'estimated', 'Deck structure depth under the upper floor, typical for system decks; the stand builder gives the figure.'),
+  post: v(200, 'estimated', 'Square post at each deck corner; spans and post sizes come from the structural engineer.'),
+  guard: v(1100, 'estimated', 'Guard rail height round the upper floor, a common European figure; take the venue manual’s.'),
+  rise: v(175, 'estimated', 'Stair riser height, a common maximum for public stairs; check the local building rules.'),
+  going: v(280, 'estimated', 'Stair tread going, a common minimum for public stairs; check the local building rules.'),
+  stairWidth: v(1200, 'estimated', 'Stair clear width; the venue sets it from the deck’s occupancy.'),
+  lift: v(1500, 'estimated', 'Platform lift footprint, square, with its enclosure; take the supplier’s drawing.'),
+};
+
+/** a 4 × 3 m deck at 2700 mm at the back of the plot, with a stair down its front edge, Placeholder until drawn */
+export function addDeck(b: Booth): Booth {
+  const n = (b.decks ?? []).length + 1;
+  const w = 4000, d = 3000;
+  const deck: BoothDeck = { id: uid('deck'), name: `D${n}`, x: 0, y: b.depth.value / 2 - d / 2, w, d, level: 2700, stair: { side: 'front', offset: -(w / 2 - DECK_DEFAULTS.stairWidth.value / 2), width: DECK_DEFAULTS.stairWidth.value }, status: 'placeholder' };
+  return { ...b, decks: [...(b.decks ?? []), deck] };
+}
+
+type Rect = { min: [number, number]; max: [number, number] };
+export const deckRect = (k: BoothDeck): Rect => ({ min: [k.x - k.w / 2, k.y - k.d / 2], max: [k.x + k.w / 2, k.y + k.d / 2] });
+
+/** number of risers and plan length of a deck's stair */
+export function stairRun(k: BoothDeck) {
+  const risers = Math.ceil(k.level / DECK_DEFAULTS.rise.value);
+  return { risers, length: risers * DECK_DEFAULTS.going.value };
+}
+
+/** the plan rectangle a stair or lift takes up on the booth floor, against the deck edge on its side */
+export function accessRect(k: BoothDeck, a: DeckAccess, kind: 'stair' | 'lift'): Rect {
+  const along = kind === 'stair' ? a.width ?? DECK_DEFAULTS.stairWidth.value : DECK_DEFAULTS.lift.value;
+  const out = kind === 'stair' ? stairRun(k).length : DECK_DEFAULTS.lift.value;
+  const r = deckRect(k);
+  switch (a.side) {
+    case 'front': return { min: [k.x + a.offset - along / 2, r.min[1] - out], max: [k.x + a.offset + along / 2, r.min[1]] };
+    case 'back': return { min: [k.x + a.offset - along / 2, r.max[1]], max: [k.x + a.offset + along / 2, r.max[1] + out] };
+    case 'left': return { min: [r.min[0] - out, k.y + a.offset - along / 2], max: [r.min[0], k.y + a.offset + along / 2] };
+    case 'right': return { min: [r.max[0], k.y + a.offset - along / 2], max: [r.max[0] + out, k.y + a.offset + along / 2] };
+  }
+}
+
+/**
+ * What a deck puts on the booth floor, as obstacles to the ground-floor route: its corner posts (the whole
+ * footprint when the deck underside is lower than the headroom), its stair and its lift.
+ */
+export function deckObstacles(k: BoothDeck, headroom: number): Extent[] {
+  const r = deckRect(k), p = DECK_DEFAULTS.post.value, top = k.level;
+  const box = (q: Rect): Extent => ({ min: [q.min[0], q.min[1], 0], max: [q.max[0], q.max[1], top] });
+  const out: Extent[] = [];
+  if (k.level - DECK_DEFAULTS.slab.value < headroom) out.push(box(r));
+  else for (const [x, y] of [[r.min[0], r.min[1]], [r.max[0] - p, r.min[1]], [r.min[0], r.max[1] - p], [r.max[0] - p, r.max[1] - p]]) out.push(box({ min: [x, y], max: [x + p, y + p] }));
+  if (k.stair) out.push(box(accessRect(k, k.stair, 'stair')));
+  if (k.lift) out.push(box(accessRect(k, k.lift, 'lift')));
+  return out;
+}
+
+/** the deck a unit stands on: its base at the deck's level and its centre over the deck */
+export function deckOf(b: Booth, e: Extent): BoothDeck | null {
+  const cx = (e.min[0] + e.max[0]) / 2, cy = (e.min[1] + e.max[1]) / 2;
+  return (b.decks ?? []).find((k) => Math.abs(e.min[2] - k.level) < 60 && Math.abs(cx - k.x) < k.w / 2 && Math.abs(cy - k.y) < k.d / 2) ?? null;
+}
+
+const within = (a: Rect, outer: Rect, tol = 1) => a.min[0] >= outer.min[0] - tol && a.max[0] <= outer.max[0] + tol && a.min[1] >= outer.min[1] - tol && a.max[1] <= outer.max[1] + tol;
 
 export function addServicePoint(b: Booth, kind: ServicePoint['kind'], x = 0, y = 0): Booth {
   const n = b.services.length + 1;
@@ -241,7 +310,11 @@ export interface Issue {
   turn?: number;
 }
 
-export interface UnitAccess { unit: string; approach: boolean; turning: boolean; zone: { min: [number, number]; max: [number, number] } }
+export interface UnitAccess {
+  unit: string; approach: boolean; turning: boolean; zone: { min: [number, number]; max: [number, number] };
+  /** the deck the unit stands on, when it is upstairs */
+  deck?: string;
+}
 
 export interface UnitService {
   unit: string;
@@ -294,7 +367,9 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
   for (let i = 0; i < nx * ny; i++) if (!inside(cx(i), cy(i)) && !beyondOpen(cx(i), cy(i))) blocked[i] = 1;
   const boxes: WorldBox[] = c.items.flatMap((p) => { const s = shapeOf(p); return s ? worldBoxes(p, s) : []; });
   const columns = b.columns ?? [];
-  for (const bx2 of [...boxes, ...columns.map(columnExtent)]) {
+  const decks = b.decks ?? [];
+  // modules on a deck stand above the floor and are not ground obstacles; the deck's posts, stair and lift are
+  for (const bx2 of [...boxes, ...columns.map(columnExtent), ...decks.flatMap((k) => deckObstacles(k, b.rules.headroom.value))]) {
     if (bx2.min[2] >= b.rules.headroom.value || bx2.max[2] - Math.max(bx2.min[2], 0) <= 15) continue;
     const i0 = Math.max(0, Math.ceil((bx2.min[0] - x0) / g)), i1 = Math.min(nx - 1, Math.floor((bx2.max[0] - x0) / g));
     const j0 = Math.max(0, Math.ceil((bx2.min[1] - y0) / g)), j1 = Math.min(ny - 1, Math.floor((bx2.max[1] - y0) / g));
@@ -338,6 +413,11 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
     const e = extentOfShape(p, s);
     if (e.min[0] < -W / 2 - 1 || e.max[0] > W / 2 + 1 || e.min[1] < -D / 2 - 1 || e.max[1] > D / 2 + 1) issues.push({ level: 'error', text: `${p.name} stands outside the booth plot.`, unit: p.groupId ?? p.id, at: [(e.min[0] + e.max[0]) / 2, (e.min[1] + e.max[1]) / 2] });
     if (e.max[2] > b.heightLimit.value + 0.5) issues.push({ level: 'error', text: `${p.name} is ${Math.round(e.max[2])} mm high, over the ${Math.round(b.heightLimit.value)} mm height limit.`, unit: p.groupId ?? p.id });
+    for (const k of decks) {
+      // a ground-floor part under a deck must clear its structure
+      const r = deckRect(k), under = k.level - DECK_DEFAULTS.slab.value;
+      if (e.min[2] < under - 1 && e.max[2] > under + 0.5 && e.min[0] < r.max[0] - 1 && e.max[0] > r.min[0] + 1 && e.min[1] < r.max[1] - 1 && e.max[1] > r.min[1] + 1) issues.push({ level: 'error', text: `${p.name} runs into the underside of deck ${k.name} (${Math.round(under)} mm clear).`, unit: p.groupId ?? p.id, at: [k.x, k.y] });
+    }
     for (const k of columns) {
       const ke = columnExtent(k);
       if (e.min[0] < ke.max[0] - 1 && e.max[0] > ke.min[0] + 1 && e.min[1] < ke.max[1] - 1 && e.max[1] > ke.min[1] + 1) issues.push({ level: 'error', text: `${p.name} runs into column ${k.name}.`, unit: p.groupId ?? p.id, at: [k.x, k.y] });
@@ -347,6 +427,19 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
     if (Math.abs(k.x) + k.w / 2 > W / 2 + 1 || Math.abs(k.y) + k.d / 2 > D / 2 + 1) issues.push({ level: 'warn', text: `Column ${k.name} is not wholly inside the plot; check its position on the hall plan.`, at: [k.x, k.y] });
   }
 
+  // decks: the plot, the height limit, a way down, and a lift for visitors who cannot use the stair
+  const plotR: Rect = { min: [-W / 2, -D / 2], max: [W / 2, D / 2] };
+  const deckReach = new Map<string, boolean>();
+  for (const k of decks) {
+    const guardTop = k.level + DECK_DEFAULTS.guard.value;
+    if (!within(deckRect(k), plotR)) issues.push({ level: 'error', text: `Deck ${k.name} is not wholly inside the plot.`, at: [k.x, k.y] });
+    if (guardTop > b.heightLimit.value + 0.5) issues.push({ level: 'error', text: `Deck ${k.name}: its guard rail tops out at ${Math.round(guardTop)} mm, over the ${Math.round(b.heightLimit.value)} mm height limit.`, at: [k.x, k.y] });
+    if (!k.stair) issues.push({ level: 'error', text: `Deck ${k.name} has no stair: the upper floor needs a way down.`, at: [k.x, k.y] });
+    else if (!within(accessRect(k, k.stair, 'stair'), plotR)) issues.push({ level: 'error', text: `Deck ${k.name}: its ${stairRun(k).length} mm stair runs outside the plot.`, at: [k.x, k.y] });
+    if (k.lift && !within(accessRect(k, k.lift, 'lift'), plotR)) issues.push({ level: 'error', text: `Deck ${k.name}: its lift stands outside the plot.`, at: [k.x, k.y] });
+  }
+  if (decks.length) issues.push({ level: 'info', text: 'Two-storey stands usually need the venue’s separate approval and a structural engineer’s sign-off; deck figures here are Estimated.' });
+
   // an accessible approach in front of each module
   const cellsIn = (z: { min: [number, number]; max: [number, number] }) => {
     const out: number[] = [];
@@ -355,8 +448,24 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
     for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) out.push(j * nx + i);
     return out;
   };
+  // a deck is reachable in a wheelchair when its lift's door has the accessible route in front of it
+  for (const k of decks) {
+    const reach = !!k.lift && cellsIn(approachZone({ min: [...accessRect(k, k.lift, 'lift').min, 0], max: [...accessRect(k, k.lift, 'lift').max, 0] }, k.lift.side, b.rules.approach.value)).some((i) => routeC[i]);
+    deckReach.set(k.id, reach);
+    if (!k.lift) issues.push({ level: 'warn', text: `Deck ${k.name} has no lift: a visitor using a wheelchair cannot reach it. Show what is up there on the ground floor too.`, at: [k.x, k.y] });
+    else if (!reach) issues.push({ level: 'error', text: `Deck ${k.name}: the accessible route does not reach its lift door.`, at: [k.x, k.y] });
+  }
   const access: UnitAccess[] = units.map((u) => {
     const zone = approachZone(u.extent, u.front, b.rules.approach.value);
+    const deck = deckOf(b, u.extent);
+    if (deck) {
+      // on a deck: the approach must fit on the deck floor, and the deck must be reachable
+      const fits = within(zone, deckRect(deck));
+      if (!fits) issues.push({ level: 'error', text: `${u.name}: no room for its approach on deck ${deck.name}.`, unit: u.id, at: [(zone.min[0] + zone.max[0]) / 2, (zone.min[1] + zone.max[1]) / 2] });
+      if (!within({ min: [u.extent.min[0], u.extent.min[1]], max: [u.extent.max[0], u.extent.max[1]] }, deckRect(deck))) issues.push({ level: 'error', text: `${u.name} overhangs the edge of deck ${deck.name}.`, unit: u.id });
+      const reach = deckReach.get(deck.id) ?? false;
+      return { unit: u.id, approach: fits && reach, turning: fits && reach && Math.min(deck.w, deck.d) >= turning, zone, deck: deck.id };
+    }
     const cells = cellsIn(zone);
     const approach = cells.some((i) => routeC[i]);
     const turn = cells.some((i) => turnC[i]);
@@ -421,7 +530,7 @@ export function freeSpot(c: Composition, extents: Extent[], size: [number, numbe
   if (!b) return null;
   const W = b.width.value, D = b.depth.value, gap = b.rules.route.value;
   const [w, d] = size;
-  extents = [...extents, ...(b.columns ?? []).map(columnExtent)];
+  extents = [...extents, ...(b.columns ?? []).map(columnExtent), ...(b.decks ?? []).flatMap((k) => deckObstacles(k, b.rules.headroom.value))];
   if (w > W || d > D) return null;
   const step = 100;
   for (let y = D / 2 - d / 2; y >= -D / 2 + d / 2; y -= step) {
@@ -537,4 +646,18 @@ export function changedModules(c: Composition, saved: Composition[]): Map<string
     if (m && m.updatedAt > g.source.updatedAt) out.set(g.id, `${m.name} was edited after it was placed here.`);
   }
   return out;
+}
+
+/**
+ * Stand items on a deck (centred on it, their base at its level) or, with no deck, back on the booth floor in
+ * the same plan position. Returns the composition unchanged when nothing has geometry.
+ */
+export function moveToDeck(c: Composition, ids: string[], deck: BoothDeck | null, shapeOf: ShapeOf): Composition {
+  const sel = c.items.filter((i) => ids.includes(i.id));
+  const e = planExtent(sel, shapeOf);
+  if (!e) return c;
+  const dx = deck ? deck.x - (e.min[0] + e.max[0]) / 2 : 0, dy = deck ? deck.y - (e.min[1] + e.max[1]) / 2 : 0;
+  const dz = (deck ? deck.level : 0) - e.min[2];
+  const r1 = (x: number) => Math.round(x * 10) / 10;
+  return { ...c, updatedAt: new Date().toISOString(), items: c.items.map((i) => (ids.includes(i.id) ? { ...i, position: [r1(i.position[0] + dx), r1(i.position[1] + dy), r1(i.position[2] + dz)] as Vec3 } : i)) };
 }

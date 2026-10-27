@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { placeOn, snapDelta, supportSurfaces } from '../core/arrange';
-import { freeSpot, newExhibition, placeModule, planExtent, refreshModule } from '../core/booth';
-import { sampleExhibition, sampleIsland } from '../core/exhibitionSample';
+import { freeSpot, moveToDeck, newExhibition, placeModule, planExtent, refreshModule } from '../core/booth';
+import { sampleExhibition, sampleIsland, sampleTwoStorey } from '../core/exhibitionSample';
 import { insertComposition, type Template } from '../core/templates';
 import { addItem, alignItems, distributeX, duplicateItems, expandToGroups, groupItems, moveItems, newComposition, nextSlot, removeItems, rotateItems, ungroup, updateItem } from '../core/compose';
 import { resolveRef, type LibraryEntry } from '../core/library';
@@ -86,8 +86,10 @@ interface State {
 
   // exhibition
   setBooth: (patch: Partial<Booth>) => void;
+  /** stand the selected modules on a deck, or back on the floor with null */
+  toDeck: (deckId: string | null) => void;
   placeModuleOnBooth: (src: Composition, template?: boolean) => void;
-  loadSampleBooth: (kind?: 'corner' | 'island') => void;
+  loadSampleBooth: (kind?: 'corner' | 'island' | 'two-storey') => void;
   /** replace a placed module with the current version of its saved source */
   refreshPlaced: (groupId: string) => void;
   circulation: boolean;
@@ -308,6 +310,14 @@ export const useStore = create<State>((set, get) => {
     newComp: () => { commit(get().comp.kind === 'exhibition' ? newExhibition() : newComposition()); set({ selection: [] }); },
 
     setBooth: (patch) => { const { comp } = get(); if (comp.booth) commit({ ...comp, booth: { ...comp.booth, ...patch }, updatedAt: new Date().toISOString() }); },
+    toDeck: (deckId) => {
+      const { comp, parts, selection } = get();
+      const deck = deckId ? comp.booth?.decks?.find((k) => k.id === deckId) ?? null : null;
+      if (!selection.length) { get().notify('Select a module first.'); return; }
+      const ids = expandToGroups(comp, selection);
+      commit(moveToDeck(comp, ids, deck, (p) => resolveRef(p.ref, parts)?.shape ?? null));
+      get().notify(deck ? `Moved onto deck ${deck.name}, at ${Math.round(deck.level)} mm.` : 'Moved back to the booth floor.');
+    },
     placeModuleOnBooth: (src, template = false) => {
       const { comp, parts } = get();
       const shapeOf = (p: Placement) => resolveRef(p.ref, parts)?.shape ?? null;
@@ -334,7 +344,7 @@ export const useStore = create<State>((set, get) => {
       set({ selection: r.ids });
       get().notify(`${g.name} now matches the saved ${src.name}. Undo puts the earlier version back.`);
     },
-    loadSampleBooth: (kind = 'corner') => { commit(kind === 'island' ? sampleIsland() : sampleExhibition()); set({ selection: [] }); get().notify(`Sample ${kind} booth loaded. Its plot, limits and service points are placeholders.`); },
+    loadSampleBooth: (kind = 'corner') => { commit(kind === 'island' ? sampleIsland() : kind === 'two-storey' ? sampleTwoStorey() : sampleExhibition()); set({ selection: [] }); get().notify(`Sample ${kind} booth loaded. Its plot, limits and service points are placeholders.`); },
     circulation: true,
 
     presentKind: (k) => { const next = docFor(k); if (next) set({ comp: next, history: [], future: [], selection: [] }); },
