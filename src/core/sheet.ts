@@ -1,6 +1,6 @@
 import { extentOfShape, worldBoxes, type ShapeOf, type WorldBox } from './arrange';
-import { BOOTH_TYPES, CELL, DECK_DEFAULTS, accessRect, boothTypeOf, deckRect, stairRun, type BoothAnalysis } from './booth';
-import type { Booth, Composition, Placement, Vec3, Verification } from './schema';
+import { CELL, plotEdges, type BoothAnalysis } from './booth';
+import type { Composition, Placement, Vec3, Verification } from './schema';
 
 /**
  * A dimensioned A3 drawing sheet for a composition: plan above front elevation (third-angle), drawn to a
@@ -218,38 +218,11 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
 
   // the plot: walls on closed sides, a dashed line on open ones
   out.push('<g id="plot">');
-  const side = (on: boolean, x1: number, y1: number, x2: number, y2: number) => line(px(x1), py(y1), px(x2), py(y2), on ? 'open' : 'wall');
-  side(b.open.front, -W / 2, -D / 2, W / 2, -D / 2);
-  side(b.open.back, -W / 2, D / 2, W / 2, D / 2);
-  side(b.open.left, -W / 2, -D / 2, -W / 2, D / 2);
-  side(b.open.right, W / 2, -D / 2, W / 2, D / 2);
+  for (const e of plotEdges(b)) line(px(e.a[0]), py(e.a[1]), px(e.b[0]), py(e.b[1]), e.open ? 'open' : 'wall');
   // hall columns, solid, with their names
   for (const col of b.columns ?? []) {
     rectW(col.x - col.w / 2, col.y - col.d / 2, col.x + col.w / 2, col.y + col.d / 2, 'column');
     text(px(col.x + col.w / 2) + 1, py(col.y + col.d / 2) - 0.6, col.name, 'tiny', 'start');
-  }
-  // upper decks: the deck edge dashed (it is overhead), posts solid, the stair with its treads and the lift crossed
-  for (const dk of b.decks ?? []) {
-    const r = deckRect(dk), p = DECK_DEFAULTS.post.value;
-    rectW(r.min[0], r.min[1], r.max[0], r.max[1], 'deck');
-    for (const [x, y] of [[r.min[0], r.min[1]], [r.max[0] - p, r.min[1]], [r.min[0], r.max[1] - p], [r.max[0] - p, r.max[1] - p]]) rectW(x, y, x + p, y + p, 'column');
-    text(px(r.min[0] + p) + 1.5, py(r.min[1] + p) - 1.2, `${dk.name} · UPPER DECK +${fmm(dk.level)}`, 'tiny', 'start');
-    if (dk.stair) {
-      const q = accessRect(dk, dk.stair, 'stair'), run = stairRun(dk), along = dk.stair.side === 'front' || dk.stair.side === 'back';
-      rectW(q.min[0], q.min[1], q.max[0], q.max[1], 'stair');
-      for (let i = 1; i < run.risers; i++) {
-        const f = i / run.risers;
-        if (along) { const y = q.min[1] + (q.max[1] - q.min[1]) * f; line(px(q.min[0]), py(y), px(q.max[0]), py(y), 'tread'); }
-        else { const x = q.min[0] + (q.max[0] - q.min[0]) * f; line(px(x), py(q.min[1]), px(x), py(q.max[1]), 'tread'); }
-      }
-      text(px((q.min[0] + q.max[0]) / 2), py((q.min[1] + q.max[1]) / 2) + 1, `UP ${run.risers}R`, 'tiny', 'middle', along ? -90 : 0);
-    }
-    if (dk.lift) {
-      const q = accessRect(dk, dk.lift, 'lift');
-      rectW(q.min[0], q.min[1], q.max[0], q.max[1], 'stair');
-      line(px(q.min[0]), py(q.min[1]), px(q.max[0]), py(q.max[1]), 'tread'); line(px(q.min[0]), py(q.max[1]), px(q.max[0]), py(q.min[1]), 'tread');
-      text(px((q.min[0] + q.max[0]) / 2), py((q.min[1] + q.max[1]) / 2) + 1, 'LIFT', 'tiny');
-    }
   }
   out.push('</g>');
 
@@ -296,9 +269,7 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
     const e = u.extent;
     const pw = s.liveCount ? `${(s.watts / 1000).toFixed(2)} kW${s.unknownLive ? ` + ${s.unknownLive} unknown` : ''}${s.power ? ` from ${svcName.get(s.power.point)} (${(s.power.run / 1000).toFixed(1)} m)` : ', no point'}` : 'static';
     text(lx + 10, y + 3.4, `${fmm(e.max[0] - e.min[0])} × ${fmm(e.max[1] - e.min[1])} mm · ${pw}`, 'tiny', 'start');
-    const upOn = acc.deck ? b.decks?.find((x) => x.id === acc.deck) : undefined;
-    const where = upOn ? `On deck ${upOn.name} +${fmm(upOn.level)} · ` : '';
-    text(lx + 10, y + 6.4, where + (acc.approach ? `Accessible approach${acc.turning ? ' and turning circle' : ', no turning circle'}` : 'NO accessible approach'), acc.approach ? 'tiny' : 'tiny err', 'start');
+    text(lx + 10, y + 6.4, acc.approach ? `Accessible approach${acc.turning ? ' and turning circle' : ', no turning circle'}` : 'NO accessible approach', acc.approach ? 'tiny' : 'tiny err', 'start');
     y += 10;
   });
   if (b.services.length && room()) {
@@ -340,7 +311,7 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
   out.push('<g id="title">');
   line(lx, ty, PAPER.w - FRAME, ty, 'frame');
   text(lx + 4, ty + 8, info.title ?? c.name, 'title', 'start');
-  text(lx + 4, ty + 14, `${info.project ? `${info.project} · ` : ''}${standName(b.open)}Booth ${fmm(W)} × ${fmm(D)} mm · height limit ${fmm(b.heightLimit.value)} mm · ${a.units.length} modules`, 'small', 'start');
+  text(lx + 4, ty + 14, `${info.project ? `${info.project} · ` : ''}Booth ${fmm(W)} × ${fmm(D)} mm · height limit ${fmm(b.heightLimit.value)} mm · ${a.units.length} modules`, 'small', 'start');
   text(lx + 4, ty + 19.5, `Scale 1:${scale} at A3 · millimetres · ${info.date ?? new Date().toISOString().slice(0, 10)}`, 'small', 'start');
   text(lx + 4, ty + 25, `Plot, limits and clearances: ${STATUS_LABEL[a.status]}. Check with the venue before submission.`, 'tiny', 'start');
   text(lx + 4, ty + 29, info.appLabel ?? 'MAESTRO', 'tiny', 'start');
@@ -367,9 +338,6 @@ const STYLE = `
     .open{stroke:#111;stroke-width:.25;stroke-dasharray:2 1.2;fill:none}
     .aisle{fill:#f2f2f4;stroke:none}
     .column{fill:#555;stroke:#111;stroke-width:.25}
-    .deck{fill:none;stroke:#111;stroke-width:.45;stroke-dasharray:3 1.2}
-    .stair{fill:#fff;stroke:#111;stroke-width:.3}
-    .tread{stroke:#111;stroke-width:.15}
     .tight{fill:#f2a33a;fill-opacity:.55;stroke:none}
     .zone{fill:none;stroke:#3b6400;stroke-width:.2;stroke-dasharray:1 .8}
     .zone.bad{stroke:#d33;stroke-width:.35}
@@ -389,6 +357,3 @@ ${out.join('\n')}
 </svg>
 `;
 }
-
-/** "Island booth" and the like, or nothing for a stand with custom open sides */
-const standName = (open: Booth['open']) => { const t = BOOTH_TYPES.find((x) => x.id === boothTypeOf(open)); return t ? `${t.name} · ` : ''; };

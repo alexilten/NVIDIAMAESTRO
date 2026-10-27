@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { BOOTH_TYPES, CELL, DECK_DEFAULTS, accessRect, addDeck, deckObstacles, moveToDeck, stairRun, addColumn, addServicePoint, boothTypeOf, turnToFace, analyseBooth, approachZone, boothCsv, changedModules, freeSpot, frontSide, newExhibition, placeModule, planExtent } from '../src/core/booth';
+import { CELL, addColumn, addServicePoint, turnToFace, analyseBooth, approachZone, boothCsv, changedModules, freeSpot, frontSide, newExhibition, placeModule, planExtent } from '../src/core/booth';
 import { addItem, rotateItems } from '../src/core/compose';
-import { sampleExhibition, sampleIsland, sampleTwoStorey } from '../src/core/exhibitionSample';
+import { sampleExhibition } from '../src/core/exhibitionSample';
 import { defaultParams } from '../src/core/geometry/kit';
 import { boxSize, shapeBounds } from '../src/core/geometry/shape';
 import { resolveRef } from '../src/core/library';
 import { buildBoothSheet } from '../src/core/sheet';
 import { boothAnnotations } from '../src/export/boothAnnotations';
 import { TEMPLATES } from '../src/core/templates';
-import type { BoothDeck, Composition, ItemRef, Placement, Vec3 } from '../src/core/schema';
+import type { Composition, ItemRef, Placement, Vec3 } from '../src/core/schema';
 
 const shapeOf = (p: Placement) => resolveRef(p.ref, [])?.shape ?? null;
 const dimsOf = (ref: ItemRef): Vec3 => boxSize(shapeBounds(resolveRef(ref, [])!.shape!));
@@ -251,28 +251,13 @@ describe('booth columns', () => {
   });
 });
 
-describe('stand types and island booths', () => {
-  it('names a stand by its open sides, and each preset reads back as itself', () => {
-    for (const t of BOOTH_TYPES) expect(boothTypeOf(t.open)).toBe(t.id);
-    expect(boothTypeOf({ front: true, back: true, left: false, right: false })).toBeNull();
-    expect(boothTypeOf({ front: false, back: false, left: true, right: true })).toBeNull();
-  });
-
+describe('facing the aisles', () => {
   it('turns a module the short way to face a side', () => {
     expect(turnToFace('front', 'front')).toBe(0);
     expect(turnToFace('front', 'right')).toBe(90);
     expect(turnToFace('front', 'back')).toBe(180);
     expect(turnToFace('front', 'left')).toBe(-90);
     expect(turnToFace('left', 'front')).toBe(90);
-  });
-
-  it('builds a clear sample island: every module faces an aisle, two back to back in the middle', () => {
-    const c = sampleIsland();
-    expect(boothTypeOf(c.booth!.open)).toBe('island');
-    const a = analyseBooth(c, shapeOf)!;
-    expect(a.issues.filter((i) => i.level !== 'info')).toEqual([]);
-    expect(a.issues.some((i) => /back to the/.test(i.text))).toBe(false);
-    expect(a.access.every((z) => z.approach)).toBe(true);
   });
 
   it('flags a module with its back to a nearby aisle, and the suggested turn clears it', () => {
@@ -296,68 +281,5 @@ describe('stand types and island booths', () => {
     const err = analyseBooth(c, shapeOf)!.issues.find((i) => i.level === 'error' && /no accessible approach/.test(i.text))!;
     expect(err).toBeDefined();
     expect(err.turn).toBe(180);
-  });
-});
-
-describe('upper decks', () => {
-  const deckBooth = (over: Partial<BoothDeck> = {}) => {
-    const c = sampleTwoStorey();
-    return { ...c, booth: { ...c.booth!, decks: [{ ...c.booth!.decks![0], ...over }] } };
-  };
-
-  it('builds a clear sample two-storey booth, with its upstairs modules reached by the lift', () => {
-    const c = sampleTwoStorey();
-    const a = analyseBooth(c, shapeOf)!;
-    expect(a.issues.filter((i) => i.level !== 'info')).toEqual([]);
-    const up = a.access.filter((z) => z.deck === 'deck-1');
-    expect(up).toHaveLength(2);
-    expect(up.every((z) => z.approach)).toBe(true);
-    expect(a.access.filter((z) => !z.deck).every((z) => z.approach)).toBe(true);
-  });
-
-  it('sizes the stair from the level and stands it against the deck edge', () => {
-    const k = sampleTwoStorey().booth!.decks![0];
-    expect(stairRun(k)).toEqual({ risers: Math.ceil(2700 / DECK_DEFAULTS.rise.value), length: Math.ceil(2700 / DECK_DEFAULTS.rise.value) * DECK_DEFAULTS.going.value });
-    const s = accessRect(k, k.stair!, 'stair');
-    expect(s.max[1]).toBe(k.y - k.d / 2);
-    expect(s.max[1] - s.min[1]).toBe(stairRun(k).length);
-    expect(s.max[0] - s.min[0]).toBe(1200);
-  });
-
-  it('blocks only the posts under a high deck, and the whole footprint under a low one', () => {
-    const k = sampleTwoStorey().booth!.decks![0];
-    const high = deckObstacles({ ...k, stair: undefined, lift: undefined }, 2030);
-    expect(high).toHaveLength(4);
-    expect(deckObstacles({ ...k, level: 1500, stair: undefined, lift: undefined }, 2030)).toHaveLength(1);
-  });
-
-  it('warns without a lift and makes upstairs modules inaccessible', () => {
-    const a = analyseBooth(deckBooth({ lift: undefined }), shapeOf)!;
-    expect(a.issues.some((i) => i.level === 'warn' && /D1 has no lift/.test(i.text))).toBe(true);
-    expect(a.access.filter((z) => z.deck).every((z) => !z.approach)).toBe(true);
-  });
-
-  it('flags a missing stair, a guard rail over the height limit and a stair running off the plot', () => {
-    expect(analyseBooth(deckBooth({ stair: undefined }), shapeOf)!.issues.some((i) => /D1 has no stair/.test(i.text))).toBe(true);
-    expect(analyseBooth(deckBooth({ level: 3200 }), shapeOf)!.issues.some((i) => /guard rail tops out at 4300 mm/.test(i.text))).toBe(true);
-    expect(analyseBooth(deckBooth({ stair: { side: 'back', offset: 0, width: 1200 } }), shapeOf)!.issues.some((i) => /stair runs outside the plot/.test(i.text))).toBe(true);
-  });
-
-  it('flags a floor module that runs into the deck underside, and moving it onto the deck clears that', () => {
-    let c = booth(8000, 6000);
-    c = { ...c, booth: addDeck(c.booth!) };
-    c = placeModule(c, tpl('tpl-board-niche'), shapeOf, [0, 2850], 0).comp;
-    const a = analyseBooth(c, shapeOf)!;
-    expect(a.issues.some((i) => /runs into the underside of deck D1/.test(i.text))).toBe(true);
-    const k = c.booth!.decks![0];
-    const up = moveToDeck(c, c.items.map((i) => i.id), k, shapeOf);
-    expect(Math.min(...up.items.map((i) => i.position[2]))).toBeGreaterThanOrEqual(k.level - 1);
-    expect(analyseBooth(up, shapeOf)!.issues.some((i) => /underside/.test(i.text))).toBe(false);
-  });
-
-  it('writes the deck, stair and lift to the DECKS layer', () => {
-    const c = sampleTwoStorey();
-    const notes = boothAnnotations(c, analyseBooth(c, shapeOf)!).filter((n) => n.layer.endsWith('::DECKS'));
-    expect(notes.map((n) => n.name)).toEqual(['D1', 'D1 STAIR', 'D1 LIFT']);
   });
 });

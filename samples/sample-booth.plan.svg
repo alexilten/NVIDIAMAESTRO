@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="420mm" height="297mm" viewBox="0 0 420 297">
-<title>Sample corner booth</title>
+<title>Sample booth</title>
 <style>
     .frame{stroke:#111;stroke-width:.35;fill:none}
     .part{fill:#fff;stroke:#1a1a1a;stroke-width:.18;stroke-linejoin:round}
@@ -20,9 +20,6 @@
     .open{stroke:#111;stroke-width:.25;stroke-dasharray:2 1.2;fill:none}
     .aisle{fill:#f2f2f4;stroke:none}
     .column{fill:#555;stroke:#111;stroke-width:.25}
-    .deck{fill:none;stroke:#111;stroke-width:.45;stroke-dasharray:3 1.2}
-    .stair{fill:#fff;stroke:#111;stroke-width:.3}
-    .tread{stroke:#111;stroke-width:.15}
     .tight{fill:#f2a33a;fill-opacity:.55;stroke:none}
     .zone{fill:none;stroke:#3b6400;stroke-width:.2;stroke-dasharray:1 .8}
     .zone.bad{stroke:#d33;stroke-width:.35}
@@ -218,9 +215,9 @@
 </g>
 <g id="plot">
 <line x1="87" y1="199.5" x2="287" y2="199.5" class="open"/>
-<line x1="87" y1="39.5" x2="287" y2="39.5" class="wall"/>
-<line x1="87" y1="199.5" x2="87" y2="39.5" class="open"/>
 <line x1="287" y1="199.5" x2="287" y2="39.5" class="wall"/>
+<line x1="287" y1="39.5" x2="87" y2="39.5" class="wall"/>
+<line x1="87" y1="39.5" x2="87" y2="199.5" class="open"/>
 </g>
 <g id="dimensions">
 <line x1="87" y1="34.5" x2="287" y2="34.5" class="dim"/>
@@ -311,8 +308,8 @@
 </g>
 <g id="title">
 <line x1="298" y1="253" x2="410" y2="253" class="frame"/>
-<text x="302" y="261" class="title" text-anchor="start">Sample corner booth</text>
-<text x="302" y="267" class="small" text-anchor="start">Corner · Booth 10000 × 8000 mm · height limit 4000 mm · 6 modules</text>
+<text x="302" y="261" class="title" text-anchor="start">Sample booth</text>
+<text x="302" y="267" class="small" text-anchor="start">Booth 10000 × 8000 mm · height limit 4000 mm · 6 modules</text>
 <text x="302" y="272.5" class="small" text-anchor="start">Scale 1:50 at A3 · millimetres · 2026-10-26</text>
 <text x="302" y="278" class="tiny" text-anchor="start">Plot, limits and clearances: Placeholder. Check with the venue before submission.</text>
 <text x="302" y="282" class="tiny" text-anchor="start">MAESTRO 0.1.0 · sample</text>

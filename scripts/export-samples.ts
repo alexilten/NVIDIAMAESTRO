@@ -14,7 +14,7 @@ import { exportComposition, readBack } from '../src/export/rhino';
 import { TEMPLATES, insertComposition } from '../src/core/templates';
 import { buildBoothSheet, buildSheet } from '../src/core/sheet';
 import { analyseBooth, boothCsv } from '../src/core/booth';
-import { sampleExhibition, sampleIsland, sampleTwoStorey } from '../src/core/exhibitionSample';
+import { sampleExhibition } from '../src/core/exhibitionSample';
 import { boothAnnotations } from '../src/export/boothAnnotations';
 import { schedule, scheduleCsv } from '../src/core/services';
 import { buildClientPackage, clientHtml } from '../src/core/presentation';
@@ -94,16 +94,6 @@ const plan = buildBoothSheet(expo, analysis, shapeOf, { appLabel: `MAESTRO ${pkg
 writeFileSync('samples/sample-booth.plan.svg', plan.svg);
 writeFileSync('samples/sample-booth.schedule.csv', boothCsv(expo, analysis));
 console.log(`samples/sample-booth.plan.svg: 1:${plan.scale}, ${analysis.units.length} modules, ${analysis.issues.length} checks open`);
-const island = sampleIsland();
-const islandAnalysis = analyseBooth(island, shapeOf, (p) => resolveRef(p.ref, [])!.entry.name)!;
-const islandPlan = buildBoothSheet(island, islandAnalysis, shapeOf, { appLabel: `MAESTRO ${pkg.version} · sample`, date: '2026-10-26' })!;
-writeFileSync('samples/sample-island.plan.svg', islandPlan.svg);
-const twoStorey = sampleTwoStorey();
-const twoAnalysis = analyseBooth(twoStorey, shapeOf, (p) => resolveRef(p.ref, [])!.entry.name)!;
-const twoPlan = buildBoothSheet(twoStorey, twoAnalysis, shapeOf, { appLabel: `MAESTRO ${pkg.version} · sample`, date: '2026-10-27' })!;
-writeFileSync('samples/sample-two-storey.plan.svg', twoPlan.svg);
-console.log(`samples/sample-two-storey.plan.svg: 1:${twoPlan.scale}, ${twoAnalysis.units.length} modules, ${twoAnalysis.issues.length} checks open`);
-console.log(`samples/sample-island.plan.svg: 1:${islandPlan.scale}, ${islandAnalysis.units.length} modules, ${islandAnalysis.issues.length} checks open`);
 
 // the client view without stills (stills are rendered in the browser): one shared link, one confidential link left out
 expo.docs = [
@@ -120,8 +110,8 @@ const client = buildClientPackage(expo, {
 writeFileSync('samples/sample-booth.client.html', clientHtml(client));
 console.log(`samples/sample-booth.client.html: ${client.items.length} item rows, ${client.docs.length} shared link(s)`);
 
-for (const [file, comp] of [['spark-demo-station.3dm', sparkStation()], ['hardware-lineup.3dm', hardwareLineup()], ['lineup-r02.3dm', lineupR02()], ['demo-modules.3dm', modules], ['sample-booth.3dm', expo], ['sample-island.3dm', island], ['sample-two-storey.3dm', twoStorey]] as const) {
-  const r = exportComposition(rh, comp, (p) => exportItemFor(p, []), pkg.version, comp === expo ? boothAnnotations(expo, analysis) : comp === island ? boothAnnotations(island, islandAnalysis) : comp === twoStorey ? boothAnnotations(twoStorey, twoAnalysis) : []);
+for (const [file, comp] of [['spark-demo-station.3dm', sparkStation()], ['hardware-lineup.3dm', hardwareLineup()], ['lineup-r02.3dm', lineupR02()], ['demo-modules.3dm', modules], ['sample-booth.3dm', expo]] as const) {
+  const r = exportComposition(rh, comp, (p) => exportItemFor(p, []), pkg.version, comp === expo ? boothAnnotations(expo, analysis) : []);
   const back = readBack(rh, r.bytes);
   writeFileSync(`samples/${file}`, r.bytes);
   writeFileSync(`samples/${file.replace('.3dm', '.maestro.json')}`, JSON.stringify(comp, null, 2));
