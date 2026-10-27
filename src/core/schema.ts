@@ -41,7 +41,7 @@ export const LOD: Record<Lod, { label: string; meaning: string }> = {
 
 export interface SpecSource {
   id: string;
-  kind: 'manufacturer-doc' | 'manufacturer-page' | 'partner-page' | 'secondary' | 'project-model' | 'project-drawing';
+  kind: 'manufacturer-doc' | 'manufacturer-page' | 'partner-page' | 'secondary' | 'project-model' | 'project-drawing' | 'project-photo';
   title: string;
   publisher: string;
   url?: string;

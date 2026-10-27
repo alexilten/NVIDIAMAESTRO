@@ -14,7 +14,8 @@ import { useStore } from './store';
 export function ProductHero({ refItem, entry, shape }: { refItem: ItemRef; entry: LibraryEntry; shape: Shape | null }) {
   const parts = useStore((s) => s.parts);
   const model = refItem.kind === 'product' ? MODEL_BY_ID.get(refItem.id) : undefined;
-  const photo = model?.image;
+  // a reference architecture borrows the photo of the first product that implements it and has one
+  const photo = model?.image ?? model?.implementations?.map((id) => MODEL_BY_ID.get(id)?.image).find(Boolean);
   const impl = !shape && model?.implementations?.length ? model.implementations[0] : null;
   const drawn = shape ?? (impl ? resolveRef({ kind: 'product', id: impl }, parts)?.shape ?? null : null);
   const [src, setSrc] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export function ProductHero({ refItem, entry, shape }: { refItem: ItemRef; entry
     return (
       <figure className="hero">
         <img src={s} alt={entry.name} onError={() => setFailed(true)} />
-        <figcaption>Image: {from ? <a href={from.url} target="_blank" rel="noreferrer">{photo.credit}</a> : photo.credit}</figcaption>
+        <figcaption>Image: {from?.url ? <a href={from.url} target="_blank" rel="noreferrer">{photo.credit}</a> : photo.credit}</figcaption>
       </figure>
     );
   }
