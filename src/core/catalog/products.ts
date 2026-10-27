@@ -1,6 +1,7 @@
 import type { PhysicalAsset, ProductFamily, ProductModel } from '../schema';
 import { IN, REVIEWED, dims, proxy, s, unknownDims } from './helpers';
 import { LINEUP_FAMILIES, LINEUP_MODELS, LINEUP_PHYSICAL } from './lineup';
+import { PHOTO_BY_ID } from './photos';
 
 /**
  * Seed catalog: a small, carefully sourced set that exercises every part of the data model.
@@ -302,7 +303,7 @@ const SEED_PHYSICAL: PhysicalAsset[] = [
 ];
 
 export const FAMILIES: ProductFamily[] = [...SEED_FAMILIES, ...LINEUP_FAMILIES];
-export const MODELS: ProductModel[] = [...SEED_MODELS, ...LINEUP_MODELS];
+export const MODELS: ProductModel[] = [...SEED_MODELS, ...LINEUP_MODELS].map((m) => (m.image || !PHOTO_BY_ID.has(m.id) ? m : { ...m, image: PHOTO_BY_ID.get(m.id) }));
 export const PHYSICAL: PhysicalAsset[] = [...SEED_PHYSICAL, ...LINEUP_PHYSICAL];
 
 export const MODEL_BY_ID = new Map(MODELS.map((m) => [m.id, m]));

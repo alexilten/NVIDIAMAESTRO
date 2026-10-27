@@ -98,6 +98,7 @@ export const SOURCES: SpecSource[] = [
     confidential: false,
   },
   // Round 02: the current exhibition line-up
+  { id: 'acronym-gtc-berlin-2026-photos', kind: 'project-photo', title: 'GTC Berlin 2026 hardware wall, on-site build photos', publisher: 'Acronym', accessed: '2026-10-27', confidential: false },
   { id: 'nv-sn6000-hw', kind: 'manufacturer-doc', title: 'NVIDIA Spectrum-6 SN6000 Switch Systems Hardware User Manual — Specifications', publisher: 'NVIDIA', url: 'https://networking-docs.nvidia.com/sn6000hw/specifications', accessed: '2026-10-26', confidential: false },
   { id: 'nv-silicon-photonics', kind: 'manufacturer-page', title: 'Silicon Photonics Networking for Agentic AI (Spectrum-X and Quantum-X Photonics)', publisher: 'NVIDIA', url: 'https://www.nvidia.com/en-us/networking/products/silicon-photonics/', accessed: '2026-10-26', confidential: false },
   { id: 'nv-cx9-hw', kind: 'manufacturer-doc', title: 'NVIDIA ConnectX-9 SuperNIC User Manual — Specifications', publisher: 'NVIDIA', url: 'https://networking-docs.nvidia.com/connectx9hw/specifications', accessed: '2026-10-26', confidential: false },
