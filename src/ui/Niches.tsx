@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { catalogResolver, labelCsv, nicheComposition, nicheItem } from '../core/niche/build';
 import { nicheElevation } from '../core/niche/elevation';
 import { NICHE_EXAMPLES } from '../core/niche/examples';
-import { layoutNiche, NICHE_TYPE_LABEL, type NicheItem, type NicheLayout } from '../core/niche/layout';
+import { labelColour, layoutNiche, NICHE_TYPE_LABEL, SINGLE_ROW, type NicheItem, type NicheLayout, type NicheType } from '../core/niche/layout';
 import { inches, RULE_DEFS, RULE_SET_BY_ID, RULE_SETS, withOverrides, type RuleKey, type RuleValue } from '../core/niche/rules';
 import { VERIFICATION, VERIFICATION_RANK, type Verification } from '../core/schema';
 import { download } from '../ingest/rhinoBrowser';
@@ -18,6 +18,7 @@ const APP = () => `MAESTRO ${__APP_VERSION__} · build ${__APP_BUILD__}`;
 const slug = (s: string) => s.replace(/[^\w-]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 60) || 'niche';
 const statuses = [...VERIFICATION_RANK].reverse() as Verification[];
 const resolve = catalogResolver();
+const TYPE_SHORT: Record<NicheType, string> = { shelf: 'Shelf niche', wall: 'Wall-hung', pedestal: 'Pedestal', rack: 'Rack' };
 
 /** The current niche laid out with the current rules; every panel reads this one layout. */
 export function useNicheLayout(): NicheLayout | null {
@@ -54,7 +55,7 @@ function Elevation({ l }: { l: NicheLayout | null }) {
   }, [l, close]);
   return (
     <div className="viewer niche-sheet">
-      {src ? <div className={`niche-paper ${close ? 'close' : ''}`}><img src={src} alt={`Front elevation of ${l!.spec.code} ${l!.spec.name}`} /></div> : <div className="viewer-empty">Add hardware on the left. The niche is sized from it and the show’s placement rules.</div>}
+      {src ? <div className={`niche-paper ${close ? 'close' : ''}`}><img src={src} alt={`${l!.spec.type === 'pedestal' ? 'Plan' : 'Front elevation'} of ${l!.spec.code} ${l!.spec.name}`} /></div> : <div className="viewer-empty">Add hardware on the left. The niche is sized from it and the show’s placement rules.</div>}
     </div>
   );
 }
@@ -66,7 +67,8 @@ function NicheEditor() {
   const spec = n.spec;
   const [adding, setAdding] = useState<'library' | 'custom'>('library');
   const example = NICHE_EXAMPLES.find((e) => e.spec.code === spec.code && e.spec.name === spec.name);
-  const rowName = (i: number) => (spec.type === 'shelf' ? `Shelf ${spec.rows.length - i}${i === 0 ? ' (top)' : i === spec.rows.length - 1 && spec.rows.length > 1 ? ' (bottom)' : ''}` : `Row ${i + 1}`);
+  const single = SINGLE_ROW(spec.type);
+  const rowName = (i: number) => (single ? (spec.type === 'rack' ? 'Racks, left to right' : 'Hardware, left to right') : spec.type === 'shelf' ? `Shelf ${spec.rows.length - i}${i === 0 ? ' (top)' : i === spec.rows.length - 1 && spec.rows.length > 1 ? ' (bottom)' : ''}` : `Row ${i + 1}`);
   return (
     <div className="panel-scroll niche-editor">
       <div className="insp-head">
@@ -77,8 +79,10 @@ function NicheEditor() {
         </div>
         <div className="niche-row-controls">
           <div className="segmented sm">
-            {(['shelf', 'wall'] as const).map((t) => <button key={t} className={spec.type === t ? 'on' : ''} onClick={() => n.patch({ type: t })}>{NICHE_TYPE_LABEL[t]}</button>)}
+            {(['shelf', 'wall', 'pedestal', 'rack'] as const).map((t) => <button key={t} className={spec.type === t ? 'on' : ''} title={NICHE_TYPE_LABEL[t]} onClick={() => n.patch({ type: t })}>{TYPE_SHORT[t]}</button>)}
           </div>
+        </div>
+        <div className="niche-row-controls">
           <div className="segmented sm" title="Letter size of the die-cut labels">
             {(['standard', 'small'] as const).map((t) => <button key={t} className={spec.letter === t ? 'on' : ''} onClick={() => n.patch({ letter: t })}>{t === 'standard' ? 'Standard type' : 'Small type'}</button>)}
           </div>
@@ -96,8 +100,8 @@ function NicheEditor() {
       </div>
 
       <div className="sub-head niche-sub">
-        <span>{spec.type === 'shelf' ? 'Shelves, top first' : 'Rows, top first'}</span>
-        <button className="chip" onClick={n.addRow}><Icon name="plus" size={11} /> {spec.type === 'shelf' ? 'Shelf' : 'Row'}</button>
+        <span>{single ? 'Hardware' : spec.type === 'shelf' ? 'Shelves, top first' : 'Rows, top first'}</span>
+        {!single && <button className="chip" onClick={n.addRow}><Icon name="plus" size={11} /> {spec.type === 'shelf' ? 'Shelf' : 'Row'}</button>}
       </div>
       {spec.rows.map((row, ri) => (
         <div key={ri} className={`niche-rowbox ${n.target === ri ? 'on' : ''}`} onClick={() => n.setTarget(ri)}>
@@ -193,6 +197,7 @@ function NicheReport({ l }: { l: NicheLayout | null }) {
   const infos = l?.checks.filter((c) => c.level === 'info') ?? [];
   const [lockW, setLockW] = useState<string | null>(null);
   const [lockH, setLockH] = useState<string | null>(null);
+  const plan = n.spec.type === 'pedestal', rack = n.spec.type === 'rack';
   return (
     <div className="panel-scroll inspector">
       <div className="insp-head">
@@ -202,34 +207,45 @@ function NicheReport({ l }: { l: NicheLayout | null }) {
       </div>
       {l ? (
         <>
-          <Section title="Opening" summary={`${Math.round(l.width)} × ${Math.round(l.height)} mm`}>
+          <Section title={plan ? 'Pedestal top' : rack ? 'Racks' : 'Opening'} summary={`${Math.round(l.width)} × ${Math.round(l.height)} mm`}>
             <KV k="Width">{mmIn(l.width)}</KV>
-            <KV k="Height">{mmIn(l.height)}</KV>
-            <KV k="Sill above floor">{mmIn(l.sill)}</KV>
-            <KV k="Centre above floor">{mmIn(l.centre)}</KV>
-            <KV k="Clear depth">{mmIn(l.depth)}</KV>
+            <KV k={plan ? 'Depth' : 'Height'}>{mmIn(l.height)}</KV>
+            {plan && <KV k="Top above floor">{mmIn(l.base ?? 0)}</KV>}
+            {rack && <KV k="Depth">{mmIn(l.depth)}</KV>}
+            {!plan && !rack && <>
+              <KV k="Sill above floor">{mmIn(l.sill)}</KV>
+              <KV k="Centre above floor">{mmIn(l.centre)}</KV>
+              <KV k="Clear depth">{mmIn(l.depth)}</KV>
+            </>}
             {l.shelves.map((s) => <KV key={s.index} k={`Shelf ${s.index + 1} top`}>{mmIn(s.top)} AFF · {Math.round(s.clear)} clear</KV>)}
             {l.labelOffset != null && <KV k="Label line">{mmIn(l.labelOffset)} above each shelf</KV>}
-            <div className="niche-locks">
+            {!rack && <div className="niche-locks">
               <label className="num-row"><span>Fix width</span><input type="number" placeholder="from rules" value={lockW ?? (n.spec.lockWidth ? String(n.spec.lockWidth) : '')} onChange={(e) => setLockW(e.target.value)} onBlur={() => { if (lockW != null) n.patch({ lockWidth: Number(lockW) > 0 ? Number(lockW) : undefined }); setLockW(null); }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} /></label>
-              <label className="num-row"><span>Fix height</span><input type="number" placeholder="from rules" value={lockH ?? (n.spec.lockHeight ? String(n.spec.lockHeight) : '')} onChange={(e) => setLockH(e.target.value)} onBlur={() => { if (lockH != null) n.patch({ lockHeight: Number(lockH) > 0 ? Number(lockH) : undefined }); setLockH(null); }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} /></label>
-              <p className="note">Fix a size when the wall is already cut. The hardware reflows inside it and any rule it can’t meet is listed below.</p>
-            </div>
+              <label className="num-row"><span>Fix {plan ? 'depth' : 'height'}</span><input type="number" placeholder="from rules" value={lockH ?? (n.spec.lockHeight ? String(n.spec.lockHeight) : '')} onChange={(e) => setLockH(e.target.value)} onBlur={() => { if (lockH != null) n.patch({ lockHeight: Number(lockH) > 0 ? Number(lockH) : undefined }); setLockH(null); }} onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }} /></label>
+              <p className="note">{plan ? 'Fix a size to fit an existing pedestal or light table.' : 'Fix a size when the wall is already cut.'} The hardware reflows inside it and any rule it can’t meet is listed below.</p>
+            </div>}
           </Section>
           <Section title="Checks" summary={errors.length || warns.length ? `${errors.length} broken · ${warns.length} to check` : 'All rules met'}>
             {[...errors, ...warns].map((c, i) => <div key={i} className={`check ${c.level === 'error' ? 'discrepancy' : ''}`}><span className="small">{c.text}</span></div>)}
             {!errors.length && !warns.length && <p className="note">Every unit and label meets the rules.</p>}
             {infos.map((c, i) => <p key={i} className="note">{c.text}</p>)}
           </Section>
-          <Section title="Labels" summary={`${l.labels.length} · ${l.rules.labels.colour}`}>
+          <Section title="Labels" summary={`${l.labels.length} · ${labelColour(l)}`}>
             {l.labels.map((lb) => <KV key={lb.code} k={lb.code}>{lb.text}</KV>)}
-            <p className="note">Numbered top row first, left to right. Each label starts at the left edge of its hardware{l.spec.type === 'shelf' ? '; the label line is set on the shelf with the tallest unit, centred in the space above it, and repeated on every shelf' : `, ${inches(l.rules.values.labelBelow.value)} below the lowest hardware in its row`}.</p>
+            <p className="note">{labelNote(l)}</p>
           </Section>
         </>
       ) : <p className="note pad">Nothing to lay out yet.</p>}
       <RulesPanel used={l?.used ?? []} />
     </div>
   );
+}
+
+function labelNote(l: NicheLayout): string {
+  const v = l.rules.values;
+  if (l.spec.type === 'rack') return `One label per rack, centred on the door ${Math.round(v.rackLabelDrop.value)} mm below the rack top, in white vinyl to read on the dark door.`;
+  if (l.spec.type === 'pedestal') return `Numbered left to right. The hardware stands on one front line; each label starts at the left edge of its hardware, ${Math.round(v.pedToLabel.value)} mm in front of it and ${Math.round(v.pedLabelToEdge.value)} mm from the front edge, so every label shares a top line.`;
+  return `Numbered top row first, left to right. Each label starts at the left edge of its hardware${l.spec.type === 'shelf' ? '; the label line is set on the shelf with the tallest unit, centred in the space above it, and repeated on every shelf' : `, ${inches(v.labelBelow.value)} below the lowest hardware in its row`}.`;
 }
 
 function RulesPanel({ used }: { used: RuleKey[] }) {

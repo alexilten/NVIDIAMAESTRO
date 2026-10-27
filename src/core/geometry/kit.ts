@@ -87,14 +87,31 @@ export const KIT: ParametricKitPart[] = [
     id: 'kit-die-cut-label',
     name: 'Die-cut label',
     category: 'signage',
-    description: 'One line of die-cut vinyl type on a niche back panel, drawn as its estimated extent. The origin is the bottom centre of the label.',
+    description: 'One line of die-cut vinyl type on a niche back panel, a rack door or a pedestal top, drawn as its estimated extent. The origin is the bottom centre of the label; a flat label reads from −Y.',
     params: [
       { key: 'width', label: 'Width', min: 1, max: 2000, step: 0.1, default: 100, unit: 'mm' },
       { key: 'height', label: 'Cap height', min: 1, max: 200, step: 0.1, default: 10, unit: 'mm' },
+      { key: 'flat', label: 'Lies flat (pedestal top)', min: 0, max: 1, step: 1, default: 0, unit: 'count' },
+      { key: 'white', label: 'White vinyl', min: 0, max: 1, step: 1, default: 0, unit: 'count' },
     ],
     status: 'estimated',
     note: 'The extent is estimated from the text length and letter height.',
     tags: ['label', 'graphics', 'vinyl'],
+    hidden: true,
+  },
+  {
+    id: 'kit-rule-pedestal',
+    name: 'Hardware pedestal (built from rules)',
+    category: 'pedestal',
+    description: 'A pedestal or light table sized in the Niches workspace from its hardware and a show’s placement rules: matte black laminate with an opal acrylic top. The origin is the front edge centre at floor level; the pedestal extends back (+Y).',
+    params: [
+      { key: 'width', label: 'Width', min: 100, max: 6000, step: 0.1, default: 1463, unit: 'mm' },
+      { key: 'depth', label: 'Depth', min: 100, max: 3000, step: 0.1, default: 660, unit: 'mm' },
+      { key: 'height', label: 'Top above floor', min: 100, max: 1500, step: 0.1, default: 900, unit: 'mm' },
+    ],
+    status: 'estimated',
+    note: 'Generated from a niche rule set; the 15 mm opal top follows the Berlin light table drawings.',
+    tags: ['pedestal', 'light table'],
     hidden: true,
   },
   {
@@ -224,7 +241,13 @@ export function kitShape(id: string, raw: Record<string, number>): Shape | null 
     }
   } else if (id === 'kit-die-cut-label') {
     const { width: w, height: h } = p;
-    parts.push(box('VINYL', 'black', [-w / 2, -0.25, 0], [w / 2, 0.25, h]));
+    const m = p.white ? 'white' : 'black';
+    parts.push(p.flat ? box('VINYL', m, [-w / 2, 0, 0], [w / 2, h, 0.5]) : box('VINYL', m, [-w / 2, -0.25, 0], [w / 2, 0.25, h]));
+  } else if (id === 'kit-rule-pedestal') {
+    const { width: w, depth: d, height: h } = p;
+    const t = Math.min(15, h / 2);
+    parts.push(box('BODY', 'laminateBlack', [-w / 2, 0, 0], [w / 2, d, h - t]));
+    parts.push(box('TOP', 'opal', [-w / 2, 0, h - t], [w / 2, d, h]));
   } else if (id === 'kit-mounted-envelope') {
     const { width: w, height: h, depth: d } = p;
     parts.push(box('ENVELOPE', 'graphite', [-w / 2, -d, 0], [w / 2, 0, h]));

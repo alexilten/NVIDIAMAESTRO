@@ -2,7 +2,7 @@ import type { NicheItem, NicheSpec } from './layout';
 
 /**
  * Niches from GTC Berlin 2026, rebuilt from their hardware lists and label schedules (pre-onsite deck pp.70, 72,
- * 79, 81). Partner hardware the catalog does not carry is entered with the sizes the fabrication deck records for it;
+ * 77–81). Partner hardware the catalog does not carry is entered with the sizes the fabrication deck records for it;
  * hardware with no recorded size is listed as a placeholder and left out of the layout until it has one.
  */
 
@@ -11,6 +11,9 @@ const id = () => `ex-${(n++).toString(36)}`;
 const product = (product: string, label?: string): NicheItem => ({ id: id(), product, label });
 const spark = (name: string, w = 150, d = 150, h = 50): NicheItem => ({ id: id(), custom: { name, width: w, depth: d, height: h, status: 'project', note: 'GTC Berlin 2026 fabrication deck p.186 (partner sizes from the Taipei hardware deck)' } });
 const tray = (name: string): NicheItem => ({ id: id(), upright: true, custom: { name, width: 445, depth: 900, height: 45, status: 'project', note: 'GTC Berlin 2026 fabrication deck pp.72, 75' } });
+const server = (name: string, w: number, d: number, h: number, ref: string, label?: string): NicheItem => ({ id: id(), label, custom: { name, width: w, depth: d, height: h, status: 'project', note: `GTC Berlin 2026 fabrication deck ${ref}` } });
+// every NVIDIA rack on the Berlin list is 600 W × 1404 L × 2296 H (fab deck p.48)
+const rack = (name: string): NicheItem => server(name, 600, 1404, 2296, 'p.48');
 const tbd = (name: string): NicheItem => ({ id: id(), placeholder: name });
 
 const base = (code: string, name: string, type: NicheSpec['type'], rows: (NicheItem | null)[][], letter: NicheSpec['letter'] = 'standard'): NicheSpec =>
@@ -42,6 +45,22 @@ export const NICHE_EXAMPLES: NicheExample[] = [
   {
     spec: base('08A', 'Vera Rubin NVL72 trays', 'wall', [[tray('NVIDIA Vera Rubin NVL72 Compute Tray'), tray('NVIDIA Vera Rubin NVL72 Switch Tray')]]),
     note: 'Two trays hung side by side, as in the label intent example (fab deck p.119).',
+  },
+  {
+    spec: { ...base('06A', 'STX CMX storage servers', 'pedestal', [[
+      server('Supermicro storage server', 482.6, 766, 88.9, 'p.69', 'NVIDIA CMX Context Memory Storage Supermicro'),
+      server('BlueField-4 STX board', 210, 192, 2.3, 'p.69', 'NVIDIA CMX Context Memory Storage'),
+      server('QuantaPlex storage server', 482.6, 766, 88.9, 'p.69', 'NVIDIA CMX Context Memory Storage Quanta'),
+    ]], 'standard'), lockWidth: 1810, lockHeight: 1250 },
+    note: 'On the 1810 × 1250 light table, 900 high, built for Berlin (fab deck p.70).',
+  },
+  {
+    spec: base('05C', 'Spectrum-6 SPX rack', 'rack', [[rack('NVIDIA Spectrum-6 SPX Rack')]]),
+    note: 'A white die-cut label on the rack door (fab deck p.129). The label’s drop from the rack top is estimated.',
+  },
+  {
+    spec: base('08B', 'DGX Vera Rubin NVL72 rack', 'rack', [[rack('NVIDIA DGX Vera Rubin NVL72')]]),
+    note: 'A white die-cut label on the rack door (fab deck p.135). The label’s drop from the rack top is estimated.',
   },
 ];
 
