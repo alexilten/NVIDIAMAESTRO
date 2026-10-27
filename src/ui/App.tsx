@@ -3,6 +3,7 @@ import { Compose } from './Compose';
 import { Discover } from './Discover';
 import { Ingest } from './Ingest';
 import { Present } from './Present';
+import { ShowPicker } from './ShowPicker';
 import { Icon } from './common';
 import { exportCompositionFile, saveCompositionJson } from './exportActions';
 import { useStore, type Workspace } from './store';
@@ -61,6 +62,7 @@ function Toolbar({ onAbout }: { onAbout: () => void }) {
         </nav>
       </div>
       <div className="tb-group">
+        {workspace === 'exhibition' && <ShowPicker />}
         {(workspace === 'compose' || workspace === 'exhibition') && (
           <>
             <button className="ghost" onClick={() => saveCompositionJson(comp)} disabled={!comp.items.length}>Save .json</button>

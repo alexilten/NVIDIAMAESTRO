@@ -271,6 +271,8 @@ export interface BoothColumn {
   w: number;
   d: number;
   status: Verification;
+  /** the item built around this column, such as a column shroud or a kiosk; it is not a clash */
+  enclosedBy?: string;
 }
 
 export interface Booth {
@@ -285,6 +287,11 @@ export interface Booth {
   services: ServicePoint[];
   /** hall columns inside the plot, from the hall plan */
   columns?: BoothColumn[];
+  /**
+   * the plot's outline when it is not a plain rectangle, as plan points (mm) inside the width × depth
+   * rectangle, in order; edges on an open side of that rectangle are open, every other edge is closed
+   */
+  outline?: [number, number][];
 }
 
 export interface Composition {
@@ -302,6 +309,8 @@ export interface Composition {
   views?: SavedView[];
   /** links to project documents kept elsewhere; MAESTRO stores the reference, never the document */
   docs?: ProjectDoc[];
+  /** the show preset this exhibition was started from (core/showPresets.ts) */
+  presetId?: string;
   updatedAt: string;
 }
 

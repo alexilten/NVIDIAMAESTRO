@@ -19,3 +19,4 @@ private/
 screenshots-private/
 samples/fixtures/
 *.maestro-library.json
+*.maestro-shows.json

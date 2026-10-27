@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { BOOTH_TYPES, CELL, addColumn, addServicePoint, boothTypeOf, turnToFace, analyseBooth, approachZone, boothCsv, changedModules, freeSpot, frontSide, newExhibition, placeModule, planExtent } from '../src/core/booth';
+import { CELL, addColumn, addServicePoint, turnToFace, analyseBooth, approachZone, boothCsv, changedModules, freeSpot, frontSide, newExhibition, placeModule, planExtent } from '../src/core/booth';
 import { addItem, rotateItems } from '../src/core/compose';
-import { sampleExhibition, sampleIsland } from '../src/core/exhibitionSample';
+import { sampleExhibition } from '../src/core/exhibitionSample';
 import { defaultParams } from '../src/core/geometry/kit';
 import { boxSize, shapeBounds } from '../src/core/geometry/shape';
 import { resolveRef } from '../src/core/library';
@@ -251,28 +251,13 @@ describe('booth columns', () => {
   });
 });
 
-describe('stand types and island booths', () => {
-  it('names a stand by its open sides, and each preset reads back as itself', () => {
-    for (const t of BOOTH_TYPES) expect(boothTypeOf(t.open)).toBe(t.id);
-    expect(boothTypeOf({ front: true, back: true, left: false, right: false })).toBeNull();
-    expect(boothTypeOf({ front: false, back: false, left: true, right: true })).toBeNull();
-  });
-
+describe('facing the aisles', () => {
   it('turns a module the short way to face a side', () => {
     expect(turnToFace('front', 'front')).toBe(0);
     expect(turnToFace('front', 'right')).toBe(90);
     expect(turnToFace('front', 'back')).toBe(180);
     expect(turnToFace('front', 'left')).toBe(-90);
     expect(turnToFace('left', 'front')).toBe(90);
-  });
-
-  it('builds a clear sample island: every module faces an aisle, two back to back in the middle', () => {
-    const c = sampleIsland();
-    expect(boothTypeOf(c.booth!.open)).toBe('island');
-    const a = analyseBooth(c, shapeOf)!;
-    expect(a.issues.filter((i) => i.level !== 'info')).toEqual([]);
-    expect(a.issues.some((i) => /back to the/.test(i.text))).toBe(false);
-    expect(a.access.every((z) => z.approach)).toBe(true);
   });
 
   it('flags a module with its back to a nearby aisle, and the suggested turn clears it', () => {

@@ -1,10 +1,12 @@
 /**
- * Write the synthetic test models to disk (two revisions of a tiny feet-unit model, and a text-only drawing PDF) for screenshots and manual
+ * Write the synthetic test models to disk (two revisions of a tiny feet-unit model, a text-only drawing PDF and a show presets file) for screenshots and manual
  * tries of Import. They are built in code; no project file is involved. Usage: vite-node scripts/fixture-files.ts [dir]
  */
 import rhino3dm from 'rhino3dm/rhino3dm.module.js';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { buildFixture } from '../tests/fixture';
+import { sampleExhibition } from '../src/core/exhibitionSample';
+import type { ShowPresetFile } from '../src/core/showPresets';
 
 const dir = process.argv[2] ?? 'samples/fixtures';
 const rh = await rhino3dm();
@@ -18,7 +20,20 @@ writeFileSync(`${dir}/synthetic-show-drawings.pdf`, textPdf([
   ['FLOORING', 'Raised floor and ramps'],
   ['LIGHTING', 'Rig and fixtures'],
 ]));
-console.log(`${dir}/synthetic-show-r1.3dm, ${dir}/synthetic-show-r2.3dm, ${dir}/synthetic-show-drawings.pdf`);
+// two invented booths for one invented show: the sample booth, and the same layout on a plot stepped at the back right
+const plain = { ...sampleExhibition(), id: 'comp-synthetic-plain', name: 'Synthetic Show booth A' };
+const step = structuredClone(plain);
+step.id = 'comp-synthetic-stepped'; step.name = 'Synthetic Show booth B';
+step.booth!.outline = [[-5000, -4000], [5000, -4000], [5000, 1000], [2000, 1000], [2000, 4000], [-5000, 4000]];
+const shows: ShowPresetFile = {
+  schema: 'maestro.show-presets', version: 1, name: 'Synthetic shows', exportedAt: '2026-10-27T00:00:00.000Z',
+  presets: [
+    { id: 'synthetic-a', show: 'Synthetic Show', edition: '2027', name: 'Booth A', summary: 'Corner plot, two open sides, six modules', sources: ['Built in code: scripts/fixture-files.ts'], comp: plain },
+    { id: 'synthetic-b', show: 'Synthetic Show', edition: '2027', name: 'Booth B', summary: 'The same plot stepped at the back right', sources: ['Built in code: scripts/fixture-files.ts'], comp: step },
+  ],
+};
+writeFileSync(`${dir}/synthetic.maestro-shows.json`, JSON.stringify(shows));
+console.log(`${dir}/synthetic-show-r1.3dm, ${dir}/synthetic-show-r2.3dm, ${dir}/synthetic-show-drawings.pdf, ${dir}/synthetic.maestro-shows.json`);
 
 /** a plain text PDF, one page per entry, so the drawing-page tools have something synthetic to index */
 function textPdf(pages: string[][]): Uint8Array {

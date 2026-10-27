@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { BOOTH_TYPES, RULE_PRESETS, SIDES, boothTypeOf, SIDE_LABEL, addColumn, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
+import { RULE_PRESETS, SIDES, SIDE_LABEL, addColumn, addServicePoint, changedModules, rulePresetOf, unconfirmed } from '../core/booth';
 import { moduleTag } from '../core/sheet';
 import { TEMPLATES } from '../core/templates';
 import { VERIFICATION, VERIFICATION_RANK, type BoothColumn, type BoothValue, type ServicePoint, type Verification } from '../core/schema';
@@ -70,7 +70,6 @@ export function BoothPanel() {
   const open = unconfirmed(b);
   const selectUnit = (id?: string) => { if (!id) return; const ids = comp.items.filter((i) => i.groupId === id || i.id === id).map((i) => i.id); if (ids.length) st.selectItems(ids); };
   const turnUnit = (id: string, deg: number) => { selectUnit(id); st.rotate(deg); };
-  const type = boothTypeOf(b.open);
   const exhibitions = saved.filter((c) => c.kind === 'exhibition');
   const changed = changedModules(comp, saved);
   const cols = b.columns ?? [];
@@ -95,17 +94,17 @@ export function BoothPanel() {
           <label className="check-row"><input type="checkbox" checked={st.circulation} onChange={() => st.toggle('circulation')} /> Show circulation on the floor</label>
           <p className="note">Green is floor a {Math.round(rules.route.value)} mm wheelchair route reaches from the aisle, darker where a {Math.round(rules.turning.value)} mm turning circle fits; orange is open floor it cannot reach. Outlines are the approach zones in front of each module.</p>
         </Section>
-        <Section title="Plot">
+        <Section title="Plot" summary={b.outline ? `stepped · ${b.outline.length} corners` : undefined}>
+          {b.outline && (
+            <div className="col">
+              <p className="note">This plot is stepped: it follows the outline from the show's model, and width and depth are its overall extent. Checks, the plan sheet and the .3dm use the outline.</p>
+              <button className="ghost wide" onClick={() => st.setBooth({ outline: undefined })}>Use a plain rectangle</button>
+            </div>
+          )}
           <ValueRow label="Width" v={b.width} onChange={(v) => st.setBooth({ width: v })} />
           <ValueRow label="Depth" v={b.depth} onChange={(v) => st.setBooth({ depth: v })} />
           <ValueRow label="Height limit" v={b.heightLimit} onChange={(v) => st.setBooth({ heightLimit: v })} />
           <ValueRow label="Hall aisle" v={b.aisle} onChange={(v) => st.setBooth({ aisle: v })} />
-          <label className="num-row"><span>Stand type</span>
-            <select value={type ?? ''} onChange={(e) => { const t = BOOTH_TYPES.find((x) => x.id === e.target.value); if (t) st.setBooth({ open: { ...t.open } }); }} aria-label="Stand type">
-              {!type && <option value="">Custom open sides</option>}
-              {BOOTH_TYPES.map((t) => <option key={t.id} value={t.id} title={t.note}>{t.name}</option>)}
-            </select>
-          </label>
           <div className="sides">
             {SIDES.map((s) => <label key={s} className="check-row"><input type="checkbox" checked={b.open[s]} onChange={(e) => st.setBooth({ open: { ...b.open, [s]: e.target.checked } })} /> {SIDE_LABEL[s]} open</label>)}
           </div>
@@ -165,10 +164,16 @@ export function BoothPanel() {
                     onBlur={(e) => { const v = +e.target.value; if (!Number.isFinite(v) || ((f === 'w' || f === 'd') && v <= 0)) return; setCol(k.id, { [f]: v, status: k.status === 'placeholder' ? 'project' : k.status }); }} /></label>
                 ))}
               </div>
+              <label className="svc-built">Built around it
+                <select value={k.enclosedBy ?? ''} onChange={(e) => setCol(k.id, { enclosedBy: e.target.value || undefined })} aria-label={`${k.name} built around by`}>
+                  <option value="">Nothing: it stands free</option>
+                  {a.units.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
+                </select>
+              </label>
             </div>
           ))}
           <button className="ghost wide" onClick={() => st.setBooth(addColumn(b))}>+ Column</button>
-          <p className="note">Hall columns from the hall plan, centred on the booth origin. They block the route like any part, and a module that runs into one is an error. A typed value becomes Project-specific.</p>
+          <p className="note">Hall columns from the hall plan, centred on the booth origin. They block the route like any part, and a module that runs into one is an error unless it is built around the column, as a shroud or a kiosk is. A typed value becomes Project-specific.</p>
         </Section>
         {changed.size > 0 && (
           <Section title="Edited since placed" summary={`${changed.size}`}>
@@ -208,10 +213,7 @@ export function BoothPanel() {
           </div>
           <button className="ghost wide" onClick={st.saveComp}>Save exhibition</button>
           <button className="ghost wide" onClick={st.newComp}>New exhibition</button>
-          <div className="btn-grid two">
-            <button className="ghost" onClick={() => st.loadSampleBooth('corner')}>Sample corner booth</button>
-            <button className="ghost" onClick={() => st.loadSampleBooth('island')}>Sample island booth</button>
-          </div>
+          <button className="ghost wide" onClick={st.loadSampleBooth}>Load sample booth</button>
         </div>
       </div>
     </div>

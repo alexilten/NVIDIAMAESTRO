@@ -2,6 +2,7 @@ import { extentOfShape, worldBoxes, type ShapeOf, type WorldBox } from './arrang
 import { newComposition, uid, type Extent } from './compose';
 import { schedule } from './services';
 import type { AccessRules, Booth, BoothColumn, BoothSide, BoothValue, Composition, Placement, ServicePoint, Vec3, Verification } from './schema';
+import type { Shape } from './geometry/shape';
 
 /**
  * The exhibition booth: its plot, the circulation and accessibility check, and the service points that feed the
@@ -69,31 +70,71 @@ export function newExhibition(name = 'Untitled exhibition'): Composition {
 export const SIDES: BoothSide[] = ['front', 'right', 'back', 'left'];
 export const SIDE_LABEL: Record<BoothSide, string> = { front: 'Front (−Y)', back: 'Back (+Y)', left: 'Left (−X)', right: 'Right (+X)' };
 
+/** the plot outline: the stated one, or the width × depth rectangle */
+export function plotOutline(b: Booth): [number, number][] {
+  if (b.outline && b.outline.length >= 3) return b.outline;
+  const w = b.width.value / 2, d = b.depth.value / 2;
+  return [[-w, -d], [w, -d], [w, d], [-w, d]];
+}
+
+/** point in the plot outline (even-odd rule) */
+export function insidePlot(b: Booth, x: number, y: number): boolean {
+  const W = b.width.value / 2, D = b.depth.value / 2;
+  if (!(x > -W && x < W && y > -D && y < D)) return false;
+  if (!b.outline || b.outline.length < 3) return true;
+  const o = b.outline;
+  let inside = false;
+  for (let i = 0, j = o.length - 1; i < o.length; j = i++) {
+    const [xi, yi] = o[i], [xj, yj] = o[j];
+    if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+
+/** a plan rectangle wholly inside the plot, within `tol` mm (its corners and centre are tested; exact for rectilinear outlines) */
+export function rectInPlot(b: Booth, min: [number, number], max: [number, number], tol = 1): boolean {
+  const x0 = min[0] + tol, y0 = min[1] + tol, x1 = max[0] - tol, y1 = max[1] - tol;
+  return [[x0, y0], [x1, y0], [x1, y1], [x0, y1], [(x0 + x1) / 2, (y0 + y1) / 2]].every(([x, y]) => insidePlot(b, x, y));
+}
+
+/**
+ * an item on a stepped plot: its extent first, then, when that crosses the outline, every point of its geometry,
+ * so a wall that follows the steps is not taken for one that leaves the plot
+ */
+export function itemInPlot(b: Booth, p: Placement, shape: Shape, e: Extent, tol = 1): boolean {
+  if (rectInPlot(b, [e.min[0], e.min[1]], [e.max[0], e.max[1]], tol)) return true;
+  if (!b.outline) return false;
+  const meshes = shape.parts.filter((x) => x.kind === 'mesh');
+  if (!meshes.length || meshes.length < shape.parts.length) return false;
+  const a = (p.rotation * Math.PI) / 180, c = Math.cos(a), sn = Math.sin(a);
+  const near = (x: number, y: number) => [[x, y], [x + tol, y], [x - tol, y], [x, y + tol], [x, y - tol]].some(([u, v]) => insidePlot(b, u, v));
+  for (const m of meshes) {
+    const v = m.positions;
+    for (let i = 0; i < v.length; i += 3) {
+      const x = p.position[0] + v[i] * c - v[i + 1] * sn, y = p.position[1] + v[i] * sn + v[i + 1] * c;
+      if (!near(x, y)) return false;
+    }
+  }
+  return true;
+}
+
+/** each edge of the plot outline, and whether it lies along an open side of the plot rectangle */
+export function plotEdges(b: Booth): { a: [number, number]; b: [number, number]; open: boolean }[] {
+  const o = plotOutline(b), W = b.width.value / 2, D = b.depth.value / 2, eq = (p: number, q: number) => Math.abs(p - q) < 1;
+  return o.map((p, i) => {
+    const q = o[(i + 1) % o.length];
+    const open = (b.open.front && eq(p[1], -D) && eq(q[1], -D)) || (b.open.back && eq(p[1], D) && eq(q[1], D))
+      || (b.open.left && eq(p[0], -W) && eq(q[0], -W)) || (b.open.right && eq(p[0], W) && eq(q[0], W));
+    return { a: p, b: q, open };
+  });
+}
+
 export function boothRect(b: Booth) {
   const w = b.width.value / 2, d = b.depth.value / 2;
   return { min: [-w, -d] as [number, number], max: [w, d] as [number, number] };
 }
 
-// ── booth types ────────────────────────────────────────────────────────────────────────────────────
-
-/** stand types by how many sides open onto a hall aisle */
-export type BoothType = 'inline' | 'corner' | 'peninsula' | 'island';
-export const BOOTH_TYPES: { id: BoothType; name: string; open: Record<BoothSide, boolean>; note: string }[] = [
-  { id: 'inline', name: 'Inline', open: { front: true, right: false, back: false, left: false }, note: 'One side open, to the front aisle.' },
-  { id: 'corner', name: 'Corner', open: { front: true, right: false, back: false, left: true }, note: 'Two adjacent sides open, at the end of a row.' },
-  { id: 'peninsula', name: 'Peninsula', open: { front: true, right: true, back: false, left: true }, note: 'Three sides open, backing onto one neighbour.' },
-  { id: 'island', name: 'Island', open: { front: true, right: true, back: true, left: true }, note: 'Open on all four sides, aisles all round.' },
-];
-
-/** the type a booth's open sides make; two opposite open sides (a pass-through stand) have no type here */
-export function boothTypeOf(open: Record<BoothSide, boolean>): BoothType | null {
-  const n = SIDES.filter((s) => open[s]).length;
-  if (n === 1) return 'inline';
-  if (n === 3) return 'peninsula';
-  if (n === 4) return 'island';
-  if (n === 2) return (open.front && open.back) || (open.left && open.right) ? null : 'corner';
-  return null;
-}
+// ── facing the aisles ───────────────────────────────────────────────────────────────────────────────
 
 const quarter = (s: BoothSide) => SIDES.indexOf(s);
 /** the plan distance from a point to each open plot edge, nearest first */
@@ -286,7 +327,7 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
   const nx = bx + 2 * margin, ny = by + 2 * margin;
   const x0 = -W / 2 - margin * g + g / 2, y0 = -D / 2 - margin * g + g / 2;
   const cx = (i: number) => x0 + (i % nx) * g, cy = (i: number) => y0 + Math.floor(i / nx) * g;
-  const inside = (x: number, y: number) => x > -W / 2 && x < W / 2 && y > -D / 2 && y < D / 2;
+  const inside = (x: number, y: number) => insidePlot(b, x, y);
   const beyondOpen = (x: number, y: number) => (b.open.front && y < -D / 2) || (b.open.back && y > D / 2) || (b.open.left && x < -W / 2) || (b.open.right && x > W / 2);
 
   // blocked cells: closed sides, and every part below the headroom (floor-thin parts such as graphics are walked over)
@@ -336,15 +377,16 @@ export function analyseBooth(c: Composition, shapeOf: ShapeOf, nameOf: (p: Place
     const s = shapeOf(p);
     if (!s) continue;
     const e = extentOfShape(p, s);
-    if (e.min[0] < -W / 2 - 1 || e.max[0] > W / 2 + 1 || e.min[1] < -D / 2 - 1 || e.max[1] > D / 2 + 1) issues.push({ level: 'error', text: `${p.name} stands outside the booth plot.`, unit: p.groupId ?? p.id, at: [(e.min[0] + e.max[0]) / 2, (e.min[1] + e.max[1]) / 2] });
+    if (!itemInPlot(b, p, s, e)) issues.push({ level: 'error', text: `${p.name} stands outside the booth plot.`, unit: p.groupId ?? p.id, at: [(e.min[0] + e.max[0]) / 2, (e.min[1] + e.max[1]) / 2] });
     if (e.max[2] > b.heightLimit.value + 0.5) issues.push({ level: 'error', text: `${p.name} is ${Math.round(e.max[2])} mm high, over the ${Math.round(b.heightLimit.value)} mm height limit.`, unit: p.groupId ?? p.id });
     for (const k of columns) {
+      if (k.enclosedBy && (k.enclosedBy === p.id || k.enclosedBy === p.groupId)) continue;
       const ke = columnExtent(k);
       if (e.min[0] < ke.max[0] - 1 && e.max[0] > ke.min[0] + 1 && e.min[1] < ke.max[1] - 1 && e.max[1] > ke.min[1] + 1) issues.push({ level: 'error', text: `${p.name} runs into column ${k.name}.`, unit: p.groupId ?? p.id, at: [k.x, k.y] });
     }
   }
   for (const k of columns) {
-    if (Math.abs(k.x) + k.w / 2 > W / 2 + 1 || Math.abs(k.y) + k.d / 2 > D / 2 + 1) issues.push({ level: 'warn', text: `Column ${k.name} is not wholly inside the plot; check its position on the hall plan.`, at: [k.x, k.y] });
+    if (!rectInPlot(b, [k.x - k.w / 2, k.y - k.d / 2], [k.x + k.w / 2, k.y + k.d / 2])) issues.push({ level: 'warn', text: `Column ${k.name} is not wholly inside the plot; check its position on the hall plan.`, at: [k.x, k.y] });
   }
 
   // an accessible approach in front of each module
@@ -426,7 +468,7 @@ export function freeSpot(c: Composition, extents: Extent[], size: [number, numbe
   const step = 100;
   for (let y = D / 2 - d / 2; y >= -D / 2 + d / 2; y -= step) {
     for (let x = -W / 2 + w / 2; x <= W / 2 - w / 2; x += step) {
-      const clash = extents.some((e) => x - w / 2 < e.max[0] + gap && x + w / 2 > e.min[0] - gap && y - d / 2 < e.max[1] + gap && y + d / 2 > e.min[1] - gap);
+      const clash = !rectInPlot(b, [x - w / 2, y - d / 2], [x + w / 2, y + d / 2]) || extents.some((e) => x - w / 2 < e.max[0] + gap && x + w / 2 > e.min[0] - gap && y - d / 2 < e.max[1] + gap && y + d / 2 > e.min[1] - gap);
       if (!clash) return [Math.round(x), Math.round(y)];
     }
   }

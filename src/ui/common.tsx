@@ -35,6 +35,7 @@ export function Icon({ name, size = 16 }: { name: string; size?: number }) {
   const p: Record<string, ReactNode> = {
     search: <><circle cx="7" cy="7" r="4.5" /><path d="M10.5 10.5 14 14" /></>,
     plus: <path d="M8 3v10M3 8h10" />,
+    chevron: <path d="m4.5 6.5 3.5 3.5 3.5-3.5" />,
     download: <><path d="M8 2.5v8M4.5 7 8 10.5 11.5 7" /><path d="M3 13.5h10" /></>,
     star: <path d="m8 2 1.8 3.8 4.2.5-3.1 2.9.8 4.1L8 11.3 4.3 13.3l.8-4.1L2 6.3l4.2-.5Z" />,
     cube: <><path d="M8 1.8 13.5 5v6L8 14.2 2.5 11V5Z" /><path d="M2.5 5 8 8.2 13.5 5M8 8.2v6" /></>,

@@ -1,4 +1,4 @@
-import { CELL, SIDES, type BoothAnalysis } from '../core/booth';
+import { CELL, SIDES, plotOutline, type BoothAnalysis } from '../core/booth';
 import type { Composition, Vec3 } from '../core/schema';
 import type { Annotation } from './rhino';
 
@@ -13,7 +13,7 @@ export function boothAnnotations(c: Composition, a: BoothAnalysis): Annotation[]
   const rect = (x0: number, y0: number, x1: number, y1: number): Vec3[] => [[x0, y0, 0], [x1, y0, 0], [x1, y1, 0], [x0, y1, 0]];
   const out: Annotation[] = [];
   out.push({
-    kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::BOOTH_PLOT', name: 'BOOTH_PLOT', points: rect(-W, -D, W, D), closed: true,
+    kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::BOOTH_PLOT', name: 'BOOTH_PLOT', points: plotOutline(b).map(([x, y]) => [x, y, 0] as Vec3), closed: true,
     user: { width_mm: b.width.value, depth_mm: b.depth.value, width_status: b.width.status, depth_status: b.depth.status, height_limit_mm: b.heightLimit.value, height_limit_status: b.heightLimit.status, open_sides: SIDES.filter((s) => b.open[s]).join(' ') },
   });
   const edge: Record<string, Vec3[]> = { front: [[-W, -D, 0], [W, -D, 0]], back: [[-W, D, 0], [W, D, 0]], left: [[-W, -D, 0], [-W, D, 0]], right: [[W, -D, 0], [W, D, 0]] };

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
-import { CELL, SIDES } from '../core/booth';
+import { CELL, SIDES, plotEdges, plotOutline } from '../core/booth';
 import type { BoothSide } from '../core/schema';
 import { useStore } from '../ui/store';
 import { useBoothAnalysis } from '../ui/useBooth';
@@ -30,6 +30,7 @@ export function BoothLayer({ present = false }: { present?: boolean }) {
     return t;
   }, [a]);
   useEffect(() => () => tex?.dispose(), [tex]);
+  const floorShape = useMemo(() => (booth ? new THREE.Shape(plotOutline(booth).map(([x, y]) => new THREE.Vector2(x, y))) : null), [booth]);
   if (!booth || !a) return null;
   const W = booth.width.value, D = booth.depth.value, A = booth.aisle.value;
   const g = a.grid;
@@ -49,7 +50,7 @@ export function BoothLayer({ present = false }: { present?: boolean }) {
     <group>
       {/* floor, aisles and overlay are a few mm apart and pushed back in depth, so they never fight at booth scale */}
       <mesh position={[0, 0, 2]} receiveShadow>
-        <planeGeometry args={[W, D]} />
+        {booth.outline && floorShape ? <shapeGeometry args={[floorShape]} /> : <planeGeometry args={[W, D]} />}
         <meshStandardMaterial color={floor} roughness={0.9} polygonOffset polygonOffsetFactor={2} polygonOffsetUnits={2} />
       </mesh>
       {SIDES.filter((s) => booth.open[s]).map((s) => (
@@ -58,9 +59,14 @@ export function BoothLayer({ present = false }: { present?: boolean }) {
           {!present && <Label position={labelAt[s]} text={`Aisle\t${Math.round(A)} mm`} />}
         </group>
       ))}
-      {SIDES.filter((s) => !booth.open[s]).map((s) => (
-        <mesh key={s} position={wall[s].pos}><boxGeometry args={wall[s].size} /><meshStandardMaterial color="#c9c9d0" transparent opacity={0.28} depthWrite={false} /></mesh>
-      ))}
+      {booth.outline
+        ? plotEdges(booth).filter((e) => !e.open).map((e, i) => {
+          const len = Math.hypot(e.b[0] - e.a[0], e.b[1] - e.a[1]);
+          return <mesh key={i} position={[(e.a[0] + e.b[0]) / 2, (e.a[1] + e.b[1]) / 2, wallH / 2]} rotation={[0, 0, Math.atan2(e.b[1] - e.a[1], e.b[0] - e.a[0])]}><boxGeometry args={[len, 20, wallH]} /><meshStandardMaterial color="#c9c9d0" transparent opacity={0.28} depthWrite={false} /></mesh>;
+        })
+        : SIDES.filter((s) => !booth.open[s]).map((s) => (
+          <mesh key={s} position={wall[s].pos}><boxGeometry args={wall[s].size} /><meshStandardMaterial color="#c9c9d0" transparent opacity={0.28} depthWrite={false} /></mesh>
+        ))}
       {show && tex && (
         <mesh position={[g.x0 - g.g / 2 + (g.nx * g.g) / 2, g.y0 - g.g / 2 + (g.ny * g.g) / 2, 8]} renderOrder={1}>
           <planeGeometry args={[g.nx * g.g, g.ny * g.g]} />

@@ -1,6 +1,6 @@
 import { extentOfShape, worldBoxes, type ShapeOf, type WorldBox } from './arrange';
-import { BOOTH_TYPES, CELL, boothTypeOf, type BoothAnalysis } from './booth';
-import type { Booth, Composition, Placement, Vec3, Verification } from './schema';
+import { CELL, plotEdges, type BoothAnalysis } from './booth';
+import type { Composition, Placement, Vec3, Verification } from './schema';
 
 /**
  * A dimensioned A3 drawing sheet for a composition: plan above front elevation (third-angle), drawn to a
@@ -218,11 +218,7 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
 
   // the plot: walls on closed sides, a dashed line on open ones
   out.push('<g id="plot">');
-  const side = (on: boolean, x1: number, y1: number, x2: number, y2: number) => line(px(x1), py(y1), px(x2), py(y2), on ? 'open' : 'wall');
-  side(b.open.front, -W / 2, -D / 2, W / 2, -D / 2);
-  side(b.open.back, -W / 2, D / 2, W / 2, D / 2);
-  side(b.open.left, -W / 2, -D / 2, -W / 2, D / 2);
-  side(b.open.right, W / 2, -D / 2, W / 2, D / 2);
+  for (const e of plotEdges(b)) line(px(e.a[0]), py(e.a[1]), px(e.b[0]), py(e.b[1]), e.open ? 'open' : 'wall');
   // hall columns, solid, with their names
   for (const col of b.columns ?? []) {
     rectW(col.x - col.w / 2, col.y - col.d / 2, col.x + col.w / 2, col.y + col.d / 2, 'column');
@@ -315,7 +311,7 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
   out.push('<g id="title">');
   line(lx, ty, PAPER.w - FRAME, ty, 'frame');
   text(lx + 4, ty + 8, info.title ?? c.name, 'title', 'start');
-  text(lx + 4, ty + 14, `${info.project ? `${info.project} · ` : ''}${standName(b.open)}Booth ${fmm(W)} × ${fmm(D)} mm · height limit ${fmm(b.heightLimit.value)} mm · ${a.units.length} modules`, 'small', 'start');
+  text(lx + 4, ty + 14, `${info.project ? `${info.project} · ` : ''}Booth ${fmm(W)} × ${fmm(D)} mm · height limit ${fmm(b.heightLimit.value)} mm · ${a.units.length} modules`, 'small', 'start');
   text(lx + 4, ty + 19.5, `Scale 1:${scale} at A3 · millimetres · ${info.date ?? new Date().toISOString().slice(0, 10)}`, 'small', 'start');
   text(lx + 4, ty + 25, `Plot, limits and clearances: ${STATUS_LABEL[a.status]}. Check with the venue before submission.`, 'tiny', 'start');
   text(lx + 4, ty + 29, info.appLabel ?? 'MAESTRO', 'tiny', 'start');
@@ -361,6 +357,3 @@ ${out.join('\n')}
 </svg>
 `;
 }
-
-/** "Island booth" and the like, or nothing for a stand with custom open sides */
-const standName = (open: Booth['open']) => { const t = BOOTH_TYPES.find((x) => x.id === boothTypeOf(open)); return t ? `${t.name} · ` : ''; };
