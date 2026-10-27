@@ -73,7 +73,7 @@ export function BoothLayer({ present = false }: { present?: boolean }) {
           <meshBasicMaterial map={tex} transparent depthWrite={false} polygonOffset polygonOffsetFactor={-2} polygonOffsetUnits={-2} />
         </mesh>
       )}
-      {show && a.access.map((z) => <Zone key={z.unit} min={z.zone.min} max={z.zone.max} ok={z.approach} />)}
+      {show && a.access.filter((z) => !z.overhead).map((z) => <Zone key={z.unit} min={z.zone.min} max={z.zone.max} ok={z.approach} />)}
       {(booth.columns ?? []).map((k) => (
         <group key={k.id} position={[k.x, k.y, 0]}>
           <mesh position={[0, 0, colH / 2]} castShadow receiveShadow><boxGeometry args={[k.w, k.d, colH]} /><meshStandardMaterial color="#b9bab7" roughness={0.85} /></mesh>

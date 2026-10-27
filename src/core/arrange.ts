@@ -20,12 +20,42 @@ export function placeBox(p: Placement, min: Vec3, max: Vec3): { min: Vec3; max: 
   return { min: [r(Math.min(...xs)), r(Math.min(...ys)), r(p.position[2] + min[2])], max: [r(Math.max(...xs)), r(Math.max(...ys)), r(p.position[2] + max[2])] };
 }
 
-/** every part of a placed item as a world box (a mesh part by its bounds) */
+/** every part of a placed item as a world box: a mesh part by its bounds, or, when it is large, by 1 m tiles */
 export function worldBoxes(p: Placement, shape: Shape): WorldBox[] {
-  return shape.parts.map((part) => {
-    const b = part.kind === 'box' ? { min: part.min, max: part.max } : shapeBounds({ parts: [part], materials: {} });
-    return { item: p.id, name: part.name, ...placeBox(p, b.min, b.max) };
+  return shape.parts.flatMap((part) => {
+    const bs = part.kind === 'box' ? [{ min: part.min, max: part.max }] : meshBoxes(part);
+    return bs.map((b) => ({ item: p.id, name: part.name, ...placeBox(p, b.min, b.max) }));
   });
+}
+
+type MeshPart = Extract<Shape['parts'][number], { kind: 'mesh' }>;
+const TILE = 1000;
+const tiled = new WeakMap<MeshPart, { min: Vec3; max: Vec3 }[]>();
+
+/**
+ * A mesh part's boxes. A large mesh (a whole wall run or room from a show model) by its bounds alone would block
+ * all the floor it spans, so its triangles are binned into 1 m plan tiles by their centres and each tile is boxed.
+ */
+function meshBoxes(part: MeshPart): { min: Vec3; max: Vec3 }[] {
+  const hit = tiled.get(part);
+  if (hit) return hit;
+  const b = shapeBounds({ parts: [part], materials: {} });
+  let out = [b];
+  if (b.max[0] - b.min[0] > 2 * TILE || b.max[1] - b.min[1] > 2 * TILE) {
+    const P = part.positions, I = part.indices;
+    const tiles = new Map<number, { min: Vec3; max: Vec3 }>();
+    for (let t = 0; t < I.length; t += 3) {
+      const a = I[t] * 3, c = I[t + 1] * 3, d = I[t + 2] * 3;
+      const tx = Math.floor((P[a] + P[c] + P[d]) / 3 / TILE), ty = Math.floor((P[a + 1] + P[c + 1] + P[d + 1]) / 3 / TILE);
+      const k = tx * 100003 + ty;
+      let box = tiles.get(k);
+      if (!box) { box = { min: [Infinity, Infinity, Infinity], max: [-Infinity, -Infinity, -Infinity] }; tiles.set(k, box); }
+      for (const v of [a, c, d]) for (let j = 0; j < 3; j++) { box.min[j] = Math.min(box.min[j], P[v + j]); box.max[j] = Math.max(box.max[j], P[v + j]); }
+    }
+    if (tiles.size) out = [...tiles.values()];
+  }
+  tiled.set(part, out);
+  return out;
 }
 
 export function extentOfShape(p: Placement, shape: Shape): Extent {

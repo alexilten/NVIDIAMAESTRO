@@ -10,7 +10,7 @@ const errors = [];
 let step = 'start';
 page.on('pageerror', (e) => errors.push(`[${step}] ${e.message}`));
 page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
-const shot = async (name) => { await page.waitForTimeout(1800); await page.screenshot({ path: `${out}/${name}.png` }); step = name; console.log('saved', name); };
+const shot = async (name) => { await page.waitForTimeout(1800); await page.screenshot({ path: `${out}/${name}.png`, timeout: 240000 }); step = name; console.log('saved', name); };
 const pick = (text) => page.locator('.cat-item', { hasText: text }).first().click();
 
 await page.goto(url);
@@ -78,12 +78,24 @@ await shot('30-exhibition-din-rule-set');
 await page.selectOption('select[aria-label="Rule set"]', 'ada-2010');
 // Round 11: show presets. GTC Berlin 2026 ships with the site; a synthetic presets file adds a booth on a stepped plot
 await page.locator('.preset-btn').click();
+await page.locator('.preset-menu .segmented button', { hasText: 'GTC Berlin' }).click();
 await page.waitForSelector('.preset-card >> text=GTC Berlin 2026');
 await shot('35-exhibition-show-presets');
 await page.locator('.preset-card', { hasText: 'GTC Berlin 2026' }).click();
 await page.waitForFunction(() => document.querySelector('.toast')?.textContent?.includes('opened'), null, { timeout: 120000 });
 await page.waitForTimeout(3000);
 await shot('37-exhibition-gtc-berlin');
+// Round 13: GTC San Jose 2026, built from the show's master model
+await page.locator('.preset-btn').click();
+await page.locator('.preset-menu .segmented button', { hasText: 'GTC San Jose' }).click();
+await page.locator('.preset-card', { hasText: 'GTC San Jose 2026' }).click();
+await page.waitForFunction(() => document.querySelector('.toast')?.textContent?.includes('San Jose 2026 opened'), null, { timeout: 180000 });
+await page.locator('.chip', { hasText: 'Frame all' }).click();
+await page.waitForTimeout(4000);
+await shot('38-exhibition-gtc-san-jose');
+await page.locator('.chip', { hasText: 'Plan' }).click();
+await page.waitForTimeout(1500);
+await shot('39-exhibition-gtc-san-jose-plan');
 const fx11 = process.argv[4];
 if (fx11) {
   await page.locator('.preset-btn').click();

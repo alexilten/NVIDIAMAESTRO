@@ -88,6 +88,17 @@ describe('booth circulation', () => {
     const over = addItem(c, ref, 'canopy', dimsOf(ref), [0, 0, 2500]).comp; // a slab hung at 2.5 m
     expect(analyseBooth(over, shapeOf)!.accessibleShare).toBe(1);
   });
+
+  it('needs no approach to an item hung above the headroom, and draws none', () => {
+    const c = booth();
+    const ref = kit('kit-light-table', { width: 3200, depth: 1600, height: 300 });
+    // hung at 2.5 m against the back wall, where nothing could approach it from the floor in front
+    const hung = addItem(c, ref, 'sign', dimsOf(ref), [0, 1200, 2500]).comp;
+    const a = analyseBooth(hung, shapeOf)!;
+    expect(a.issues.filter((i) => /approach|turning/.test(i.text))).toEqual([]);
+    expect(a.access[0].overhead).toBe(true);
+    expect(boothAnnotations(hung, a).some((x) => /APPROACH/.test(JSON.stringify(x)))).toBe(false);
+  });
 });
 
 describe('modules on a booth', () => {

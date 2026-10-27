@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { placeOn, snapDelta, supportSurfaces } from '../src/core/arrange';
+import { placeOn, snapDelta, supportSurfaces, worldBoxes } from '../src/core/arrange';
 import { addItem, newComposition } from '../src/core/compose';
 import { defaultParams } from '../src/core/geometry/kit';
 import { boxSize, shapeBounds } from '../src/core/geometry/shape';
@@ -120,5 +120,20 @@ describe('elevation sheet', () => {
     for (const v of ['>1500<', '>2700<', '>300<', 'Scale 1:20']) expect(r.svg).toContain(v);
     expect((r.svg.match(/<g /g) ?? []).length).toBe((r.svg.match(/<\/g>/g) ?? []).length);
     expect(buildSheet(newComposition(), shapeOf, { statusOf: () => 'verified' })).toBeNull();
+  });
+});
+
+describe('placed boxes of large meshes', () => {
+  it('boxes a large mesh by 1 m tiles, so an L of wall does not block the floor inside the L', () => {
+    // two thin walls, 6 m along X and 6 m along Y, meeting at the origin
+    const quad = (x0: number, y0: number, x1: number, y1: number) => [x0, y0, 0, x1, y1, 0, x1, y1, 2400, x0, y0, 2400];
+    const positions = new Float32Array([...quad(0, 0, 6000, 0), ...quad(0, 0, 0, 6000)]);
+    const indices = new Uint32Array([0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7]);
+    const shape = { parts: [{ kind: 'mesh' as const, name: 'WALL', material: 'm', positions, indices }], materials: {} };
+    const p: Placement = { id: 'w', ref: kit('kit-demo-counter'), name: 'Wall', position: [0, 0, 0], rotation: 0, snapshot: { width: 6000, depth: 6000, height: 2400, version: 1 } };
+    const boxes = worldBoxes(p, shape);
+    expect(boxes.length).toBeGreaterThan(1);
+    // nothing covers the middle of the L
+    expect(boxes.some((b) => b.min[0] < 3000 && b.max[0] > 3000 && b.min[1] < 3000 && b.max[1] > 3000)).toBe(false);
   });
 });

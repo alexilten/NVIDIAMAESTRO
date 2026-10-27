@@ -195,7 +195,7 @@ export function BoothPanel() {
                 <span className="tag-dot">{moduleTag(k)}</span>
                 <span className="unit-name">{u.name}</span>
                 <span className="muted small">{s.liveCount ? `${(s.watts / 1000).toFixed(2)} kW${pt ? ` · ${pt.name} ${(s.power!.run / 1000).toFixed(1)} m` : ' · no point'}` : 'static'}</span>
-                <span className={`acc ${z.approach ? (z.turning ? 'ok' : 'part') : 'bad'}`} title={z.approach ? (z.turning ? 'Accessible approach and turning circle' : 'Accessible approach; no turning circle in front') : 'No accessible approach'}>{z.approach ? '♿' : '✕'}</span>
+                <span className={`acc ${z.approach ? (z.turning ? 'ok' : 'part') : 'bad'}`} title={z.overhead ? 'Overhead, above the headroom: no approach needed' : z.approach ? (z.turning ? 'Accessible approach and turning circle' : 'Accessible approach; no turning circle in front') : 'No accessible approach'}>{z.approach ? '♿' : '✕'}</span>
               </button>
             );
           })}

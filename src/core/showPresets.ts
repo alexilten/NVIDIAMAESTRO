@@ -23,7 +23,7 @@ export interface ShowPreset {
   comp: Composition;
   /** shipped with the site rather than loaded from a file */
   builtIn?: boolean;
-  /** where the library bundle with this preset's parts can be fetched */
+  /** where the library bundle with this preset's parts can be fetched; in the site's shows.json, a file name next to it */
   partsUrl?: string;
 }
 

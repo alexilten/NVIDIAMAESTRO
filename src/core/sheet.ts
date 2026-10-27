@@ -207,7 +207,7 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
 
   // approach zones
   out.push('<g id="approach">');
-  for (const z of a.access) rectW(z.zone.min[0], z.zone.min[1], z.zone.max[0], z.zone.max[1], z.approach ? 'zone' : 'zone bad');
+  for (const z of a.access.filter((x) => !x.overhead)) rectW(z.zone.min[0], z.zone.min[1], z.zone.max[0], z.zone.max[1], z.approach ? 'zone' : 'zone bad');
   out.push('</g>');
 
   // parts in plan, low first
@@ -269,7 +269,7 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
     const e = u.extent;
     const pw = s.liveCount ? `${(s.watts / 1000).toFixed(2)} kW${s.unknownLive ? ` + ${s.unknownLive} unknown` : ''}${s.power ? ` from ${svcName.get(s.power.point)} (${(s.power.run / 1000).toFixed(1)} m)` : ', no point'}` : 'static';
     text(lx + 10, y + 3.4, `${fmm(e.max[0] - e.min[0])} × ${fmm(e.max[1] - e.min[1])} mm · ${pw}`, 'tiny', 'start');
-    text(lx + 10, y + 6.4, acc.approach ? `Accessible approach${acc.turning ? ' and turning circle' : ', no turning circle'}` : 'NO accessible approach', acc.approach ? 'tiny' : 'tiny err', 'start');
+    text(lx + 10, y + 6.4, acc.overhead ? 'Overhead, above the headroom' : acc.approach ? `Accessible approach${acc.turning ? ' and turning circle' : ', no turning circle'}` : 'NO accessible approach', acc.approach ? 'tiny' : 'tiny err', 'start');
     y += 10;
   });
   if (b.services.length && room()) {

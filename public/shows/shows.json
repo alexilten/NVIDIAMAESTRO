@@ -2,8 +2,699 @@
  "schema": "maestro.show-presets",
  "version": 1,
  "name": "Show presets",
- "exportedAt": "2026-10-27T14:05:08.257Z",
+ "exportedAt": "2026-10-27T22:20:45.956Z",
  "presets": [
+  {
+   "id": "gtc-san-jose-2026",
+   "show": "GTC San Jose",
+   "edition": "2026",
+   "name": "GTC San Jose 2026",
+   "summary": "115.8 × 13.4 m plot; stage, infinity room, robotic wall, 12 demo stations and 4 hanging signs",
+   "sources": [
+    "SanJose_Clean_Master.3dm: layout, carpet edge and pieces (meshes simplified for the web)"
+   ],
+   "comp": {
+    "schema": "maestro.composition",
+    "version": 1,
+    "id": "comp-gtcsj-2026",
+    "name": "GTC San Jose 2026",
+    "kind": "exhibition",
+    "items": [
+     {
+      "id": "it-quantum-lightbox",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-quantum-lightbox",
+       "version": 1
+      },
+      "name": "Quantum Lightbox",
+      "position": [
+       -54864,
+       456,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 4572.879209556619,
+       "depth": 76.19999999999999,
+       "height": 5795.893752426728,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-1",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 1",
+      "position": [
+       -46066,
+       -2815,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-2",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 2",
+      "position": [
+       -40053,
+       -4606,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-3",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 3",
+      "position": [
+       -34096,
+       -6425,
+       981
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-ceiling-grid-west",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-ceiling-grid-west",
+       "version": 1
+      },
+      "name": "Ceiling Grid West",
+      "position": [
+       -27467,
+       -3911,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 39089.215262230544,
+       "depth": 5667.700240872975,
+       "height": 123.69800000904661,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-theatre-seating",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-theatre-seating",
+       "version": 1
+      },
+      "name": "Theatre Seating",
+      "position": [
+       -27467,
+       3455,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 9033.446153781628,
+       "depth": 2503.28608965091,
+       "height": 667.8617333617277,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-west-podiums",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-west-podiums",
+       "version": 1
+      },
+      "name": "West Podiums",
+      "position": [
+       -27432,
+       -449,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 42657.89946720797,
+       "depth": 11889.332168746885,
+       "height": 6546.849999999999,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-infinity-room",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-infinity-room",
+       "version": 1
+      },
+      "name": "Infinity Room",
+      "position": [
+       -23078,
+       -325,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 69668.37239046567,
+       "depth": 12031.56681674142,
+       "height": 3193.4102936104373,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-4",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 4",
+      "position": [
+       -19263,
+       -6425,
+       981
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-5",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 5",
+      "position": [
+       -13372,
+       -4583,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-6",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 6",
+      "position": [
+       -7113,
+       -3254,
+       907
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-hanging-sign-4",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-hanging-sign-4",
+       "version": 1
+      },
+      "name": "Hanging Sign 4",
+      "position": [
+       661,
+       3088,
+       -25
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 12820.75876032954,
+       "depth": 2331.1395176696196,
+       "height": 3712.524149193265,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-hanging-sign-3",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-hanging-sign-3",
+       "version": 1
+      },
+      "name": "Hanging Sign 3",
+      "position": [
+       661,
+       3088,
+       -25
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 12754.844435535584,
+       "depth": 2700.4968585769616,
+       "height": 3712.524149193265,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-hanging-sign-1",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-hanging-sign-1",
+       "version": 1
+      },
+      "name": "Hanging Sign 1",
+      "position": [
+       674,
+       3113,
+       -25
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 12567.84517011635,
+       "depth": 3483.2277537297514,
+       "height": 3712.524149193265,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-hanging-sign-2",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-hanging-sign-2",
+       "version": 1
+      },
+      "name": "Hanging Sign 2",
+      "position": [
+       674,
+       3113,
+       -25
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 12563.783199235193,
+       "depth": 3483.230558362593,
+       "height": 3712.524149193265,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-7",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 7",
+      "position": [
+       3552,
+       -6425,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-8",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 8",
+      "position": [
+       10603,
+       -6425,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-9",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 9",
+      "position": [
+       17654,
+       -6425,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-show-car",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-show-car",
+       "version": 1
+      },
+      "name": "Show Car",
+      "position": [
+       24131,
+       -3894,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3458.4444508200877,
+       "depth": 4389.485654307628,
+       "height": 1208.5186945856856,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-ceiling-grid-east",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-ceiling-grid-east",
+       "version": 1
+      },
+      "name": "Ceiling Grid East",
+      "position": [
+       24212,
+       -2968,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 41657.02476878193,
+       "depth": 7588.55366519975,
+       "height": 123.69800001400017,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-east-back-wall",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-east-back-wall",
+       "version": 1
+      },
+      "name": "East Back Wall",
+      "position": [
+       28663,
+       -370,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 57912.00359582992,
+       "depth": 11952.341312387187,
+       "height": 6541.963284621011,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-east-demo-tables",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-east-demo-tables",
+       "version": 1
+      },
+      "name": "East Demo Tables",
+      "position": [
+       31799,
+       2342,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 52226.15619352488,
+       "depth": 6096.000052782493,
+       "height": 1524.0000732047172,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-10",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 10",
+      "position": [
+       32361,
+       -6425,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-11",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 11",
+      "position": [
+       39412,
+       -6425,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-stage",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-stage",
+       "version": 1
+      },
+      "name": "Stage",
+      "position": [
+       40900,
+       -647,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 35699.45439933295,
+       "depth": 12106.947209677974,
+       "height": 2348.9583563098063,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-robotic-wall",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-robotic-wall",
+       "version": 1
+      },
+      "name": "Robotic Wall",
+      "position": [
+       42985,
+       -878,
+       0
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 29827.353621724953,
+       "depth": 12338.461007685817,
+       "height": 2190.547492980957,
+       "version": 1
+      }
+     },
+     {
+      "id": "it-demo-station-12",
+      "ref": {
+       "kind": "ingested",
+       "id": "part-gtcsj-demo-station",
+       "version": 1
+      },
+      "name": "Demo Station 12",
+      "position": [
+       46463,
+       -6425,
+       1006
+      ],
+      "rotation": 0,
+      "snapshot": {
+       "width": 3088.480408802756,
+       "depth": 2681.273010314921,
+       "height": 2438.4000476332258,
+       "version": 1
+      }
+     }
+    ],
+    "groups": [],
+    "updatedAt": "2026-10-27T22:20:45.758Z",
+    "booth": {
+     "width": {
+      "value": 115824,
+      "status": "project",
+      "note": "From SanJose_Clean_Master.3dm, the carpet edge."
+     },
+     "depth": {
+      "value": 13401,
+      "status": "project",
+      "note": "From SanJose_Clean_Master.3dm, the carpet edge."
+     },
+     "open": {
+      "front": true,
+      "left": false,
+      "back": false,
+      "right": false
+     },
+     "aisle": {
+      "value": 3000,
+      "status": "placeholder",
+      "note": "Not in the model. Check against the floor plan."
+     },
+     "heightLimit": {
+      "value": 9400,
+      "status": "placeholder",
+      "note": "No ceiling limit in the model; set just above the tallest item (9304 mm). Check against the hall's technical guidelines."
+     },
+     "rules": {
+      "route": {
+       "value": 915,
+       "status": "estimated",
+       "note": "Accessible route clear width, 36 in (ADA 2010, 403.5.1). Replace with the venue rule."
+      },
+      "turning": {
+       "value": 1525,
+       "status": "estimated",
+       "note": "Turning circle diameter, 60 in (ADA 2010, 304.3.1). Many European venues ask for 1500."
+      },
+      "approach": {
+       "value": 1220,
+       "status": "estimated",
+       "note": "Clear floor space depth in front of a demo, 48 in (ADA 2010, 305.3)."
+      },
+      "headroom": {
+       "value": 2030,
+       "status": "estimated",
+       "note": "Parts lower than 80 in are obstacles (ADA 2010, 307.4)."
+      }
+     },
+     "services": [],
+     "outline": [
+      [
+       -57912,
+       -607
+      ],
+      [
+       -48768,
+       -607
+      ],
+      [
+       -48768,
+       -6701
+      ],
+      [
+       57912,
+       -6701
+      ],
+      [
+       57912,
+       5491
+      ],
+      [
+       610,
+       5491
+      ],
+      [
+       610,
+       6701
+      ],
+      [
+       -6096,
+       6701
+      ],
+      [
+       -6096,
+       5491
+      ],
+      [
+       -47854,
+       5491
+      ],
+      [
+       -47854,
+       6091
+      ],
+      [
+       -57912,
+       6091
+      ]
+     ],
+     "columns": []
+    }
+   },
+   "partsUrl": "parts-gtc-san-jose.json"
+  },
   {
    "id": "gtc-berlin-2026",
    "show": "GTC Berlin",
