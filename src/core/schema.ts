@@ -285,6 +285,35 @@ export interface Booth {
   services: ServicePoint[];
   /** hall columns inside the plot, from the hall plan */
   columns?: BoothColumn[];
+  /** upper decks of a two-storey stand */
+  decks?: BoothDeck[];
+}
+
+/** a flight of stairs or a platform lift standing on the booth floor beside one edge of a deck */
+export interface DeckAccess {
+  /** the deck edge it stands against; a stair runs away from the deck, a lift door faces away from it */
+  side: BoothSide;
+  /** position along that edge, from the edge's centre, mm (toward +X on front and back, toward +Y on left and right) */
+  offset: number;
+  /** clear width, mm (stair only; a lift uses the platform size in DECK_DEFAULTS) */
+  width?: number;
+}
+
+/** an upper floor over part of the plot, on posts at its corners */
+export interface BoothDeck {
+  id: string;
+  name: string;
+  /** centre, mm */
+  x: number;
+  y: number;
+  /** plan size, mm */
+  w: number;
+  d: number;
+  /** upper floor level above the booth floor, mm */
+  level: number;
+  stair?: DeckAccess;
+  lift?: DeckAccess;
+  status: Verification;
 }
 
 export interface Composition {

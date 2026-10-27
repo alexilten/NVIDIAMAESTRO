@@ -93,10 +93,19 @@ await page.locator('.section', { hasText: 'Checks' }).first().scrollIntoViewIfNe
 await shot('36-exhibition-back-to-aisle');
 await page.locator('.turn-btn').first().click();
 await page.keyboard.press('Escape');
+// Round 10: a two-storey stand, in 3D, with its deck in the panel
+await page.locator('button', { hasText: 'Sample two-storey booth' }).click();
+await page.locator('.chip', { hasText: 'Plan' }).click();
+await page.locator('.chip', { hasText: 'Frame all' }).click();
+await page.locator('summary', { hasText: 'Decks' }).scrollIntoViewIfNeeded();
+await shot('37-exhibition-two-storey');
+await page.locator('.chip', { hasText: 'Plan' }).click();
 await page.locator('button', { hasText: 'Sample corner booth' }).click();
 const plan = await browser.newPage({ viewport: { width: 1587, height: 1123 } });
 await plan.goto(new URL('../samples/sample-booth.plan.svg', import.meta.url).href);
 await plan.screenshot({ path: `${out}/22-booth-plan-sheet.png` });
+await plan.goto(new URL('../samples/sample-two-storey.plan.svg', import.meta.url).href);
+await plan.screenshot({ path: `${out}/38-two-storey-plan-sheet.png` });
 await plan.close();
 console.log('saved 22-booth-plan-sheet');
 // Round 06: presentation of the sample booth

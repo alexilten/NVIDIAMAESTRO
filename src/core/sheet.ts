@@ -1,5 +1,5 @@
 import { extentOfShape, worldBoxes, type ShapeOf, type WorldBox } from './arrange';
-import { BOOTH_TYPES, CELL, boothTypeOf, type BoothAnalysis } from './booth';
+import { BOOTH_TYPES, CELL, DECK_DEFAULTS, accessRect, boothTypeOf, deckRect, stairRun, type BoothAnalysis } from './booth';
 import type { Booth, Composition, Placement, Vec3, Verification } from './schema';
 
 /**
@@ -228,6 +228,29 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
     rectW(col.x - col.w / 2, col.y - col.d / 2, col.x + col.w / 2, col.y + col.d / 2, 'column');
     text(px(col.x + col.w / 2) + 1, py(col.y + col.d / 2) - 0.6, col.name, 'tiny', 'start');
   }
+  // upper decks: the deck edge dashed (it is overhead), posts solid, the stair with its treads and the lift crossed
+  for (const dk of b.decks ?? []) {
+    const r = deckRect(dk), p = DECK_DEFAULTS.post.value;
+    rectW(r.min[0], r.min[1], r.max[0], r.max[1], 'deck');
+    for (const [x, y] of [[r.min[0], r.min[1]], [r.max[0] - p, r.min[1]], [r.min[0], r.max[1] - p], [r.max[0] - p, r.max[1] - p]]) rectW(x, y, x + p, y + p, 'column');
+    text(px(r.min[0] + p) + 1.5, py(r.min[1] + p) - 1.2, `${dk.name} · UPPER DECK +${fmm(dk.level)}`, 'tiny', 'start');
+    if (dk.stair) {
+      const q = accessRect(dk, dk.stair, 'stair'), run = stairRun(dk), along = dk.stair.side === 'front' || dk.stair.side === 'back';
+      rectW(q.min[0], q.min[1], q.max[0], q.max[1], 'stair');
+      for (let i = 1; i < run.risers; i++) {
+        const f = i / run.risers;
+        if (along) { const y = q.min[1] + (q.max[1] - q.min[1]) * f; line(px(q.min[0]), py(y), px(q.max[0]), py(y), 'tread'); }
+        else { const x = q.min[0] + (q.max[0] - q.min[0]) * f; line(px(x), py(q.min[1]), px(x), py(q.max[1]), 'tread'); }
+      }
+      text(px((q.min[0] + q.max[0]) / 2), py((q.min[1] + q.max[1]) / 2) + 1, `UP ${run.risers}R`, 'tiny', 'middle', along ? -90 : 0);
+    }
+    if (dk.lift) {
+      const q = accessRect(dk, dk.lift, 'lift');
+      rectW(q.min[0], q.min[1], q.max[0], q.max[1], 'stair');
+      line(px(q.min[0]), py(q.min[1]), px(q.max[0]), py(q.max[1]), 'tread'); line(px(q.min[0]), py(q.max[1]), px(q.max[0]), py(q.min[1]), 'tread');
+      text(px((q.min[0] + q.max[0]) / 2), py((q.min[1] + q.max[1]) / 2) + 1, 'LIFT', 'tiny');
+    }
+  }
   out.push('</g>');
 
   // dimensions
@@ -273,7 +296,9 @@ export function buildBoothSheet(c: Composition, a: BoothAnalysis, shapeOf: Shape
     const e = u.extent;
     const pw = s.liveCount ? `${(s.watts / 1000).toFixed(2)} kW${s.unknownLive ? ` + ${s.unknownLive} unknown` : ''}${s.power ? ` from ${svcName.get(s.power.point)} (${(s.power.run / 1000).toFixed(1)} m)` : ', no point'}` : 'static';
     text(lx + 10, y + 3.4, `${fmm(e.max[0] - e.min[0])} × ${fmm(e.max[1] - e.min[1])} mm · ${pw}`, 'tiny', 'start');
-    text(lx + 10, y + 6.4, acc.approach ? `Accessible approach${acc.turning ? ' and turning circle' : ', no turning circle'}` : 'NO accessible approach', acc.approach ? 'tiny' : 'tiny err', 'start');
+    const upOn = acc.deck ? b.decks?.find((x) => x.id === acc.deck) : undefined;
+    const where = upOn ? `On deck ${upOn.name} +${fmm(upOn.level)} · ` : '';
+    text(lx + 10, y + 6.4, where + (acc.approach ? `Accessible approach${acc.turning ? ' and turning circle' : ', no turning circle'}` : 'NO accessible approach'), acc.approach ? 'tiny' : 'tiny err', 'start');
     y += 10;
   });
   if (b.services.length && room()) {
@@ -342,6 +367,9 @@ const STYLE = `
     .open{stroke:#111;stroke-width:.25;stroke-dasharray:2 1.2;fill:none}
     .aisle{fill:#f2f2f4;stroke:none}
     .column{fill:#555;stroke:#111;stroke-width:.25}
+    .deck{fill:none;stroke:#111;stroke-width:.45;stroke-dasharray:3 1.2}
+    .stair{fill:#fff;stroke:#111;stroke-width:.3}
+    .tread{stroke:#111;stroke-width:.15}
     .tight{fill:#f2a33a;fill-opacity:.55;stroke:none}
     .zone{fill:none;stroke:#3b6400;stroke-width:.2;stroke-dasharray:1 .8}
     .zone.bad{stroke:#d33;stroke-width:.35}

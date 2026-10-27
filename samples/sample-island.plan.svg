@@ -20,6 +20,9 @@
     .open{stroke:#111;stroke-width:.25;stroke-dasharray:2 1.2;fill:none}
     .aisle{fill:#f2f2f4;stroke:none}
     .column{fill:#555;stroke:#111;stroke-width:.25}
+    .deck{fill:none;stroke:#111;stroke-width:.45;stroke-dasharray:3 1.2}
+    .stair{fill:#fff;stroke:#111;stroke-width:.3}
+    .tread{stroke:#111;stroke-width:.15}
     .tight{fill:#f2a33a;fill-opacity:.55;stroke:none}
     .zone{fill:none;stroke:#3b6400;stroke-width:.2;stroke-dasharray:1 .8}
     .zone.bad{stroke:#d33;stroke-width:.35}

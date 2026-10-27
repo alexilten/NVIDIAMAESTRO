@@ -1,4 +1,4 @@
-import { CELL, SIDES, type BoothAnalysis } from '../core/booth';
+import { CELL, SIDES, accessRect, deckRect, stairRun, type BoothAnalysis } from '../core/booth';
 import type { Composition, Vec3 } from '../core/schema';
 import type { Annotation } from './rhino';
 
@@ -20,6 +20,12 @@ export function boothAnnotations(c: Composition, a: BoothAnalysis): Annotation[]
   for (const s of SIDES) if (b.open[s]) out.push({ kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::BOOTH_PLOT', name: `OPEN_SIDE_${s.toUpperCase()}`, points: edge[s] });
   for (const k of b.columns ?? []) {
     out.push({ kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::COLUMNS', name: k.name, points: rect(k.x - k.w / 2, k.y - k.d / 2, k.x + k.w / 2, k.y + k.d / 2), closed: true, user: { width_mm: k.w, depth_mm: k.d, status: k.status } });
+  }
+  for (const k of b.decks ?? []) {
+    const r = deckRect(k), z = k.level;
+    out.push({ kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::DECKS', name: k.name, points: rect(r.min[0], r.min[1], r.max[0], r.max[1]).map(([x, y]) => [x, y, z] as Vec3), closed: true, user: { level_mm: k.level, width_mm: k.w, depth_mm: k.d, status: k.status, stair: k.stair ? `${k.stair.side} edge` : 'none', lift: k.lift ? `${k.lift.side} edge` : 'none' } });
+    if (k.stair) { const q = accessRect(k, k.stair, 'stair'); out.push({ kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::DECKS', name: `${k.name} STAIR`, points: rect(q.min[0], q.min[1], q.max[0], q.max[1]), closed: true, user: { risers: stairRun(k).risers, run_mm: stairRun(k).length, verification: 'estimated' } }); }
+    if (k.lift) { const q = accessRect(k, k.lift, 'lift'); out.push({ kind: 'polyline', layer: '50_EXHIBITION_ARCHITECTURE::DECKS', name: `${k.name} LIFT`, points: rect(q.min[0], q.min[1], q.max[0], q.max[1]), closed: true, user: { verification: 'estimated' } }); }
   }
   for (const l of a.loads) {
     const sp = l.point;
