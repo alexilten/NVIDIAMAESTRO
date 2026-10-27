@@ -53,8 +53,9 @@ export function productEntries(): LibraryEntry[] {
   });
 }
 
-export function kitEntries(): LibraryEntry[] {
-  return KIT.map((k) => {
+/** the kit the library offers; `all` adds the parts other tools make (resolving a placement needs those too) */
+export function kitEntries(all = false): LibraryEntry[] {
+  return KIT.filter((k) => all || !k.hidden).map((k) => {
     const params = defaultParams(k.id);
     const s = kitShape(k.id, params);
     const dims = s ? boxSize(shapeBounds(s)) : null;
@@ -93,7 +94,7 @@ export function resolveRef(ref: ItemRef, parts: IngestedPart[]): Resolved | null
     return { entry: e, shape: productShape(ref.id, 1) };
   }
   if (ref.kind === 'kit') {
-    const base = kitEntries().find((x) => x.ref.kind === 'kit' && x.ref.id === ref.id);
+    const base = kitEntries(true).find((x) => x.ref.kind === 'kit' && x.ref.id === ref.id);
     if (!base) return null;
     const params = resolveParams(ref.id, ref.params);
     const shape = kitShape(ref.id, params);

@@ -1,0 +1,41 @@
+/* Niches workspace */
+.niche-sheet { display: block; }
+.niche-paper { position: absolute; top: 78px; bottom: 74px; left: calc(var(--left-w) + 28px); right: calc(var(--right-w) + 28px); display: grid; place-items: center; }
+.niche-paper img { max-width: 100%; max-height: 100%; aspect-ratio: 420 / 297; width: auto; height: auto; background: #fff; border-radius: 6px; box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 18px 40px -18px rgba(0,0,0,.35); }
+.niche-paper.close img { aspect-ratio: auto; border-radius: 10px; }
+.niche-editor .insp-head { display: flex; flex-direction: column; gap: 8px; }
+.niche-title { display: grid; grid-template-columns: 64px 1fr; gap: 6px; }
+.niche-title .code { font-weight: 700; text-align: center; letter-spacing: .04em; }
+.niche-row-controls { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.niche-row-controls select.field { flex: 1; }
+.niche-sub { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.niche-sub .chip { text-transform: none; letter-spacing: 0; font-weight: 500; display: inline-flex; align-items: center; gap: 3px; }
+.niche-rowbox { margin: 0 10px 8px; padding: 6px 8px 4px; border-radius: 11px; background: rgba(255,255,255,.5); box-shadow: 0 0 0 0.5px var(--line-2); cursor: pointer; }
+.niche-rowbox.on { box-shadow: 0 0 0 1.5px var(--accent); background: rgba(255,255,255,.8); }
+.niche-rowhead { display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 2px 0 4px; }
+.niche-rowhead .grow { flex: 1; }
+.niche-cell { border-top: 0.5px solid var(--line); cursor: default; }
+.niche-cell-line { display: flex; align-items: center; gap: 2px; min-height: 30px; }
+.niche-cell-name { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; text-align: left; font-size: 12px; padding: 3px 0; }
+.niche-cell-name .ellipsis { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.niche-cell-more { padding: 2px 0 8px; }
+.niche-cell-more .num-row input { width: 150px; text-align: left; }
+.niche-check { display: flex; gap: 6px; align-items: center; font-size: 11.5px; color: var(--ink-2); padding: 4px 0; }
+.niche-cell-actions { border-top: 0.5px solid var(--line); padding-top: 2px; }
+.niche-cell-actions .link-row { font-size: 11.5px; padding: 4px 0; }
+.niche-catalog { height: 420px; display: flex; flex-direction: column; min-height: 0; }
+.niche-catalog > * { flex: 1; min-height: 0; }
+.niche-custom .primary { margin-top: 8px; width: 100%; }
+.niche-custom .num-row input, .niche-custom .num-row select { width: 150px; }
+.niche-locks { margin-top: 8px; padding-top: 6px; border-top: 0.5px solid var(--line); }
+.rule-row { padding: 6px 0; border-bottom: 0.5px solid var(--line); }
+.rule-row:last-of-type { border-bottom: 0; }
+.rule-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 12px; font-weight: 500; }
+.rule-row .value-row { grid-template-columns: 1fr 104px 104px; }
+.rule-input { display: flex; align-items: center; gap: 2px; }
+.rule-input input { width: 100%; }
+.rule-input .unit { font-size: 10.5px; color: var(--ink-3); padding: 0 3px; height: 26px; border-radius: 6px; }
+.rule-input .unit:hover { background: var(--hover); }
+.rule-src { font-size: 10.5px; line-height: 1.4; color: var(--ink-3); }
+.link-row.inline { display: inline; width: auto; padding: 0; font-size: 11px; }
+.sub-head.flush { padding-left: 0; padding-right: 0; }

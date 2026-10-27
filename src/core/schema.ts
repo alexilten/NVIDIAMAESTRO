@@ -204,6 +204,8 @@ export interface ParametricKitPart {
   status: Verification;
   note: string;
   tags: string[];
+  /** made by another tool (the niche builder) rather than picked from the library */
+  hidden?: boolean;
 }
 
 // ── references and composition ─────────────────────────────────────────────────────────────────────

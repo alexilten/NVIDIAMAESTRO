@@ -89,10 +89,14 @@ describe('parametric kit', () => {
       const p = defaultParams(k.id);
       const size = boxSize(shapeBounds(kitShape(k.id, p)!));
       // a niche is as wide as its wall panel; everything else as wide as its width parameter
-      expect(size[0]).toBeCloseTo(k.id === 'kit-gallery-niche' ? p.panelWidth : p.width, 3);
-      expect(size[1]).toBeCloseTo(p.depth, 3);
+      expect(size[0]).toBeCloseTo(k.id === 'kit-gallery-niche' ? p.panelWidth : k.id === 'kit-rule-niche' ? p.wallWidth : p.width, 3);
+      // a rule niche also carries its back panel, the service void and the void's rear panel (18 mm each)
+      // a die-cut label is 0.5 mm of vinyl
+      expect(size[1]).toBeCloseTo(k.id === 'kit-rule-niche' ? p.depth + p.void + 36 : k.id === 'kit-die-cut-label' ? 0.5 : p.depth, 3);
     }
-    expect(kitEntries()).toHaveLength(KIT.length);
+    // parts the Niches tab builds stay out of the kit list
+    expect(kitEntries()).toHaveLength(KIT.filter((k) => !k.hidden).length);
+    expect(kitEntries(true)).toHaveLength(KIT.length);
     // the display never overhangs the counter, wherever the accessible section puts it
     const c: Record<string, number> = { ...defaultParams('kit-demo-counter'), accessible: 900 };
     expect(boxSize(shapeBounds(kitShape('kit-demo-counter', c)!))[0]).toBeCloseTo(c.width, 3);

@@ -13,7 +13,7 @@ import { compStore, partsStore, docsStore, type DocIndex } from '../ingest/store
 import type { IngestedPart } from '../ingest/types';
 import type { Look } from '../viewport/Studio';
 
-export type Workspace = 'discover' | 'compose' | 'exhibition' | 'present' | 'ingest';
+export type Workspace = 'discover' | 'compose' | 'exhibition' | 'niches' | 'present' | 'ingest';
 export type CameraPreset = 'perspective' | 'front' | 'rear' | 'side' | 'top' | 'iso';
 
 const COMP_KEY = 'maestro.composition.v1';
